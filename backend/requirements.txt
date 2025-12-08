@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-multipart
+python-docx
+pdfplumber
+pytesseract
+Pillow
+sentence-transformers
+pgvector
+psycopg2-binary
+pytest
