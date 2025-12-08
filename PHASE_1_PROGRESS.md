@@ -86,8 +86,8 @@ docker-compose -f docker-compose.dev.yml up -d
 
 # Terminal 2: Start Backend
 cd backend
-source venv/bin/activate
-pip install -r requirements.txt
+source .venv/bin/activate  # uv creates .venv by default
+uv pip install -e ".[dev]"  # if not installed yet
 uvicorn main:app --reload
 ```
 
