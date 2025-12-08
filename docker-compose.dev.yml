@@ -1,0 +1,87 @@
+# FairPact - Development Docker Compose
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+
+version: '3.8'
+
+services:
+  # PostgreSQL with pgvector
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: fairpact-dev-db
+    environment:
+      POSTGRES_DB: fairpact
+      POSTGRES_USER: fairpact
+      POSTGRES_PASSWORD: fairpact_dev_pass
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./backend/database/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fairpact -d fairpact"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fairpact-dev
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: fairpact-dev-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fairpact-dev
+
+  # MinIO (S3-compatible storage)
+  minio:
+    image: minio/minio:latest
+    container_name: fairpact-dev-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: fairpact_admin
+      MINIO_ROOT_PASSWORD: fairpact_admin_pass
+    volumes:
+      - minio_dev_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - fairpact-dev
+
+  # Adminer (Database UI)
+  adminer:
+    image: adminer:latest
+    container_name: fairpact-dev-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - fairpact-dev
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+  minio_dev_data:
+
+networks:
+  fairpact-dev:
+    driver: bridge

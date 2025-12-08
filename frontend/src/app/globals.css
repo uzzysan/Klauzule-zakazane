@@ -2,13 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 62, 39, 35;
-  --background-start-rgb: 245, 245, 220;
-  --background-end-rgb: 245, 245, 220;
+@layer base {
+  :root {
+    /* Light mode (Ecru/Brown theme) */
+    --background: 42 15% 92%; /* #F5F5DC - Ecru */
+    --foreground: 16 42% 14%; /* #3E2723 - Dark Brown */
+
+    --card: 42 15% 96%;
+    --card-foreground: 16 42% 14%;
+
+    --popover: 42 15% 96%;
+    --popover-foreground: 16 42% 14%;
+
+    --primary: 14 25% 50%; /* #8D6E63 - Earth tone */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 42 12% 82%;
+    --secondary-foreground: 16 42% 14%;
+
+    --muted: 42 10% 88%;
+    --muted-foreground: 16 20% 40%;
+
+    --accent: 24 100% 45%; /* #E65100 - Burnt Orange */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 42 10% 80%;
+    --input: 42 10% 80%;
+    --ring: 14 25% 50%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark mode (Dark Brown/Orange theme) */
+    --background: 24 55% 5%; /* #1A120B - Very Dark Brown */
+    --foreground: 0 0% 88%; /* #E0E0E0 - Off-white */
+
+    --card: 24 50% 8%;
+    --card-foreground: 0 0% 88%;
+
+    --popover: 24 50% 8%;
+    --popover-foreground: 0 0% 88%;
+
+    --primary: 14 25% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 24 40% 12%;
+    --secondary-foreground: 0 0% 88%;
+
+    --muted: 24 35% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 24 100% 45%; /* #E65100 - Burnt Orange */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 24 35% 20%;
+    --input: 24 35% 20%;
+    --ring: 24 100% 45%;
+  }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-primary rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/80;
+  }
+}
+
+/* Risk badges */
+@layer components {
+  .risk-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .risk-high {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  .risk-medium {
+    @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400;
+  }
+
+  .risk-low {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
 }

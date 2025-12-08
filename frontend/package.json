@@ -6,7 +6,15 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "lint:fix": "next lint --fix",
+        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+        "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
+        "type-check": "tsc --noEmit",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "test:ui": "vitest --ui",
+        "prepare": "cd .. && husky install frontend/.husky"
     },
     "dependencies": {
         "react": "^18",
@@ -14,7 +22,12 @@
         "next": "14.1.0",
         "lucide-react": "^0.300.0",
         "clsx": "^2.1.0",
-        "tailwind-merge": "^2.2.0"
+        "tailwind-merge": "^2.2.0",
+        "zustand": "^4.4.7",
+        "react-hook-form": "^7.49.3",
+        "zod": "^3.22.4",
+        "@hookform/resolvers": "^3.3.4",
+        "next-themes": "^0.2.1"
     },
     "devDependencies": {
         "typescript": "^5",
@@ -25,6 +38,18 @@
         "postcss": "^8",
         "tailwindcss": "^3.3.0",
         "eslint": "^8",
-        "eslint-config-next": "14.1.0"
+        "eslint-config-next": "14.1.0",
+        "@typescript-eslint/eslint-plugin": "^6.19.0",
+        "@typescript-eslint/parser": "^6.19.0",
+        "prettier": "^3.2.4",
+        "prettier-plugin-tailwindcss": "^0.5.11",
+        "husky": "^8.0.3",
+        "lint-staged": "^15.2.0",
+        "vitest": "^1.2.1",
+        "@vitejs/plugin-react": "^4.2.1",
+        "@testing-library/react": "^14.1.2",
+        "@testing-library/jest-dom": "^6.2.0",
+        "@vitest/ui": "^1.2.1",
+        "@vitest/coverage-v8": "^1.2.1"
     }
 }

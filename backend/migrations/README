@@ -1,0 +1,37 @@
+# FairPact Database Migrations
+
+This directory contains Alembic database migrations for FairPact.
+
+## Commands
+
+### Create a new migration
+```bash
+alembic revision --autogenerate -m "description of changes"
+```
+
+### Apply migrations
+```bash
+# Upgrade to latest
+alembic upgrade head
+
+# Upgrade one revision
+alembic upgrade +1
+
+# Downgrade one revision
+alembic downgrade -1
+```
+
+### View migration history
+```bash
+alembic history
+alembic current
+```
+
+## Migration Naming Convention
+
+Format: `YYYYMMDD_HHMM_description`
+
+Examples:
+- `20251208_1400_initial_schema`
+- `20251209_0930_add_user_preferences`
+- `20251210_1615_create_clause_categories`

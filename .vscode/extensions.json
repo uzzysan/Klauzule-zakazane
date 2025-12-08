@@ -1,0 +1,34 @@
+{
+  "recommendations": [
+    // Python
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-python.mypy-type-checker",
+
+    // TypeScript/JavaScript
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+
+    // Git
+    "eamodio.gitlens",
+
+    // Docker
+    "ms-azuretools.vscode-docker",
+
+    // Database
+    "ms-ossdata.vscode-postgresql",
+
+    // Testing
+    "zixuanchen.vitest-explorer",
+
+    // Utilities
+    "wayou.vscode-todo-highlight",
+    "aaron-bond.better-comments",
+    "christian-kohler.path-intellisense",
+    "formulahendry.auto-rename-tag"
+  ]
+}
