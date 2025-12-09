@@ -1,49 +1,52 @@
 # Phase 1: Core Backend - Document Processing
 
-## 🎯 Status: IN PROGRESS (Day 1)
+## Status: IN PROGRESS (Day 2)
 
 **Goal:** Build document upload and OCR pipeline
-**Duration:** 2 weeks (estimated)
 **Started:** 2025-12-08
 
 ---
 
-## ✅ Completed Tasks (2/10)
+## Completed Tasks (8/10)
 
-| Task | Status | Time | Notes |
-|------|--------|------|-------|
-| Document upload API endpoint | ✅ | 1h | Validation, storage integration |
-| MinIO file storage service | ✅ | 45min | S3-compatible, secure filenames |
-| Tesseract OCR pipeline | 🔄 | - | Next task |
-| PDF parser | ⏳ | - | Pending |
-| DOCX parser | ⏳ | - | Pending |
-| Metadata extraction | ⏳ | - | Pending |
-| OCR quality detection | ⏳ | - | Pending |
-| Celery async processing | ⏳ | - | Pending |
-| Test suite | ⏳ | - | Pending |
-| Polish character tests | ⏳ | - | Pending |
+| Task | Status | Notes |
+|------|--------|-------|
+| Document upload API endpoint | ✅ | Validation, storage integration, DB save |
+| MinIO file storage service | ✅ | S3-compatible, secure filenames, lifecycle policies |
+| Tesseract OCR pipeline | ✅ | Polish language support, image preprocessing |
+| PDF parser | ✅ | pdfplumber with text extraction |
+| DOCX parser | ✅ | python-docx with structure extraction |
+| Metadata extraction | ✅ | Title, author, word count, sections |
+| OCR quality detection | ✅ | Detects native text layer, auto-fallback |
+| Celery async processing | ✅ | Redis broker, task tracking, status API |
+| Database models & migrations | ✅ | Document, DocumentMetadata tables |
+| Test suite | ⏳ | Pending |
 
-**Progress:** ██░░░░░░░░░░░░░░░░░░ 20%
-
----
-
-## 📁 Files Created (Phase 1 - Day 1)
-
-### Backend Core (9 files)
-1. ✅ [backend/config.py](backend/config.py) - Application configuration with Pydantic
-2. ✅ [backend/database/connection.py](backend/database/connection.py) - Async SQLAlchemy setup
-3. ✅ [backend/schemas/document.py](backend/schemas/document.py) - Pydantic schemas
-4. ✅ [backend/services/storage.py](backend/services/storage.py) - MinIO storage service
-5. ✅ [backend/api/documents.py](backend/api/documents.py) - Document upload endpoint
-6. ✅ [backend/main.py](backend/main.py) - Updated FastAPI app
-7. ✅ [backend/requirements.txt](backend/requirements.txt) - Updated dependencies
-8. ✅ [backend/schemas/__init__.py](backend/schemas/__init__.py)
-9. ✅ [backend/services/__init__.py](backend/services/__init__.py)
-10. ✅ [backend/api/__init__.py](backend/api/__init__.py)
+**Progress:** ████████████████░░░░ 80%
 
 ---
 
-## 🚀 What's Working
+## Files Created/Updated (Phase 1)
+
+### Backend Core
+1. ✅ `backend/config.py` - Application configuration with Pydantic
+2. ✅ `backend/database/connection.py` - Async SQLAlchemy setup
+3. ✅ `backend/schemas/document.py` - Pydantic schemas
+4. ✅ `backend/services/storage.py` - MinIO storage service (fixed lifecycle config)
+5. ✅ `backend/api/documents.py` - Document upload + GET endpoint with DB integration
+6. ✅ `backend/api/jobs.py` - Job status tracking API
+7. ✅ `backend/main.py` - FastAPI app with routers
+8. ✅ `backend/celery_app.py` - Celery configuration
+9. ✅ `backend/services/ocr.py` - Tesseract OCR service
+10. ✅ `backend/services/parser.py` - PDF/DOCX/Image parser
+11. ✅ `backend/tasks/document_processing.py` - Async document processing task
+12. ✅ `backend/models/document.py` - SQLAlchemy models
+13. ✅ `backend/migrations/versions/` - Alembic migrations
+14. ✅ `backend/.env` - Environment configuration
+
+---
+
+## What's Working
 
 ### 1. Document Upload API
 **Endpoint:** `POST /api/v1/documents/upload`
@@ -51,8 +54,10 @@
 **Features:**
 - ✅ File validation (type, size, extension)
 - ✅ Secure file storage with MinIO
-- ✅ Checksum verification
+- ✅ Checksum verification (SHA-256)
 - ✅ Presigned URLs for access
+- ✅ Database record creation
+- ✅ Async processing with Celery
 - ✅ Error handling with detailed messages
 
 **Supported Formats:**
@@ -61,188 +66,139 @@
 - JPG/JPEG (image/jpeg)
 - PNG (image/png)
 
-**Constraints:**
-- Max file size: 50MB
-- Validation on MIME type and extension
+### 2. Document Retrieval API
+**Endpoint:** `GET /api/v1/documents/{document_id}`
 
-### 2. Storage Service
-**Provider:** MinIO (S3-compatible)
+**Returns:**
+- Document metadata
+- Processing status
+- OCR info (confidence, completion)
+- Celery task ID
+
+### 3. Job Status API
+**Endpoint:** `GET /api/v1/jobs/{job_id}`
 
 **Features:**
-- ✅ Automatic bucket creation
-- ✅ Lifecycle policy (24h retention for guest uploads)
-- ✅ Secure filename generation
-- ✅ SHA-256 checksums
-- ✅ Presigned URLs with expiration
+- Real-time task status (queued, processing, completed, failed)
+- Progress metadata
+- Result data on completion
+
+### 4. OCR Service
+**Features:**
+- ✅ Tesseract integration with Polish (pol) and English (eng) support
+- ✅ Image preprocessing (grayscale, contrast, sharpening)
+- ✅ Confidence score extraction
+- ✅ PDF page-to-image conversion for scanned documents
+- ✅ Native text layer detection
+
+### 5. Document Parser
+**Features:**
+- ✅ PDF parsing with pdfplumber
+- ✅ DOCX parsing with python-docx
+- ✅ Image OCR parsing
+- ✅ Metadata extraction (title, author, dates)
+- ✅ Section and structure detection
+- ✅ Word count calculation
+
+### 6. Database
+**Tables:**
+- `documents` - Main document records
+- `document_metadata` - Extracted text and structure
 
 ---
 
-## 🧪 How to Test
+## How to Test
 
 ### 1. Start Services
 ```bash
-# Terminal 1: Start Docker services
-docker-compose -f docker-compose.dev.yml up -d
+# Start Podman services
+podman-compose -f docker-compose.dev.yml up -d
 
-# Terminal 2: Start Backend
+# Start Backend (with uv)
 cd backend
-source .venv/bin/activate  # uv creates .venv by default
-uv pip install -e ".[dev]"  # if not installed yet
-uvicorn main:app --reload
+uv run uvicorn main:app --reload
 ```
 
 ### 2. Test Upload Endpoint
 ```bash
-# Using curl
 curl -X POST "http://localhost:8000/api/v1/documents/upload" \
   -F "file=@/path/to/contract.pdf" \
   -F "language=pl" \
   -F "analysis_mode=offline"
-
-# Using HTTPie
-http -f POST localhost:8000/api/v1/documents/upload \
-  file@contract.pdf \
-  language=pl \
-  analysis_mode=offline
 ```
 
-### 3. Check API Docs
+### 3. Check Document Status
+```bash
+curl http://localhost:8000/api/v1/documents/{document_id}
+```
+
+### 4. Check Job Status
+```bash
+curl http://localhost:8000/api/v1/jobs/{task_id}
+```
+
+### 5. API Docs
 - Interactive docs: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-### 4. Verify MinIO
+### 6. Verify MinIO
 - Console: http://localhost:9001
 - Login: `fairpact_admin` / `fairpact_admin_pass`
-- Check bucket: `fairpact-uploads`
+
+### 7. Database Admin
+- Adminer: http://localhost:8080
+- Server: postgres, User: fairpact, DB: fairpact
 
 ---
 
-## 🎨 Design Integration
+## Known Issues / TODOs
 
-Based on the provided design drafts ([app_draft1.png](docs/app_draft1.png), [app_draft2.png](docs/app_draft2.png)):
+1. **Authentication** - User ID hardcoded as None
+   - Need to implement auth middleware (Phase 4)
 
-**Light Mode (Implemented):**
-- Background: #F5F5DC (Ecru/Beige) ✅
-- Text: #3E2723 (Dark Brown) ✅
-- Upload button: Brown tones ✅
+2. **Google Drive** - Not implemented
+   - save_to_drive parameter ignored (Phase 4)
 
-**Dark Mode (Implemented):**
-- Background: #1A120B (Very Dark Brown) ✅
-- Text: #E0E0E0 (Off-white) ✅
-- Accent: #E65100 (Burnt Orange) ✅
+3. **Rate Limiting** - Not implemented
+   - Need to add middleware (Phase 5)
 
-**UI Elements from Design:**
-- ✅ Magnifying glass logo concept
-- ✅ Clean upload area with dashed border
-- ✅ File format indicators (PDF, JPG/PNG)
-- ✅ "Choose File" button with brand colors
+4. **Test Suite** - Not complete
+   - Need unit tests for services
+   - Need integration tests
 
----
-
-## 📋 Next Steps (This Week)
-
-### Tomorrow (Day 2):
-1. **OCR Service** - Tesseract integration
-   - Polish language support (pol traineddata)
-   - Image preprocessing
-   - Confidence score extraction
-
-2. **Document Parsers**
-   - PDF parser with pdfplumber
-   - DOCX parser with python-docx
-   - Text extraction with layout preservation
-
-### Day 3-4:
-3. **OCR Quality Detection**
-   - Detect if PDF has native text
-   - Quality scoring
-   - Automatic fallback
-
-4. **Celery Integration**
-   - Async job processing
-   - Progress tracking
-   - Result storage
-
-### Day 5:
-5. **Testing**
-   - Unit tests for upload
-   - Integration tests
-   - Sample document tests
+5. **Celery Worker** - Need to run separately
+   ```bash
+   uv run celery -A celery_app worker --loglevel=info -Q documents
+   ```
 
 ---
 
-## 🐛 Known Issues / TODOs
+## API Endpoints Status
 
-1. **Database Integration** - Document records not saved yet
-   - Need to create Document model
-   - Need to implement save logic
-
-2. **Authentication** - User ID hardcoded as None
-   - Need to implement auth middleware
-   - Need to extract user from session
-
-3. **Google Drive** - Not implemented
-   - save_to_drive parameter ignored
-   - Need Drive API integration
-
-4. **Rate Limiting** - Not implemented
-   - No request throttling
-   - Need to add middleware
-
-5. **Monitoring** - No metrics yet
-   - No Prometheus integration
-   - No Sentry error tracking
+| Endpoint | Method | Status |
+|----------|--------|--------|
+| POST /api/v1/documents/upload | POST | ✅ Working |
+| GET /api/v1/documents/{id} | GET | ✅ Working |
+| GET /api/v1/documents/health | GET | ✅ Working |
+| GET /api/v1/jobs/{id} | GET | ✅ Working |
+| POST /api/v1/jobs/test | POST | ✅ Working |
+| GET /health | GET | ✅ Working |
 
 ---
 
-## 💡 Technical Decisions Made
+## Next Steps
 
-### 1. Async SQLAlchemy
-**Decision:** Use asyncpg for async database operations
-**Rationale:** Better performance for I/O-bound operations like file uploads
+### Remaining Phase 1 Tasks:
+1. Create test suite for OCR and parsing services
+2. Add sample document tests with Polish text
 
-### 2. MinIO for Storage
-**Decision:** Use MinIO instead of local filesystem
-**Rationale:**
-- S3-compatible (easy migration to AWS/GCS)
-- Built-in lifecycle policies
-- Better scalability
-
-### 3. Pydantic for Validation
-**Decision:** Strict validation with detailed error messages
-**Rationale:**
-- Better DX for API consumers
-- Automatic OpenAPI schema generation
-- Type safety
-
-### 4. Presigned URLs
-**Decision:** Generate temporary URLs for file access
-**Rationale:**
-- Security (no direct access to storage)
-- Controlled expiration
-- Better for guest users
+### Phase 2 Preview (Analysis Engine):
+1. Set up clause database schema
+2. Implement vector embeddings with sentence-transformers
+3. Build keyword matching with fuzzy logic
+4. Create clause detection pipeline
 
 ---
 
-## 📊 API Metrics (Once Complete)
-
-| Endpoint | Method | Response Time Target | Status |
-|----------|--------|---------------------|--------|
-| POST /upload | POST | <1s | ✅ Working |
-| GET /documents | GET | <200ms | ⏳ Pending |
-| GET /documents/{id} | GET | <200ms | ⏳ Pending |
-| DELETE /documents/{id} | DELETE | <500ms | ⏳ Pending |
-
----
-
-## 🔗 Related Documentation
-
-- [Implementation Plan - Phase 1](docs/implementation_plan_v2.md#phase-1-core-backend---document-processing-weeks-2-3)
-- [API Specification](docs/api_specification.md#2-documents-api)
-- [Testing Strategy](docs/testing_strategy.md#42-backend-testing)
-
----
-
-**Last Updated:** 2025-12-08 17:45
-**Next Update:** 2025-12-09 (OCR implementation)
-**Phase 1 Completion:** ~20% (2/10 tasks)
+**Last Updated:** 2025-12-09 13:30
+**Phase 1 Completion:** ~80% (8/10 tasks)

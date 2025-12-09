@@ -1,10 +1,15 @@
 """API endpoints for document operations."""
+import os
+from datetime import datetime, timedelta
 from typing import Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import settings
+from database.connection import get_db
+from models.document import Document
 from schemas.document import (
     ALLOWED_EXTENSIONS,
     ALLOWED_MIME_TYPES,
@@ -16,8 +21,8 @@ from services.storage import storage_service
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
 
-def validate_file(file: UploadFile) -> None:
-    """Validate uploaded file."""
+def validate_file(file: UploadFile) -> int:
+    """Validate uploaded file and return file size."""
     # Check file size
     file.file.seek(0, 2)  # Seek to end
     file_size = file.file.tell()
@@ -54,8 +59,6 @@ def validate_file(file: UploadFile) -> None:
 
     # Check file extension
     if file.filename:
-        import os
-
         _, ext = os.path.splitext(file.filename.lower())
         if ext not in ALLOWED_EXTENSIONS:
             raise HTTPException(
@@ -69,9 +72,12 @@ def validate_file(file: UploadFile) -> None:
                 },
             )
 
+    return file_size
+
 
 @router.post("/upload", response_model=DocumentUploadResponse, status_code=status.HTTP_200_OK)
 async def upload_document(
+    db: AsyncSession = Depends(get_db),
     file: UploadFile = File(..., description="Document file to upload"),
     language: str = Form(default="pl", description="Document language (pl or en)"),
     analysis_mode: str = Form(
@@ -93,7 +99,7 @@ async def upload_document(
     - **save_to_drive**: Save to Google Drive (requires authentication)
     """
     # Validate file
-    validate_file(file)
+    file_size = validate_file(file)
 
     # Validate language
     if language not in ["pl", "en"]:
@@ -113,7 +119,7 @@ async def upload_document(
 
     try:
         # Upload file to storage
-        object_name, checksum, file_size = storage_service.upload_file(
+        object_name, checksum, actual_file_size = storage_service.upload_file(
             file_data=file.file,
             original_filename=file.filename or "unknown",
             content_type=file.content_type or "application/octet-stream",
@@ -126,30 +132,63 @@ async def upload_document(
         # Generate document ID
         document_id = uuid4()
 
-        # TODO: Save to database
-        # - Create document record
-        # - Queue analysis job
+        # Determine if this is a guest upload (set expiration)
+        expires_at = None
+        if user_id is None:
+            expires_at = datetime.utcnow() + timedelta(hours=settings.guest_file_retention_hours)
 
-        from datetime import datetime
+        # Create document record in database
+        document = Document(
+            id=document_id,
+            user_id=UUID(user_id) if user_id else None,
+            filename=object_name,
+            original_filename=file.filename or "unknown",
+            size_bytes=actual_file_size,
+            mime_type=file.content_type or "application/octet-stream",
+            language=language,
+            status="processing",
+            upload_url=upload_url,
+            sha256_hash=checksum,
+            expires_at=expires_at,
+        )
+
+        db.add(document)
+        await db.flush()  # Get the ID assigned
+
+        # Queue document processing task
+        from tasks.document_processing import process_document
+
+        task = process_document.delay(
+            document_id=str(document_id),
+            object_name=object_name,
+            mime_type=file.content_type or "application/octet-stream",
+            language=language,
+        )
+
+        # Update document with task ID
+        document.celery_task_id = task.id
+        await db.commit()
 
         return DocumentUploadResponse(
             document_id=document_id,
             filename=file.filename or "unknown",
-            size_bytes=file_size,
+            size_bytes=actual_file_size,
             pages=None,  # Will be determined during processing
             upload_url=upload_url,
-            created_at=datetime.utcnow(),
+            created_at=document.created_at,
         )
 
     except ValueError as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": {"code": "STORAGE_ERROR", "message": str(e)}},
         )
     except Exception as e:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": {"code": "INTERNAL_ERROR", "message": "An error occurred"}},
+            detail={"error": {"code": "INTERNAL_ERROR", "message": str(e)}},
         )
 
 
@@ -157,3 +196,38 @@ async def upload_document(
 async def health_check() -> dict:
     """Health check endpoint."""
     return {"status": "ok", "service": "documents"}
+
+
+@router.get("/{document_id}")
+async def get_document(
+    document_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Get document by ID."""
+    from sqlalchemy import select
+
+    result = await db.execute(
+        select(Document).where(Document.id == document_id, Document.deleted_at == None)
+    )
+    document = result.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "NOT_FOUND", "message": "Document not found"}},
+        )
+
+    return {
+        "document_id": str(document.id),
+        "filename": document.original_filename,
+        "size_bytes": document.size_bytes,
+        "pages": document.pages,
+        "language": document.language,
+        "status": document.status,
+        "ocr_required": document.ocr_required,
+        "ocr_completed": document.ocr_completed,
+        "ocr_confidence": document.ocr_confidence,
+        "created_at": document.created_at.isoformat(),
+        "upload_url": document.upload_url,
+        "celery_task_id": document.celery_task_id,
+    }

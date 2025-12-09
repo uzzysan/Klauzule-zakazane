@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import BinaryIO, Optional
 
 from minio import Minio
+from minio.commonconfig import Filter
 from minio.error import S3Error
+from minio.lifecycleconfig import Expiration, LifecycleConfig, Rule
 
 from config import settings
 
@@ -32,16 +34,16 @@ class StorageService:
                 self.client.make_bucket(self.bucket_name)
 
                 # Set lifecycle policy for guest uploads
-                lifecycle_config = {
-                    "Rules": [
-                        {
-                            "ID": "DeleteGuestUploadsAfter24h",
-                            "Status": "Enabled",
-                            "Filter": {"Prefix": "guest/"},
-                            "Expiration": {"Days": 1},
-                        }
+                lifecycle_config = LifecycleConfig(
+                    [
+                        Rule(
+                            "Enabled",
+                            rule_filter=Filter(prefix="guest/"),
+                            rule_id="DeleteGuestUploadsAfter24h",
+                            expiration=Expiration(days=1),
+                        )
                     ]
-                }
+                )
                 self.client.set_bucket_lifecycle(self.bucket_name, lifecycle_config)
         except S3Error as e:
             print(f"Error ensuring bucket: {e}")

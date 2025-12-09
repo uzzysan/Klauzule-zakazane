@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.documents import router as documents_router
+from api.jobs import router as jobs_router
 from config import settings
 
 # Create FastAPI app
@@ -25,6 +26,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(documents_router)
+app.include_router(jobs_router)
 
 
 @app.get("/")
