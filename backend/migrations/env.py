@@ -8,6 +8,8 @@ from alembic import context
 # Import Base and all models for autogenerate support
 from database.connection import Base
 from models.document import Document, DocumentMetadata  # noqa: F401
+from models.clause import ClauseCategory, LegalReference, ProhibitedClause, ClauseLegalReference  # noqa: F401
+from models.analysis import Analysis, FlaggedClause  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

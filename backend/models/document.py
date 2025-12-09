@@ -63,6 +63,11 @@ class Document(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    analyses: Mapped[list["Analysis"]] = relationship(
+        "Analysis",
+        back_populates="document",
+        cascade="all, delete-orphan",
+    )
 
     # Constraints
     __table_args__ = (
