@@ -10,9 +10,7 @@ class DocumentUploadRequest(BaseModel):
     """Request schema for document upload."""
 
     language: Literal["pl", "en"] = Field(default="pl", description="Document language")
-    analysis_mode: Literal["offline", "ai"] = Field(
-        default="offline", description="Analysis mode"
-    )
+    analysis_mode: Literal["offline", "ai"] = Field(default="offline", description="Analysis mode")
     custom_clauses: bool = Field(
         default=True, description="Include user's custom clauses in analysis"
     )

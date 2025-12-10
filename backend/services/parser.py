@@ -247,9 +247,7 @@ class DocumentParser:
                 word_count=0,
             )
 
-    def _create_sections_from_text(
-        self, text: str, pages: int
-    ) -> List[DocumentSection]:
+    def _create_sections_from_text(self, text: str, pages: int) -> List[DocumentSection]:
         """Create sections by splitting text into pages."""
         # Split text evenly across pages
         words = text.split()

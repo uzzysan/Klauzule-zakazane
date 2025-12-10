@@ -4,17 +4,9 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (
-    Boolean,
-    CheckConstraint,
-    Date,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy.dialects.postgresql import ARRAY, UUID as PG_UUID
+from sqlalchemy import Boolean, CheckConstraint, Date, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -38,9 +30,7 @@ class ClauseCategory(Base):
     # Classification
     default_risk_level: Mapped[str] = mapped_column(String(20), default="medium", nullable=False)
     parent_category_id: Mapped[Optional[UUID]] = mapped_column(
-        PG_UUID(as_uuid=True),
-        ForeignKey("clause_categories.id"),
-        nullable=True
+        PG_UUID(as_uuid=True), ForeignKey("clause_categories.id"), nullable=True
     )
 
     # Metadata
@@ -50,25 +40,20 @@ class ClauseCategory(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     # Relationships
     clauses: Mapped[List["ProhibitedClause"]] = relationship(
-        "ProhibitedClause",
-        back_populates="category",
-        foreign_keys="ProhibitedClause.category_id"
+        "ProhibitedClause", back_populates="category", foreign_keys="ProhibitedClause.category_id"
     )
     parent: Mapped[Optional["ClauseCategory"]] = relationship(
-        "ClauseCategory",
-        remote_side=[id],
-        backref="children"
+        "ClauseCategory", remote_side=[id], backref="children"
     )
 
     __table_args__ = (
-        CheckConstraint(
-            "default_risk_level IN ('high', 'medium', 'low')",
-            name="valid_risk_level"
-        ),
+        CheckConstraint("default_risk_level IN ('high', 'medium', 'low')", name="valid_risk_level"),
     )
 
     def __repr__(self) -> str:
@@ -98,12 +83,13 @@ class LegalReference(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     # Relationships
     clause_references: Mapped[List["ClauseLegalReference"]] = relationship(
-        "ClauseLegalReference",
-        back_populates="legal_reference"
+        "ClauseLegalReference", back_populates="legal_reference"
     )
 
     def __repr__(self) -> str:
@@ -116,11 +102,11 @@ class ProhibitedClause(Base):
     __tablename__ = "prohibited_clauses"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True, index=True)
+    user_id: Mapped[Optional[UUID]] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True, index=True
+    )
     category_id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        ForeignKey("clause_categories.id"),
-        nullable=False
+        PG_UUID(as_uuid=True), ForeignKey("clause_categories.id"), nullable=False
     )
 
     # Clause content
@@ -150,33 +136,23 @@ class ProhibitedClause(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now(), nullable=False
+    )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     # Relationships
-    category: Mapped["ClauseCategory"] = relationship(
-        "ClauseCategory",
-        back_populates="clauses"
-    )
+    category: Mapped["ClauseCategory"] = relationship("ClauseCategory", back_populates="clauses")
     legal_references: Mapped[List["ClauseLegalReference"]] = relationship(
-        "ClauseLegalReference",
-        back_populates="clause",
-        cascade="all, delete-orphan"
+        "ClauseLegalReference", back_populates="clause", cascade="all, delete-orphan"
     )
 
     __table_args__ = (
+        CheckConstraint("risk_level IN ('high', 'medium', 'low')", name="valid_clause_risk_level"),
         CheckConstraint(
-            "risk_level IN ('high', 'medium', 'low')",
-            name="valid_clause_risk_level"
+            "source IN ('standard', 'user', 'community', 'imported')", name="valid_clause_source"
         ),
-        CheckConstraint(
-            "source IN ('standard', 'user', 'community', 'imported')",
-            name="valid_clause_source"
-        ),
-        CheckConstraint(
-            "confidence >= 0.0 AND confidence <= 1.0",
-            name="valid_clause_confidence"
-        ),
+        CheckConstraint("confidence >= 0.0 AND confidence <= 1.0", name="valid_clause_confidence"),
     )
 
     def __repr__(self) -> str:
@@ -191,12 +167,12 @@ class ClauseLegalReference(Base):
     clause_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("prohibited_clauses.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True,
     )
     legal_reference_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("legal_references.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True,
     )
 
     # Relationship metadata
@@ -208,12 +184,10 @@ class ClauseLegalReference(Base):
 
     # Relationships
     clause: Mapped["ProhibitedClause"] = relationship(
-        "ProhibitedClause",
-        back_populates="legal_references"
+        "ProhibitedClause", back_populates="legal_references"
     )
     legal_reference: Mapped["LegalReference"] = relationship(
-        "LegalReference",
-        back_populates="clause_references"
+        "LegalReference", back_populates="clause_references"
     )
 
     def __repr__(self) -> str:

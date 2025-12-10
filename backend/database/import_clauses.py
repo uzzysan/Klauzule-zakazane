@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database.connection import get_db_context
-from models.clause import ClauseCategory, LegalReference, ProhibitedClause, ClauseLegalReference
+from models.clause import ClauseCategory, ClauseLegalReference, LegalReference, ProhibitedClause
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -52,11 +52,15 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
 
         with engine.connect() as conn:
             # First, check what tables exist
-            result = conn.execute(text("""
+            result = conn.execute(
+                text(
+                    """
                 SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema = 'public'
-            """))
+            """
+                )
+            )
             tables = [row[0] for row in result]
             logger.info(f"Available tables: {tables}")
 
@@ -66,7 +70,7 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
                 "postanowienia_niedozwolone",
                 "klauzule",
                 "clauses",
-                "prohibited_clauses"
+                "prohibited_clauses",
             ]
 
             table_name = None
@@ -87,11 +91,15 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
             logger.info(f"Fetching data from table: {table_name}")
 
             # Fetch column information
-            result = conn.execute(text(f"""
+            result = conn.execute(
+                text(
+                    f"""
                 SELECT column_name, data_type
                 FROM information_schema.columns
                 WHERE table_name = '{table_name}'
-            """))
+            """
+                )
+            )
             columns = {row[0]: row[1] for row in result}
             logger.info(f"Available columns: {list(columns.keys())}")
 
@@ -105,7 +113,7 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
                 "powod",
                 "pozwany",
                 "data_wpisu",
-                "zagadnienie"
+                "zagadnienie",
             ]
 
             # Filter to only existing columns
@@ -137,6 +145,7 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error fetching from external database: {e}")
         import traceback
+
         traceback.print_exc()
         return []
 
@@ -170,7 +179,7 @@ async def get_or_create_category(
     session: AsyncSession,
     code: str = "court_decisions",
     name_pl: str = "Klauzule niedozwolone z orzeczeń sądowych",
-    name_en: str = "Prohibited clauses from court decisions"
+    name_en: str = "Prohibited clauses from court decisions",
 ) -> ClauseCategory:
     """Get or create default category for imported clauses.
 
@@ -185,9 +194,7 @@ async def get_or_create_category(
     """
     from sqlalchemy import select
 
-    result = await session.execute(
-        select(ClauseCategory).where(ClauseCategory.code == code)
-    )
+    result = await session.execute(select(ClauseCategory).where(ClauseCategory.code == code))
     category = result.scalar_one_or_none()
 
     if not category:
@@ -199,7 +206,7 @@ async def get_or_create_category(
             description_pl="Klauzule uznane za niedozwolone przez polskie sądy",
             description_en="Clauses deemed prohibited by Polish courts",
             default_risk_level="high",
-            is_active=True
+            is_active=True,
         )
         session.add(category)
         await session.flush()
@@ -209,9 +216,7 @@ async def get_or_create_category(
 
 
 async def import_clause(
-    session: AsyncSession,
-    clause_data: Dict[str, Any],
-    category: ClauseCategory
+    session: AsyncSession, clause_data: Dict[str, Any], category: ClauseCategory
 ) -> Optional[ProhibitedClause]:
     """Import a single clause into the database.
 
@@ -232,10 +237,9 @@ async def import_clause(
 
         # Check if clause already exists
         from sqlalchemy import select
+
         result = await session.execute(
-            select(ProhibitedClause).where(
-                ProhibitedClause.clause_text == clause_text
-            )
+            select(ProhibitedClause).where(ProhibitedClause.clause_text == clause_text)
         )
         existing = result.scalar_one_or_none()
 
@@ -279,7 +283,7 @@ async def import_clause(
             confidence=1.0,
             is_active=True,
             tags=tags if tags else None,
-            notes=notes
+            notes=notes,
         )
         session.add(clause)
         await session.flush()
@@ -291,9 +295,7 @@ async def import_clause(
         if sygnatura:
             # Create or get legal reference
             result = await session.execute(
-                select(LegalReference).where(
-                    LegalReference.article_code == sygnatura
-                )
+                select(LegalReference).where(LegalReference.article_code == sygnatura)
             )
             legal_ref = result.scalar_one_or_none()
 
@@ -305,7 +307,7 @@ async def import_clause(
                     description=f"Klauzula uznana za niedozwoloną wyrokiem o sygnaturze {sygnatura}",
                     law_name="Orzeczenie Sądu Ochrony Konkurencji i Konsumentów",
                     jurisdiction="PL",
-                    effective_date=data_wyroku if isinstance(data_wyroku, datetime) else None
+                    effective_date=data_wyroku if isinstance(data_wyroku, datetime) else None,
                 )
                 session.add(legal_ref)
                 await session.flush()
@@ -315,7 +317,7 @@ async def import_clause(
                 clause_id=clause.id,
                 legal_reference_id=legal_ref.id,
                 relevance_score=1.0,
-                notes=f"Wyrok z dnia: {data_wyroku}" if data_wyroku else None
+                notes=f"Wyrok z dnia: {data_wyroku}" if data_wyroku else None,
             )
             session.add(clause_legal_ref)
 
@@ -325,6 +327,7 @@ async def import_clause(
     except Exception as e:
         logger.error(f"Error importing clause: {e}")
         import traceback
+
         traceback.print_exc()
         return None
 

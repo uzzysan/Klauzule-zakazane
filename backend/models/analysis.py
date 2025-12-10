@@ -3,16 +3,9 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import (
-    Boolean,
-    CheckConstraint,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy import Boolean, CheckConstraint, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -26,9 +19,7 @@ class Analysis(Base):
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     document_id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        ForeignKey("documents.id", ondelete="CASCADE"),
-        nullable=False
+        PG_UUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False
     )
 
     # Configuration
@@ -68,23 +59,17 @@ class Analysis(Base):
     # Relationships
     document: Mapped["Document"] = relationship("Document", back_populates="analyses")
     flagged_clauses: Mapped[List["FlaggedClause"]] = relationship(
-        "FlaggedClause",
-        back_populates="analysis",
-        cascade="all, delete-orphan"
+        "FlaggedClause", back_populates="analysis", cascade="all, delete-orphan"
     )
 
     __table_args__ = (
         CheckConstraint(
             "status IN ('queued', 'processing', 'completed', 'failed', 'cancelled')",
-            name="valid_analysis_status"
+            name="valid_analysis_status",
         ),
+        CheckConstraint("mode IN ('offline', 'ai')", name="valid_analysis_mode"),
         CheckConstraint(
-            "mode IN ('offline', 'ai')",
-            name="valid_analysis_mode"
-        ),
-        CheckConstraint(
-            "risk_score IS NULL OR (risk_score >= 0 AND risk_score <= 100)",
-            name="valid_risk_score"
+            "risk_score IS NULL OR (risk_score >= 0 AND risk_score <= 100)", name="valid_risk_score"
         ),
     )
 
@@ -99,14 +84,12 @@ class FlaggedClause(Base):
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     analysis_id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        ForeignKey("analyses.id", ondelete="CASCADE"),
-        nullable=False
+        PG_UUID(as_uuid=True), ForeignKey("analyses.id", ondelete="CASCADE"), nullable=False
     )
     clause_id: Mapped[Optional[UUID]] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("prohibited_clauses.id", ondelete="SET NULL"),
-        nullable=True
+        nullable=True,
     )
 
     # Matched text
@@ -135,18 +118,11 @@ class FlaggedClause(Base):
     matched_clause: Mapped[Optional["ProhibitedClause"]] = relationship("ProhibitedClause")
 
     __table_args__ = (
+        CheckConstraint("risk_level IN ('high', 'medium', 'low')", name="valid_flagged_risk_level"),
         CheckConstraint(
-            "risk_level IN ('high', 'medium', 'low')",
-            name="valid_flagged_risk_level"
+            "match_type IN ('keyword', 'vector', 'hybrid', 'ai')", name="valid_match_type"
         ),
-        CheckConstraint(
-            "match_type IN ('keyword', 'vector', 'hybrid', 'ai')",
-            name="valid_match_type"
-        ),
-        CheckConstraint(
-            "confidence >= 0.0 AND confidence <= 1.0",
-            name="valid_flagged_confidence"
-        ),
+        CheckConstraint("confidence >= 0.0 AND confidence <= 1.0", name="valid_flagged_confidence"),
     )
 
     def __repr__(self) -> str:

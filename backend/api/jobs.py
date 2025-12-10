@@ -1,6 +1,6 @@
 """API endpoints for job status tracking."""
-from fastapi import APIRouter, HTTPException, status
 from celery.result import AsyncResult
+from fastapi import APIRouter, HTTPException, status
 
 from celery_app import celery_app
 

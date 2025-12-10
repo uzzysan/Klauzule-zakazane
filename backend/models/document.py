@@ -4,7 +4,8 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, Float, ForeignKey, Index, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -20,7 +21,9 @@ class Document(Base):
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign keys (user_id will reference users table later)
-    user_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), nullable=True, index=True)
+    user_id: Mapped[Optional[UUID]] = mapped_column(
+        PG_UUID(as_uuid=True), nullable=True, index=True
+    )
 
     # File metadata
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -50,9 +53,7 @@ class Document(Base):
     celery_task_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     expires_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
@@ -100,7 +101,7 @@ class DocumentMetadata(Base):
         ForeignKey("documents.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
-        index=True
+        index=True,
     )
 
     # Document properties
@@ -119,14 +120,10 @@ class DocumentMetadata(Base):
     paragraphs: Mapped[Optional[int]] = mapped_column(nullable=True)
 
     # Timestamp
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     # Relationships
-    document: Mapped["Document"] = relationship(
-        "Document", back_populates="metadata_record"
-    )
+    document: Mapped["Document"] = relationship("Document", back_populates="metadata_record")
 
     def __repr__(self) -> str:
         """String representation."""

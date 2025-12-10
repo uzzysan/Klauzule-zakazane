@@ -1,15 +1,18 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Import Base and all models for autogenerate support
 from database.connection import Base
-from models.document import Document, DocumentMetadata  # noqa: F401
-from models.clause import ClauseCategory, LegalReference, ProhibitedClause, ClauseLegalReference  # noqa: F401
 from models.analysis import Analysis, FlaggedClause  # noqa: F401
+from models.clause import (  # noqa: F401
+    ClauseCategory,
+    ClauseLegalReference,
+    LegalReference,
+    ProhibitedClause,
+)
+from models.document import Document, DocumentMetadata  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -68,9 +71,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

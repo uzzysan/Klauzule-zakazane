@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.connection import AsyncSessionLocal
 from models.clause import ClauseCategory, LegalReference, ProhibitedClause
 
-
 # Categories for prohibited clauses
 CATEGORIES = [
     {
@@ -163,7 +162,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "high",
         "language": "pl",
     },
-
     # Withdrawal restriction clauses
     {
         "clause_text": "Klient nie ma prawa do odstąpienia od umowy",
@@ -200,7 +198,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "high",
         "language": "pl",
     },
-
     # Unilateral change clauses
     {
         "clause_text": "Sprzedawca zastrzega sobie prawo do zmiany ceny bez uprzedzenia",
@@ -237,7 +234,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "high",
         "language": "pl",
     },
-
     # Hidden fees clauses
     {
         "clause_text": "Dodatkowe opłaty zostaną naliczone zgodnie z aktualnym cennikiem",
@@ -274,7 +270,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "medium",
         "language": "pl",
     },
-
     # Unfair arbitration clauses
     {
         "clause_text": "Wszelkie spory będą rozstrzygane przez sąd polubowny wybrany przez sprzedawcę",
@@ -297,7 +292,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "medium",
         "language": "pl",
     },
-
     # Jurisdiction clauses
     {
         "clause_text": "Sądem właściwym jest sąd w miejscu siedziby sprzedawcy",
@@ -313,7 +307,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "medium",
         "language": "pl",
     },
-
     # Automatic renewal clauses
     {
         "clause_text": "Umowa ulega automatycznemu przedłużeniu na kolejny okres",
@@ -343,7 +336,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "low",
         "language": "pl",
     },
-
     # Penalty clauses
     {
         "clause_text": "W przypadku rozwiązania umowy klient zapłaci karę w wysokości 100% wartości umowy",
@@ -366,7 +358,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "high",
         "language": "pl",
     },
-
     # Data usage clauses
     {
         "clause_text": "Dane osobowe mogą być przekazywane podmiotom trzecim w celach marketingowych",
@@ -389,7 +380,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "high",
         "language": "pl",
     },
-
     # Warranty limitation clauses
     {
         "clause_text": "Gwarancja nie obejmuje wad powstałych w wyniku normalnego użytkowania",
@@ -419,7 +409,6 @@ PROHIBITED_CLAUSES = [
         "risk_level": "medium",
         "language": "pl",
     },
-
     # Additional clauses
     {
         "clause_text": "Sprzedawca nie ponosi odpowiedzialności za opóźnienia w dostawie",

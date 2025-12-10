@@ -80,12 +80,8 @@ async def upload_document(
     db: AsyncSession = Depends(get_db),
     file: UploadFile = File(..., description="Document file to upload"),
     language: str = Form(default="pl", description="Document language (pl or en)"),
-    analysis_mode: str = Form(
-        default="offline", description="Analysis mode (offline or ai)"
-    ),
-    custom_clauses: bool = Form(
-        default=True, description="Include user's custom clauses"
-    ),
+    analysis_mode: str = Form(default="offline", description="Analysis mode (offline or ai)"),
+    custom_clauses: bool = Form(default=True, description="Include user's custom clauses"),
     save_to_drive: bool = Form(default=False, description="Save to Google Drive"),
     user_id: Optional[str] = None,  # TODO: Get from auth dependency
 ) -> DocumentUploadResponse:
@@ -112,9 +108,7 @@ async def upload_document(
     if analysis_mode not in ["offline", "ai"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": {"code": "INVALID_ANALYSIS_MODE", "message": "Invalid analysis mode"}
-            },
+            detail={"error": {"code": "INVALID_ANALYSIS_MODE", "message": "Invalid analysis mode"}},
         )
 
     try:
