@@ -99,30 +99,68 @@ The app uses `sentence-transformers` with local inference (no external API) to p
 - **Dark mode**: Dark Brown/Orange (`#1A120B` background, `#E0E0E0` text, `#E65100` accents)
 
 ## Implemented Features
-- ✅ **Clause Database**: 7,233 prohibited clauses with vector embeddings
-- ✅ **Database Models**: ProhibitedClause, ClauseCategory, LegalReference
-- ✅ **Vector Search**: pgvector extension for semantic similarity
-- ✅ **Import Tool**: Automated data import from external sources
-- ✅ **Database Migrations**: Alembic setup with initial schema
 
-## Planned Features (Not Yet Implemented)
+### Backend (✅ Complete)
+- ✅ **Clause Database**: 7,233 prohibited clauses with vector embeddings
+- ✅ **Database Models**: Document, Analysis, FlaggedClause, ProhibitedClause, LegalReference
+- ✅ **Vector Search**: pgvector extension for semantic similarity
+- ✅ **Document Upload API**: `POST /api/v1/documents/upload` (PDF, DOCX, images)
+- ✅ **Analysis Service**: Hybrid search (vector + keyword matching)
+- ✅ **Analysis API**: Results retrieval endpoints
+- ✅ **Celery Pipeline**: Async document processing with OCR/parsing
+- ✅ **Database Migrations**: Alembic setup with full schema
+
+### Frontend (🚧 In Progress)
+- ✅ **Project Setup**: Next.js 14 + TailwindCSS + Zustand
+- ✅ **Theme System**: Light/Dark mode with CSS variables
+- 🚧 **Upload Page**: File upload with drag & drop
+- 🚧 **Results Page**: Analysis results with risk highlighting
+- ⏳ **Navigation & Layout**: Header, footer, responsive design
+
+## Current Development Phase: Frontend MVP
+
+### Phase 1: Core UI Components
+- [ ] Button, Card, Input components
+- [ ] FileUpload with drag & drop
+- [ ] RiskBadge, ProgressBar components
+- [ ] Loading states and error handling
+
+### Phase 2: Upload Flow
+- [ ] Upload page with file selection
+- [ ] File validation (type, size)
+- [ ] Upload progress indicator
+- [ ] Redirect to results on completion
+
+### Phase 3: Results Display
+- [ ] Analysis summary (risk score, counts)
+- [ ] Flagged clauses list with highlighting
+- [ ] Document text viewer with markers
+- [ ] Export/download functionality
+
+### Phase 4: Polish & Navigation
+- [ ] Header with theme toggle
+- [ ] Landing page improvements
+- [ ] Mobile responsiveness
+- [ ] Error pages (404, 500)
+
+## Planned Features (Future)
 - Clause database CRUD API endpoints
-- Document analysis pipeline integration
 - Google Drive integration
 - Camera capture for mobile
 - Feedback loop system
 - Admin panel for clause management
 - Cron job for guest file cleanup
+- User authentication (NextAuth.js)
 
 ## Database Schema (✅ IMPLEMENTED)
 PostgreSQL with `pgvector` extension stores:
+- **Documents**: Upload metadata, status tracking
+- **Document Metadata**: Extracted text, word count, sections
+- **Analyses**: Analysis jobs with results summary
+- **Flagged Clauses**: Individual matches with confidence scores
 - **Prohibited Clauses**: 7,233 entries with 384-dim embeddings
 - **Legal References**: 5,009 court decisions
 - **Clause Categories**: Industry and risk classification
-- **Metadata**: Tags, notes, court case information
-- User metadata (planned)
-- User feedback and ratings (planned)
-- Analysis history (planned)
 
 ## Deployment Plan
 - **Frontend**: Vercel or Dockerized VPS
