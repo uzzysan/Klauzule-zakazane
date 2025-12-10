@@ -18,10 +18,19 @@ This is a monorepo with two main components:
 3. **Document Parsing** → `pdfplumber` (PDF) and `python-docx` (Word) extract structured text
 4. **Analysis Engine** → Hybrid search combining:
    - Keyword matching with fuzzy logic (Levenshtein distance)
-   - Vector similarity using local models (`sentence-transformers` with `all-MiniLM-L6-v2`)
-   - PostgreSQL with `pgvector` extension for semantic search
+   - Vector similarity using local models (`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`)
+   - PostgreSQL with `pgvector` extension for semantic search (384-dimensional embeddings)
    - Optional Gemini API integration for advanced AI analysis
 5. **Result Presentation** → Side-by-side view showing original document with highlighted risks
+
+### Prohibited Clause Database (✅ IMPLEMENTED)
+The system now includes **7,233 prohibited clauses** from Polish court decisions:
+- **Source**: External PostgreSQL database with real court rulings
+- **Coverage**: Multiple industries (Real Estate, E-commerce, Financial Services, Education, etc.)
+- **Embeddings**: 384-dimensional vectors for semantic similarity search
+- **Metadata**: Court decision references (sygnatura), judgment dates, industry tags, party information
+- **Legal References**: 5,009 unique court decisions linked to clauses
+- **Import Tool**: Automated import script at `backend/database/import_clauses.py`
 
 ### Data Storage Strategy
 - **Guest users**: Temporary storage with 24h retention (local filesystem or MinIO/S3)
@@ -42,6 +51,18 @@ npm run lint               # Run ESLint
 ```
 
 ### Backend Development
+
+#### Quick Start (Recommended: uv)
+```bash
+cd backend
+uv venv                    # Create virtual environment
+source .venv/bin/activate  # Activate venv (Linux/Mac)
+uv pip install -e ".[dev]" # Install all dependencies
+uvicorn main:app --reload  # Start dev server (http://localhost:8000)
+pytest                     # Run tests
+```
+
+#### Alternative (pip)
 ```bash
 cd backend
 python3 -m venv venv       # Create virtual environment (first time only)
@@ -49,6 +70,18 @@ source venv/bin/activate   # Activate venv (Linux/Mac)
 pip install -r requirements.txt  # Install dependencies
 uvicorn main:app --reload  # Start dev server (http://localhost:8000)
 pytest                     # Run tests
+```
+
+#### Database Commands
+```bash
+# Start development services (PostgreSQL, Redis, MinIO)
+podman-compose -f docker-compose.dev.yml up -d
+
+# Run migrations
+uv run alembic upgrade head
+
+# Import prohibited clauses (one-time setup)
+PYTHONPATH=$PWD:$PYTHONPATH python database/import_clauses.py
 ```
 
 **Note**: If `python3 -m venv venv` fails with ensurepip error, install `python3-venv` system package first.
@@ -65,20 +98,31 @@ The app uses `sentence-transformers` with local inference (no external API) to p
 - **Light mode**: Ecru/Brown palette (`#F5F5DC` background, `#3E2723` text, `#8D6E63` accents)
 - **Dark mode**: Dark Brown/Orange (`#1A120B` background, `#E0E0E0` text, `#E65100` accents)
 
+## Implemented Features
+- ✅ **Clause Database**: 7,233 prohibited clauses with vector embeddings
+- ✅ **Database Models**: ProhibitedClause, ClauseCategory, LegalReference
+- ✅ **Vector Search**: pgvector extension for semantic similarity
+- ✅ **Import Tool**: Automated data import from external sources
+- ✅ **Database Migrations**: Alembic setup with initial schema
+
 ## Planned Features (Not Yet Implemented)
-- Clause database CRUD API
+- Clause database CRUD API endpoints
+- Document analysis pipeline integration
 - Google Drive integration
 - Camera capture for mobile
 - Feedback loop system
 - Admin panel for clause management
 - Cron job for guest file cleanup
 
-## Database Schema (To Be Implemented)
-PostgreSQL with `pgvector` extension will store:
-- User metadata
-- Clause database with vector embeddings
-- User feedback and ratings
-- Analysis history
+## Database Schema (✅ IMPLEMENTED)
+PostgreSQL with `pgvector` extension stores:
+- **Prohibited Clauses**: 7,233 entries with 384-dim embeddings
+- **Legal References**: 5,009 court decisions
+- **Clause Categories**: Industry and risk classification
+- **Metadata**: Tags, notes, court case information
+- User metadata (planned)
+- User feedback and ratings (planned)
+- Analysis history (planned)
 
 ## Deployment Plan
 - **Frontend**: Vercel or Dockerized VPS

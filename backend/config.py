@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     database_pool_size: int = 20
     database_max_overflow: int = 10
 
+    # External source database (prohibited clauses)
+    source_database_url: SecretStr = SecretStr("")
+
     # Redis
     redis_url: str = "redis://localhost:6379/0"
     redis_password: str = ""
