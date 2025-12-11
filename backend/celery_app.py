@@ -27,5 +27,6 @@ celery_app.conf.update(
 
 # Task routing (optional - for future scaling)
 celery_app.conf.task_routes = {
-    "tasks.document_processing.*": {"queue": "documents"},
+    "tasks.process_document": {"queue": "documents"},
+    "tasks.test_celery": {"queue": "documents"},
 }
