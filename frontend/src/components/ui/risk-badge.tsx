@@ -53,7 +53,8 @@ export function RiskScore({ score, className }: RiskScoreProps) {
 
     return (
         <div className={cn("flex flex-col items-center", className)}>
-            <div className={cn("text-4xl font-bold", getColor())}>{score}</div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Wynik ryzyka</div>
+            <div className={cn("text-4xl font-bold", getColor())}>{score}<span className="text-lg text-muted-foreground font-normal">/100</span></div>
             <div className="text-sm text-muted-foreground">{getLabel()}</div>
         </div>
     );
