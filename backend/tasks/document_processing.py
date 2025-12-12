@@ -29,12 +29,12 @@ async def _store_metadata_and_analyze(
     """
     from sqlalchemy import select
 
-    from database.connection import get_db_context
+    from database.connection import get_celery_db_context
     from models.analysis import Analysis, FlaggedClause
     from models.document import Document, DocumentMetadata
     from services.analysis import get_analysis_service
 
-    async with get_db_context() as session:
+    async with get_celery_db_context() as session:
         doc_uuid = UUID(document_id)
 
         # Get the document
@@ -250,10 +250,10 @@ async def _mark_document_failed(document_id: str, error_message: str) -> None:
     """Mark document as failed in database."""
     from sqlalchemy import select
 
-    from database.connection import get_db_context
+    from database.connection import get_celery_db_context
     from models.document import Document
 
-    async with get_db_context() as session:
+    async with get_celery_db_context() as session:
         result = await session.execute(select(Document).where(Document.id == UUID(document_id)))
         document = result.scalar_one_or_none()
         if document:

@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     tesseract_languages: str = "pol+eng"
 
     # CORS
-    allowed_origins: List[str] = ["http://localhost:3000"]
+    allowed_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     # Rate limiting
     rate_limit_enabled: bool = True
