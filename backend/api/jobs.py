@@ -33,23 +33,36 @@ async def get_job_status(job_id: str) -> dict:
 
         elif task_result.state == "PROCESSING":
             response["status"] = "processing"
-            response["meta"] = task_result.info
+            try:
+                response["meta"] = task_result.info
+            except Exception:
+                response["meta"] = {"stage": "unknown"}
 
         elif task_result.state == "SUCCESS":
             response["status"] = "completed"
-            response["result"] = task_result.result
+            try:
+                response["result"] = task_result.result
+            except Exception:
+                response["result"] = {"analysis_id": None}
 
         elif task_result.state == "FAILURE":
             response["status"] = "failed"
-            response["error"] = str(task_result.info)
+            try:
+                response["error"] = str(task_result.info)
+            except Exception:
+                response["error"] = "Task failed (details unavailable)"
 
         return response
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": {"code": "JOB_ERROR", "message": str(e)}},
-        )
+        # Return a proper error response instead of 500
+        return {
+            "job_id": job_id,
+            "status": "failed",
+            "result": None,
+            "error": f"Unable to retrieve job status: {str(e)}",
+            "meta": None,
+        }
 
 
 @router.post("/test")
