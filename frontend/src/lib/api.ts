@@ -136,12 +136,12 @@ class ApiClient {
                     const status = await this.getJobStatus(jobId);
                     onStatusChange?.(status);
 
-                    if (status.status === "SUCCESS") {
+                    if (status.status === "completed") {
                         resolve(status);
                         return;
                     }
 
-                    if (status.status === "FAILURE") {
+                    if (status.status === "failed") {
                         reject(new Error(status.error || "Job failed"));
                         return;
                     }

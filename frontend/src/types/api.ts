@@ -93,7 +93,7 @@ export interface DocumentAnalysisResponse {
 // Job status types
 export interface JobStatus {
     job_id: string;
-    status: "PENDING" | "STARTED" | "PROCESSING" | "SUCCESS" | "FAILURE";
+    status: "queued" | "processing" | "completed" | "failed";
     result: Record<string, unknown> | null;
     error: string | null;
     meta: {

@@ -57,10 +57,10 @@ class AnalysisResult:
 class ClauseAnalysisService:
     """Service for analyzing documents against prohibited clause database."""
 
-    # Similarity thresholds
-    VECTOR_THRESHOLD_HIGH = 0.85  # Very similar
-    VECTOR_THRESHOLD_MEDIUM = 0.75  # Moderately similar
-    VECTOR_THRESHOLD_LOW = 0.65  # Somewhat similar
+    # Similarity thresholds for risk level classification based on match quality
+    VECTOR_THRESHOLD_HIGH = 0.93  # Very high similarity - high risk
+    VECTOR_THRESHOLD_MEDIUM = 0.86  # Good similarity - medium risk
+    VECTOR_THRESHOLD_LOW = 0.80  # Moderate similarity - low risk (also minimum threshold)
 
     # Minimum segment length for analysis
     MIN_SEGMENT_LENGTH = 50
@@ -241,6 +241,18 @@ class ClauseAnalysisService:
             # Hybrid score: weighted average
             hybrid_score = (vector_score * 0.7) + (keyword_score * 0.3)
 
+            # Skip matches below the minimum threshold (VECTOR_THRESHOLD_LOW = 80%)
+            if hybrid_score < self.VECTOR_THRESHOLD_LOW:
+                continue
+
+            # Determine risk level based on similarity score, not clause's original risk
+            if hybrid_score >= self.VECTOR_THRESHOLD_HIGH:
+                risk_level = "high"
+            elif hybrid_score >= self.VECTOR_THRESHOLD_MEDIUM:
+                risk_level = "medium"
+            else:
+                risk_level = "low"
+
             # Determine match type based on which method contributed more
             if vector_score > 0.8 and keyword_score > 0.3:
                 match_type = "hybrid"
@@ -258,7 +270,7 @@ class ClauseAnalysisService:
                 matched_text=segment_text,
                 similarity_score=hybrid_score,
                 match_type=match_type,
-                risk_level=clause.risk_level,
+                risk_level=risk_level,
                 start_position=start_position,
                 end_position=end_position,
                 legal_references=legal_refs,
