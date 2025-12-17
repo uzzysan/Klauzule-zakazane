@@ -84,6 +84,100 @@ if ! command -v pip3 &> /dev/null && ! command -v pip &> /dev/null; then
 fi
 log_success "pip zainstalowany"
 
+# Sprawdź zależności systemowe wymagane do kompilacji pakietów Python
+log_info "Sprawdzanie zależności systemowych dla pakietów Python..."
+
+MISSING_DEPS=()
+INSTALL_COMMANDS=()
+
+# Wykryj system operacyjny
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    OS=$(uname -s)
+fi
+
+# Sprawdź gcc (kompilator C)
+if ! command -v gcc &> /dev/null; then
+    MISSING_DEPS+=("gcc (kompilator C)")
+fi
+
+# Sprawdź czy są zainstalowane nagłówki Pythona
+if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+    PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+    if ! dpkg -l | grep -q "python${PYTHON_VERSION}-dev"; then
+        MISSING_DEPS+=("python3-dev (nagłówki Python)")
+    fi
+    
+    # Sprawdź biblioteki dla Pillow
+    PILLOW_DEPS=("libjpeg-dev" "zlib1g-dev" "libpng-dev" "libfreetype6-dev")
+    for dep in "${PILLOW_DEPS[@]}"; do
+        if ! dpkg -l | grep -q "$dep"; then
+            MISSING_DEPS+=("$dep")
+        fi
+    done
+    
+    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+        INSTALL_COMMANDS+=("sudo apt-get update")
+        INSTALL_COMMANDS+=("sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev")
+    fi
+    
+elif [ "$OS" = "fedora" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+    if ! rpm -q python3-devel &> /dev/null; then
+        MISSING_DEPS+=("python3-devel (nagłówki Python)")
+    fi
+    
+    # Sprawdź biblioteki dla Pillow
+    PILLOW_DEPS=("libjpeg-turbo-devel" "zlib-devel" "libpng-devel" "freetype-devel")
+    for dep in "${PILLOW_DEPS[@]}"; do
+        if ! rpm -q "$dep" &> /dev/null; then
+            MISSING_DEPS+=("$dep")
+        fi
+    done
+    
+    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+        INSTALL_COMMANDS+=("sudo dnf groupinstall -y 'Development Tools'")
+        INSTALL_COMMANDS+=("sudo dnf install -y python3-devel libjpeg-turbo-devel zlib-devel libpng-devel freetype-devel")
+    fi
+    
+elif [ "$OS" = "arch" ] || [ "$OS" = "manjaro" ]; then
+    # Arch zwykle ma wszystko w base-devel
+    if ! pacman -Qq base-devel &> /dev/null; then
+        MISSING_DEPS+=("base-devel")
+    fi
+    
+    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+        INSTALL_COMMANDS+=("sudo pacman -S --needed base-devel python libjpeg-turbo zlib libpng freetype2")
+    fi
+fi
+
+if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+    log_error "Brakujące zależności systemowe:"
+    for dep in "${MISSING_DEPS[@]}"; do
+        echo "  - $dep"
+    done
+    echo ""
+    log_error "Te pakiety są wymagane do kompilacji pakietów Python (np. Pillow)."
+    echo ""
+    if [ ${#INSTALL_COMMANDS[@]} -gt 0 ]; then
+        log_info "Zainstaluj je za pomocą następujących komend:"
+        for cmd in "${INSTALL_COMMANDS[@]}"; do
+            echo "  $cmd"
+        done
+    fi
+    echo ""
+    read -p "Czy chcesz kontynuować mimo brakujących zależności? (t/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Tt]$ ]]; then
+        log_error "Instalacja przerwana. Zainstaluj wymagane pakiety i uruchom skrypt ponownie."
+        exit 1
+    fi
+    log_warning "Kontynuacja mimo brakujących zależności - mogą wystąpić błędy podczas instalacji pakietów Python!"
+else
+    log_success "Wszystkie wymagane zależności systemowe są zainstalowane"
+fi
+
 # Sprawdź Node.js i npm (dla frontendu)
 if ! command -v node &> /dev/null; then
     log_warning "Node.js nie jest zainstalowany - frontend nie uruchomi się w trybie dev!"
@@ -132,8 +226,42 @@ source backend/venv/bin/activate
 if [ -f "backend/requirements.txt" ]; then
     log_info "Instalowanie zależności Python..."
     pip install -q --upgrade pip
-    pip install -q -r backend/requirements.txt
-    log_success "Zależności Python zainstalowane"
+    
+    # Spróbuj zainstalować zależności
+    if pip install -q -r backend/requirements.txt; then
+        log_success "Zależności Python zainstalowane"
+    else
+        log_error "Wystąpił błąd podczas instalacji zależności Python!"
+        echo ""
+        echo "Najbardziej prawdopodobne przyczyny:"
+        echo "  1. Brakujące biblioteki systemowe (np. dla Pillow, lxml)"
+        echo "  2. Niekompatybilna wersja Pythona"
+        echo "  3. Problemy z siecią"
+        echo ""
+        log_info "Spróbuj uruchomić instalację ręcznie aby zobaczyć szczegóły błędu:"
+        echo "  source backend/venv/bin/activate"
+        echo "  pip install -r backend/requirements.txt"
+        echo ""
+        
+        # Sprawdź czy to problem z Pillow
+        if grep -q "Pillow" backend/requirements.txt; then
+            log_warning "W requirements.txt znajduje się Pillow - upewnij się, że masz zainstalowane:"
+            if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+                echo "  sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
+            elif [ "$OS" = "fedora" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
+                echo "  sudo dnf install -y gcc python3-devel libjpeg-turbo-devel zlib-devel libpng-devel freetype-devel"
+            fi
+        fi
+        
+        echo ""
+        read -p "Czy chcesz kontynuować mimo błędów? (t/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Tt]$ ]]; then
+            log_error "Instalacja przerwana."
+            exit 1
+        fi
+        log_warning "Kontynuacja mimo błędów - aplikacja może nie działać poprawnie!"
+    fi
 else
     log_warning "Plik requirements.txt nie został znaleziony"
 fi

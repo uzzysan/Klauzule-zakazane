@@ -3,11 +3,63 @@
 FairPact is a web application designed to analyze contracts and identify prohibited clauses using OCR and NLP.
 
 ## Project Structure
+
 - `frontend/`: Next.js application (React, TailwindCSS)
 - `backend/`: FastAPI application (Python)
 - `docs/`: Documentation (Implementation Plan, Visual Concepts)
 
 ## Setup Instructions
+
+### Quick Start (Recommended)
+
+For automatic setup on a new machine, use the provided automation scripts:
+
+1. **Install system dependencies** (requires sudo):
+
+   ```bash
+   ./install-dependencies.sh
+   ```
+
+   This will install Podman, Python, Node.js, and all required development libraries.
+
+2. **Start the application**:
+
+   ```bash
+   ./start-app.sh
+   ```
+
+   This script will:
+
+   - Check for required packages
+   - Create and activate Python virtual environment
+   - Install Python and npm dependencies
+   - Start all containers (PostgreSQL, Redis, MinIO, Celery workers)
+
+3. **Run Backend API** (in a separate terminal):
+
+   ```bash
+   cd backend
+   source venv/bin/activate
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+4. **Run Frontend** (in another terminal):
+
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+The application will be available at:
+
+- Frontend: <http://localhost:3000>
+- Backend API: <http://localhost:8000>
+- API Documentation: <http://localhost:8000/docs>
+
+
+### Manual Setup
+
+If you prefer manual setup or the automation scripts don't work on your system:
 
 ### Frontend
 1. Navigate to the frontend directory:
