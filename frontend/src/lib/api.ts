@@ -6,15 +6,51 @@ import type {
     FlaggedClause,
     JobStatus,
     ApiError,
+    User,
+    UserWithToken,
+    LoginCredentials,
+    RegisterData,
+    MetricsResponse,
+    PendingReviewItem,
+    FeedbackCreate,
+    FeedbackResponse,
+    SyncResponse,
 } from "@/types/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 class ApiClient {
     private baseUrl: string;
+    private token: string | null = null;
 
     constructor(baseUrl: string = API_BASE_URL) {
         this.baseUrl = baseUrl;
+        // Load token from localStorage if available
+        if (typeof window !== "undefined") {
+            this.token = localStorage.getItem("auth_token");
+        }
+    }
+
+    setToken(token: string | null) {
+        this.token = token;
+        if (typeof window !== "undefined") {
+            if (token) {
+                localStorage.setItem("auth_token", token);
+            } else {
+                localStorage.removeItem("auth_token");
+            }
+        }
+    }
+
+    getToken(): string | null {
+        return this.token;
+    }
+
+    private getAuthHeaders(): HeadersInit {
+        if (this.token) {
+            return { Authorization: `Bearer ${this.token}` };
+        }
+        return {};
     }
 
     private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -22,6 +58,7 @@ class ApiClient {
         const response = await fetch(url, {
             ...options,
             headers: {
+                ...this.getAuthHeaders(),
                 ...options?.headers,
             },
         });
@@ -158,6 +195,73 @@ class ApiClient {
             };
 
             poll();
+        });
+    }
+
+    // =====================
+    // Authentication endpoints
+    // =====================
+
+    async login(credentials: LoginCredentials): Promise<UserWithToken> {
+        const response = await this.request<UserWithToken>("/api/v1/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credentials),
+        });
+        this.setToken(response.token.access_token);
+        return response;
+    }
+
+    async register(data: RegisterData): Promise<UserWithToken> {
+        const response = await this.request<UserWithToken>("/api/v1/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        this.setToken(response.token.access_token);
+        return response;
+    }
+
+    async getCurrentUser(): Promise<User> {
+        return this.request<User>("/api/v1/auth/me");
+    }
+
+    async refreshToken(): Promise<{ access_token: string; token_type: string; expires_in: number }> {
+        const response = await this.request<{ access_token: string; token_type: string; expires_in: number }>(
+            "/api/v1/auth/refresh",
+            { method: "POST" }
+        );
+        this.setToken(response.access_token);
+        return response;
+    }
+
+    logout() {
+        this.setToken(null);
+    }
+
+    // =====================
+    // Admin endpoints
+    // =====================
+
+    async getMetrics(days: number = 30): Promise<MetricsResponse[]> {
+        return this.request<MetricsResponse[]>(`/api/v1/admin/metrics?days=${days}`);
+    }
+
+    async getPendingReviews(limit: number = 20): Promise<PendingReviewItem[]> {
+        return this.request<PendingReviewItem[]>(`/api/v1/admin/pending-reviews?limit=${limit}`);
+    }
+
+    async submitFeedback(feedback: FeedbackCreate): Promise<FeedbackResponse> {
+        return this.request<FeedbackResponse>("/api/v1/admin/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(feedback),
+        });
+    }
+
+    async triggerClauseSync(): Promise<SyncResponse> {
+        return this.request<SyncResponse>("/api/v1/admin/sync-clauses", {
+            method: "POST",
         });
     }
 }

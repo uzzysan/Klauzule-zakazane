@@ -123,3 +123,82 @@ export interface ApiError {
         details?: Record<string, unknown>;
     };
 }
+
+// Authentication types
+export interface User {
+    id: string;
+    email: string;
+    full_name: string | null;
+    is_active: boolean;
+    is_admin: boolean;
+    is_reviewer: boolean;
+    created_at: string;
+}
+
+export interface TokenResponse {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+}
+
+export interface UserWithToken {
+    user: User;
+    token: TokenResponse;
+}
+
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
+export interface RegisterData {
+    email: string;
+    password: string;
+    full_name?: string;
+}
+
+// Admin types
+export interface MetricsResponse {
+    id: string;
+    date: string;
+    true_positives: number;
+    false_positives: number;
+    true_negatives: number;
+    false_negatives: number;
+    precision: number | null;
+    recall: number | null;
+    f1_score: number | null;
+    accuracy: number | null;
+    total_reviews: number;
+}
+
+export interface PendingReviewItem {
+    analysis_id: string;
+    document_id: string;
+    filename: string;
+    total_clauses: number;
+    high_risk_count: number;
+    completed_at: string;
+    has_feedback: boolean;
+}
+
+export interface FeedbackCreate {
+    flagged_clause_id: string;
+    is_correct: boolean;
+    notes?: string;
+}
+
+export interface FeedbackResponse {
+    id: string;
+    flagged_clause_id: string;
+    is_correct: boolean;
+    reviewer_id: string | null;
+    notes: string | null;
+    created_at: string;
+}
+
+export interface SyncResponse {
+    message: string;
+    task_id: string;
+    status: string;
+}
