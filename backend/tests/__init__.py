@@ -1,0 +1,1 @@
+"""FairPact backend tests."""
