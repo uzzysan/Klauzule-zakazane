@@ -1,341 +1,427 @@
 #!/bin/bash
-# FairPact - Skrypt automatycznego uruchamiania aplikacji
-# Ten skrypt sprawdza wymagane zależności i uruchamia backend oraz frontend aplikacji
 
-set -e  # Zatrzymaj wykonywanie skryptu w przypadku błędu
+#===============================================================================
+# FairPact - Skrypt automatycznego uruchomienia aplikacji
+#===============================================================================
+# Sprawdza wymagane zależności, uruchamia kontenery i serwisy deweloperskie.
+# Użycie: ./start-app.sh [--stop] [--status] [--help]
+#===============================================================================
 
-# Kolory dla lepszej czytelności
+set -e
+
+# Kolory dla outputu
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-RED='\033[0;31m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Funkcja do wyświetlania kolorowych komunikatów
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+# Konfiguracja
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$SCRIPT_DIR/backend"
+FRONTEND_DIR="$SCRIPT_DIR/frontend"
+COMPOSE_FILE="$SCRIPT_DIR/docker-compose.dev.yml"
 
-log_success() {
-    echo -e "${GREEN}[OK]${NC} $1"
-}
+# Porty
+FRONTEND_PORT=3000
+BACKEND_PORT=8000
 
-log_warning() {
-    echo -e "${YELLOW}[OSTRZEŻENIE]${NC} $1"
-}
+# PID files
+PID_DIR="$SCRIPT_DIR/.pids"
+BACKEND_PID_FILE="$PID_DIR/backend.pid"
+FRONTEND_PID_FILE="$PID_DIR/frontend.pid"
+CELERY_PID_FILE="$PID_DIR/celery.pid"
 
-log_error() {
-    echo -e "${RED}[BŁĄD]${NC} $1"
-}
+#-------------------------------------------------------------------------------
+# Funkcje pomocnicze
+#-------------------------------------------------------------------------------
 
-# Sprawdź czy skrypt jest uruchomiony z właściwego katalogu
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
-
-log_info "Sprawdzanie katalogu projektu..."
-if [ ! -f "docker-compose.dev.yml" ]; then
-    log_error "Nie znaleziono pliku docker-compose.dev.yml w bieżącym katalogu!"
-    log_error "Upewnij się, że uruchamiasz skrypt z głównego katalogu projektu."
-    exit 1
-fi
-log_success "Katalog projektu: $SCRIPT_DIR"
-
-# Sprawdź wymagane pakiety
-log_info "Sprawdzanie wymaganych pakietów..."
-
-# Sprawdź podman
-if ! command -v podman &> /dev/null; then
-    log_error "Podman nie jest zainstalowany!"
-    echo "Zainstaluj Podman za pomocą:"
-    echo "  - Fedora/RHEL: sudo dnf install podman"
-    echo "  - Ubuntu/Debian: sudo apt-get install podman"
-    echo "  - Arch: sudo pacman -S podman"
-    exit 1
-fi
-log_success "Podman zainstalowany: $(podman --version)"
-
-# Sprawdź podman-compose
-if ! command -v podman-compose &> /dev/null; then
-    log_error "Podman-compose nie jest zainstalowany!"
-    echo "Zainstaluj podman-compose za pomocą:"
-    echo "  pip install podman-compose"
-    echo "  lub:"
-    echo "  sudo dnf install podman-compose"
-    exit 1
-fi
-log_success "Podman-compose zainstalowany: $(podman-compose --version)"
-
-# Sprawdź Python3
-if ! command -v python3 &> /dev/null; then
-    log_error "Python3 nie jest zainstalowany!"
-    echo "Zainstaluj Python3 za pomocą menedżera pakietów swojej dystrybucji."
-    exit 1
-fi
-log_success "Python3 zainstalowany: $(python3 --version)"
-
-# Sprawdź pip
-if ! command -v pip3 &> /dev/null && ! command -v pip &> /dev/null; then
-    log_error "pip nie jest zainstalowany!"
-    echo "Zainstaluj pip za pomocą:"
-    echo "  sudo apt-get install python3-pip  # Ubuntu/Debian"
-    echo "  lub:"
-    echo "  sudo dnf install python3-pip      # Fedora/RHEL"
-    exit 1
-fi
-log_success "pip zainstalowany"
-
-# Sprawdź zależności systemowe wymagane do kompilacji pakietów Python
-log_info "Sprawdzanie zależności systemowych dla pakietów Python..."
-
-MISSING_DEPS=()
-INSTALL_COMMANDS=()
-
-# Wykryj system operacyjny
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    OS=$ID
-else
-    OS=$(uname -s)
-fi
-
-# Sprawdź gcc (kompilator C)
-if ! command -v gcc &> /dev/null; then
-    MISSING_DEPS+=("gcc (kompilator C)")
-fi
-
-# Sprawdź czy są zainstalowane nagłówki Pythona
-if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-    PYTHON_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
-    if ! dpkg -l | grep -q "python${PYTHON_VERSION}-dev"; then
-        MISSING_DEPS+=("python3-dev (nagłówki Python)")
-    fi
-    
-    # Sprawdź biblioteki dla Pillow
-    PILLOW_DEPS=("libjpeg-dev" "zlib1g-dev" "libpng-dev" "libfreetype6-dev")
-    for dep in "${PILLOW_DEPS[@]}"; do
-        if ! dpkg -l | grep -q "$dep"; then
-            MISSING_DEPS+=("$dep")
-        fi
-    done
-    
-    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
-        INSTALL_COMMANDS+=("sudo apt-get update")
-        INSTALL_COMMANDS+=("sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev")
-    fi
-    
-elif [ "$OS" = "fedora" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
-    if ! rpm -q python3-devel &> /dev/null; then
-        MISSING_DEPS+=("python3-devel (nagłówki Python)")
-    fi
-    
-    # Sprawdź biblioteki dla Pillow
-    PILLOW_DEPS=("libjpeg-turbo-devel" "zlib-devel" "libpng-devel" "freetype-devel")
-    for dep in "${PILLOW_DEPS[@]}"; do
-        if ! rpm -q "$dep" &> /dev/null; then
-            MISSING_DEPS+=("$dep")
-        fi
-    done
-    
-    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
-        INSTALL_COMMANDS+=("sudo dnf groupinstall -y 'Development Tools'")
-        INSTALL_COMMANDS+=("sudo dnf install -y python3-devel libjpeg-turbo-devel zlib-devel libpng-devel freetype-devel")
-    fi
-    
-elif [ "$OS" = "arch" ] || [ "$OS" = "manjaro" ]; then
-    # Arch zwykle ma wszystko w base-devel
-    if ! pacman -Qq base-devel &> /dev/null; then
-        MISSING_DEPS+=("base-devel")
-    fi
-    
-    if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
-        INSTALL_COMMANDS+=("sudo pacman -S --needed base-devel python libjpeg-turbo zlib libpng freetype2")
-    fi
-fi
-
-if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
-    log_error "Brakujące zależności systemowe:"
-    for dep in "${MISSING_DEPS[@]}"; do
-        echo "  - $dep"
-    done
+print_header() {
     echo ""
-    log_error "Te pakiety są wymagane do kompilacji pakietów Python (np. Pillow)."
+    echo -e "${CYAN}╔════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}        ${GREEN}FairPact - Contract Analysis Application${NC}              ${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    if [ ${#INSTALL_COMMANDS[@]} -gt 0 ]; then
-        log_info "Zainstaluj je za pomocą następujących komend:"
-        for cmd in "${INSTALL_COMMANDS[@]}"; do
-            echo "  $cmd"
-        done
-    fi
-    echo ""
-    read -p "Czy chcesz kontynuować mimo brakujących zależności? (t/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Tt]$ ]]; then
-        log_error "Instalacja przerwana. Zainstaluj wymagane pakiety i uruchom skrypt ponownie."
-        exit 1
-    fi
-    log_warning "Kontynuacja mimo brakujących zależności - mogą wystąpić błędy podczas instalacji pakietów Python!"
-else
-    log_success "Wszystkie wymagane zależności systemowe są zainstalowane"
-fi
+}
 
-# Sprawdź Node.js i npm (dla frontendu)
-if ! command -v node &> /dev/null; then
-    log_warning "Node.js nie jest zainstalowany - frontend nie uruchomi się w trybie dev!"
-    log_warning "Frontend będzie dostępny tylko przez kontenery Docker."
-else
-    log_success "Node.js zainstalowany: $(node --version)"
-fi
+print_step() {
+    echo -e "${BLUE}[*]${NC} $1"
+}
 
-if ! command -v npm &> /dev/null; then
-    log_warning "npm nie jest zainstalowany - frontend nie uruchomi się w trybie dev!"
-else
-    log_success "npm zainstalowany: $(npm --version)"
-fi
+print_success() {
+    echo -e "${GREEN}[✓]${NC} $1"
+}
 
-echo ""
-log_info "Wszystkie wymagane pakiety są zainstalowane!"
-echo ""
+print_warning() {
+    echo -e "${YELLOW}[!]${NC} $1"
+}
 
-# Sprawdź czy środowisko wirtualne Python istnieje
-log_info "Sprawdzanie środowiska wirtualnego Python..."
-if [ ! -d "backend/venv" ]; then
-    log_warning "Środowisko wirtualne Python nie istnieje. Tworzę nowe..."
-    
-    # Sprawdź czy python3-venv jest zainstalowany
-    if ! python3 -m venv --help &> /dev/null; then
-        log_error "Moduł venv nie jest dostępny!"
-        echo "Zainstaluj python3-venv:"
-        echo "  sudo apt-get install python3-venv  # Ubuntu/Debian"
-        echo "  lub:"
-        echo "  sudo dnf install python3-venv      # Fedora/RHEL"
-        exit 1
-    fi
-    
-    cd backend
-    python3 -m venv venv
-    cd ..
-    log_success "Środowisko wirtualne utworzone"
-else
-    log_success "Środowisko wirtualne istnieje"
-fi
+print_error() {
+    echo -e "${RED}[✗]${NC} $1"
+}
 
-# Aktywuj środowisko wirtualne i zainstaluj zależności
-log_info "Aktywowanie środowiska wirtualnego i instalacja zależności..."
-source backend/venv/bin/activate
+check_command() {
+    command -v "$1" &> /dev/null
+}
 
-if [ -f "backend/requirements.txt" ]; then
-    log_info "Instalowanie zależności Python..."
-    pip install -q --upgrade pip
-    
-    # Spróbuj zainstalować zależności
-    if pip install -q -r backend/requirements.txt; then
-        log_success "Zależności Python zainstalowane"
+#-------------------------------------------------------------------------------
+# Sprawdzanie wymagań systemowych
+#-------------------------------------------------------------------------------
+
+check_requirements() {
+    print_step "Sprawdzanie wymagań systemowych..."
+    local missing_deps=()
+
+    # Python
+    if check_command python3; then
+        print_success "Python: $(python3 --version 2>&1 | cut -d' ' -f2)"
     else
-        log_error "Wystąpił błąd podczas instalacji zależności Python!"
+        missing_deps+=("python3")
+        print_error "Python3 nie jest zainstalowany"
+    fi
+
+    # Node.js
+    if check_command node; then
+        print_success "Node.js: $(node --version)"
+    else
+        missing_deps+=("nodejs")
+        print_error "Node.js nie jest zainstalowany"
+    fi
+
+    # npm
+    if check_command npm; then
+        print_success "npm: $(npm --version)"
+    else
+        missing_deps+=("npm")
+        print_error "npm nie jest zainstalowany"
+    fi
+
+    # Podman lub Docker
+    if check_command podman; then
+        print_success "Podman: $(podman --version | cut -d' ' -f3)"
+        CONTAINER_ENGINE="podman"
+    elif check_command docker; then
+        print_success "Docker: $(docker --version | cut -d' ' -f3 | tr -d ',')"
+        CONTAINER_ENGINE="docker"
+    else
+        missing_deps+=("podman lub docker")
+        print_error "Podman ani Docker nie są zainstalowane"
+    fi
+
+    # podman-compose lub docker-compose
+    if check_command podman-compose; then
+        print_success "podman-compose: zainstalowany"
+        COMPOSE_CMD="podman-compose"
+    elif check_command docker-compose; then
+        print_success "docker-compose: zainstalowany"
+        COMPOSE_CMD="docker-compose"
+    elif check_command docker && docker compose version &> /dev/null; then
+        print_success "docker compose: zainstalowany"
+        COMPOSE_CMD="docker compose"
+    else
+        missing_deps+=("podman-compose lub docker-compose")
+        print_error "podman-compose ani docker-compose nie są zainstalowane"
+    fi
+
+    # uv (opcjonalnie)
+    if check_command uv; then
+        print_success "uv: $(uv --version | cut -d' ' -f2)"
+        USE_UV=true
+    else
+        print_warning "uv nie jest zainstalowany (użyję pip)"
+        USE_UV=false
+    fi
+
+    # Jeśli brakuje zależności
+    if [ ${#missing_deps[@]} -gt 0 ]; then
         echo ""
-        echo "Najbardziej prawdopodobne przyczyny:"
-        echo "  1. Brakujące biblioteki systemowe (np. dla Pillow, lxml)"
-        echo "  2. Niekompatybilna wersja Pythona"
-        echo "  3. Problemy z siecią"
+        print_error "Brakujące zależności: ${missing_deps[*]}"
         echo ""
-        log_info "Spróbuj uruchomić instalację ręcznie aby zobaczyć szczegóły błędu:"
-        echo "  source backend/venv/bin/activate"
-        echo "  pip install -r backend/requirements.txt"
+        echo -e "${YELLOW}Instrukcje instalacji:${NC}"
         echo ""
-        
-        # Sprawdź czy to problem z Pillow
-        if grep -q "Pillow" backend/requirements.txt; then
-            log_warning "W requirements.txt znajduje się Pillow - upewnij się, że masz zainstalowane:"
-            if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
-                echo "  sudo apt-get install -y build-essential python3-dev libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev"
-            elif [ "$OS" = "fedora" ] || [ "$OS" = "rhel" ] || [ "$OS" = "centos" ]; then
-                echo "  sudo dnf install -y gcc python3-devel libjpeg-turbo-devel zlib-devel libpng-devel freetype-devel"
-            fi
+        echo "  Python3:        sudo apt install python3 python3-venv python3-pip"
+        echo "  Node.js + npm:  sudo apt install nodejs npm"
+        echo "  Podman:         sudo apt install podman"
+        echo "  podman-compose: pip install podman-compose"
+        echo ""
+        exit 1
+    fi
+
+    echo ""
+    print_success "Wszystkie wymagania spełnione!"
+}
+
+#-------------------------------------------------------------------------------
+# Zarządzanie kontenerami
+#-------------------------------------------------------------------------------
+
+start_containers() {
+    print_step "Uruchamianie kontenerów (PostgreSQL, Redis, MinIO)..."
+    cd "$SCRIPT_DIR"
+    
+    $COMPOSE_CMD -f "$COMPOSE_FILE" up -d postgres redis minio adminer 2>&1 | grep -v "^podman" || true
+    
+    print_success "Kontenery uruchomione"
+
+    print_step "Oczekiwanie na gotowość PostgreSQL..."
+    local attempt=0
+    while [ $attempt -lt 30 ]; do
+        if $CONTAINER_ENGINE exec fairpact-dev-db pg_isready -U fairpact -d fairpact &> /dev/null; then
+            print_success "PostgreSQL gotowy"
+            return
         fi
-        
-        echo ""
-        read -p "Czy chcesz kontynuować mimo błędów? (t/N): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Tt]$ ]]; then
-            log_error "Instalacja przerwana."
+        attempt=$((attempt + 1))
+        sleep 1
+    done
+    print_warning "PostgreSQL może nie być jeszcze gotowy, kontynuuję..."
+}
+
+stop_containers() {
+    print_step "Zatrzymywanie kontenerów..."
+    cd "$SCRIPT_DIR"
+    $COMPOSE_CMD -f "$COMPOSE_FILE" down 2>&1 | grep -v "^podman" || true
+    print_success "Kontenery zatrzymane"
+}
+
+#-------------------------------------------------------------------------------
+# Backend
+#-------------------------------------------------------------------------------
+
+setup_backend_venv() {
+    print_step "Konfiguracja środowiska Python dla backendu..."
+    cd "$BACKEND_DIR"
+
+    if [ ! -d ".venv" ]; then
+        python3 -m venv .venv
+    fi
+
+    source .venv/bin/activate
+
+    if [ "$USE_UV" = true ]; then
+        uv pip install -e ".[dev]" --quiet 2>/dev/null || uv pip install -e ".[dev]"
+    else
+        pip install -e ".[dev]" --quiet 2>/dev/null || pip install -e ".[dev]"
+    fi
+
+    print_success "Środowisko Python skonfigurowane"
+}
+
+run_migrations() {
+    print_step "Uruchamianie migracji bazy danych..."
+    cd "$BACKEND_DIR"
+    source .venv/bin/activate
+
+    if [ "$USE_UV" = true ]; then
+        uv run alembic upgrade head
+    else
+        python -m alembic upgrade head
+    fi
+
+    print_success "Migracje wykonane"
+}
+
+start_backend() {
+    print_step "Uruchamianie backendu FastAPI..."
+    cd "$BACKEND_DIR"
+    source .venv/bin/activate
+
+    mkdir -p "$PID_DIR" "$SCRIPT_DIR/.logs"
+
+    if [ "$USE_UV" = true ]; then
+        nohup uv run uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload > "$SCRIPT_DIR/.logs/backend.log" 2>&1 &
+    else
+        nohup python -m uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT --reload > "$SCRIPT_DIR/.logs/backend.log" 2>&1 &
+    fi
+
+    echo $! > "$BACKEND_PID_FILE"
+    print_success "Backend uruchomiony (PID: $(cat $BACKEND_PID_FILE))"
+}
+
+start_celery() {
+    print_step "Uruchamianie Celery worker..."
+    cd "$BACKEND_DIR"
+    source .venv/bin/activate
+
+    mkdir -p "$PID_DIR" "$SCRIPT_DIR/.logs"
+
+    if [ "$USE_UV" = true ]; then
+        nohup uv run celery -A celery_app worker -Q documents,sync,celery --loglevel=info > "$SCRIPT_DIR/.logs/celery.log" 2>&1 &
+    else
+        nohup python -m celery -A celery_app worker -Q documents,sync,celery --loglevel=info > "$SCRIPT_DIR/.logs/celery.log" 2>&1 &
+    fi
+
+    echo $! > "$CELERY_PID_FILE"
+    print_success "Celery worker uruchomiony (PID: $(cat $CELERY_PID_FILE))"
+}
+
+#-------------------------------------------------------------------------------
+# Frontend
+#-------------------------------------------------------------------------------
+
+setup_frontend() {
+    print_step "Konfiguracja frontendu Next.js..."
+    cd "$FRONTEND_DIR"
+
+    if [ ! -d "node_modules" ]; then
+        npm install --silent 2>/dev/null || npm install
+    fi
+
+    print_success "Frontend skonfigurowany"
+}
+
+start_frontend() {
+    print_step "Uruchamianie frontendu Next.js..."
+    cd "$FRONTEND_DIR"
+
+    mkdir -p "$PID_DIR" "$SCRIPT_DIR/.logs"
+
+    nohup npm run dev > "$SCRIPT_DIR/.logs/frontend.log" 2>&1 &
+
+    echo $! > "$FRONTEND_PID_FILE"
+    print_success "Frontend uruchomiony (PID: $(cat $FRONTEND_PID_FILE))"
+}
+
+#-------------------------------------------------------------------------------
+# Zatrzymywanie serwisów
+#-------------------------------------------------------------------------------
+
+stop_services() {
+    print_step "Zatrzymywanie serwisów..."
+
+    for pid_file in "$BACKEND_PID_FILE" "$CELERY_PID_FILE" "$FRONTEND_PID_FILE"; do
+        if [ -f "$pid_file" ]; then
+            PID=$(cat "$pid_file")
+            kill "$PID" 2>/dev/null || true
+            rm -f "$pid_file"
+        fi
+    done
+
+    pkill -f "uvicorn main:app" 2>/dev/null || true
+    pkill -f "celery -A celery_app" 2>/dev/null || true
+    pkill -f "next dev" 2>/dev/null || true
+
+    stop_containers
+}
+
+#-------------------------------------------------------------------------------
+# Status
+#-------------------------------------------------------------------------------
+
+show_status() {
+    print_header
+    echo -e "${BLUE}Status serwisów:${NC}"
+    echo ""
+
+    echo -e "${CYAN}Kontenery:${NC}"
+    $CONTAINER_ENGINE ps --filter "name=fairpact" --format "  {{.Names}}: {{.Status}}" 2>/dev/null || echo "  Brak"
+    echo ""
+
+    echo -e "${CYAN}Backend:${NC}"
+    if [ -f "$BACKEND_PID_FILE" ] && kill -0 "$(cat $BACKEND_PID_FILE)" 2>/dev/null; then
+        echo -e "  Status: ${GREEN}Uruchomiony${NC} | URL: http://localhost:$BACKEND_PORT"
+    else
+        echo -e "  Status: ${RED}Zatrzymany${NC}"
+    fi
+
+    echo -e "${CYAN}Celery:${NC}"
+    if [ -f "$CELERY_PID_FILE" ] && kill -0 "$(cat $CELERY_PID_FILE)" 2>/dev/null; then
+        echo -e "  Status: ${GREEN}Uruchomiony${NC}"
+    else
+        echo -e "  Status: ${RED}Zatrzymany${NC}"
+    fi
+
+    echo -e "${CYAN}Frontend:${NC}"
+    if [ -f "$FRONTEND_PID_FILE" ] && kill -0 "$(cat $FRONTEND_PID_FILE)" 2>/dev/null; then
+        echo -e "  Status: ${GREEN}Uruchomiony${NC} | URL: http://localhost:$FRONTEND_PORT"
+    else
+        echo -e "  Status: ${RED}Zatrzymany${NC}"
+    fi
+    echo ""
+}
+
+#-------------------------------------------------------------------------------
+# Informacje końcowe
+#-------------------------------------------------------------------------------
+
+show_services_info() {
+    echo ""
+    echo -e "${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║${NC}              ${CYAN}Aplikacja uruchomiona pomyślnie!${NC}                 ${GREEN}║${NC}"
+    echo -e "${GREEN}╚════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${BLUE}Dostępne serwisy:${NC}"
+    echo ""
+    echo -e "  ${CYAN}Frontend:${NC}        http://localhost:${FRONTEND_PORT}"
+    echo -e "  ${CYAN}Backend API:${NC}     http://localhost:${BACKEND_PORT}"
+    echo -e "  ${CYAN}API Docs:${NC}        http://localhost:${BACKEND_PORT}/docs"
+    echo -e "  ${CYAN}Adminer (DB):${NC}    http://localhost:8080"
+    echo -e "  ${CYAN}MinIO Console:${NC}   http://localhost:9001"
+    echo ""
+    echo -e "${BLUE}Dane logowania MinIO:${NC}  fairpact_admin / fairpact_admin_pass"
+    echo -e "${BLUE}Dane logowania DB:${NC}    fairpact / fairpact_dev_pass"
+    echo ""
+    echo -e "${YELLOW}Logi:${NC}        tail -f .logs/backend.log"
+    echo -e "${YELLOW}Zatrzymanie:${NC} ./start-app.sh --stop"
+    echo -e "${YELLOW}Status:${NC}      ./start-app.sh --status"
+    echo ""
+}
+
+#-------------------------------------------------------------------------------
+# Pomoc
+#-------------------------------------------------------------------------------
+
+show_help() {
+    echo "FairPact - Skrypt uruchomienia aplikacji"
+    echo ""
+    echo "Użycie: $0 [opcja]"
+    echo ""
+    echo "Opcje:"
+    echo "  (brak)     Uruchom wszystkie serwisy"
+    echo "  --stop     Zatrzymaj wszystkie serwisy"
+    echo "  --status   Pokaż status serwisów"
+    echo "  --help     Pokaż tę pomoc"
+    echo ""
+}
+
+#-------------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------------
+
+main() {
+    case "${1:-}" in
+        --stop)
+            print_header
+            stop_services
+            print_success "Wszystkie serwisy zatrzymane"
+            ;;
+        --status)
+            show_status
+            ;;
+        --help|-h)
+            show_help
+            ;;
+        "")
+            print_header
+            check_requirements
+            mkdir -p "$SCRIPT_DIR/.logs"
+            start_containers
+            setup_backend_venv
+            run_migrations
+            start_backend
+            start_celery
+            setup_frontend
+            start_frontend
+            print_step "Oczekiwanie na uruchomienie serwisów..."
+            sleep 5
+            show_services_info
+            ;;
+        *)
+            print_error "Nieznana opcja: $1"
+            show_help
             exit 1
-        fi
-        log_warning "Kontynuacja mimo błędów - aplikacja może nie działać poprawnie!"
-    fi
-else
-    log_warning "Plik requirements.txt nie został znaleziony"
-fi
+            ;;
+    esac
+}
 
-# Sprawdź czy zależności frontendu są zainstalowane
-if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
-    log_info "Sprawdzanie zależności frontendu..."
-    if [ ! -d "frontend/node_modules" ]; then
-        if command -v npm &> /dev/null; then
-            log_info "Instalowanie zależności npm..."
-            cd frontend
-            npm install
-            cd ..
-            log_success "Zależności npm zainstalowane"
-        else
-            log_warning "npm nie jest dostępne - pomijam instalację zależności frontendu"
-        fi
-    else
-        log_success "Zależności npm są już zainstalowane"
-    fi
-fi
-
-echo ""
-log_info "Uruchamianie kontenerów za pomocą podman-compose..."
-echo ""
-
-# Zatrzymaj istniejące kontenery (jeśli działają)
-log_info "Zatrzymywanie istniejących kontenerów..."
-podman-compose -f docker-compose.dev.yml down 2>/dev/null || true
-
-# Uruchom kontenery
-log_info "Uruchamianie nowych kontenerów..."
-podman-compose -f docker-compose.dev.yml up -d --build
-
-# Poczekaj na uruchomienie serwisów
-log_info "Czekam na uruchomienie serwisów..."
-sleep 10
-
-# Sprawdź status kontenerów
-log_info "Sprawdzanie statusu kontenerów..."
-echo ""
-podman-compose -f docker-compose.dev.yml ps
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-log_success "Aplikacja FairPact została uruchomiona!"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo -e "${GREEN}Dostępne usługi:${NC}"
-echo ""
-echo -e "  ${BLUE}📊 PostgreSQL Database:${NC}    localhost:5432"
-echo -e "  ${BLUE}🔴 Redis:${NC}                  localhost:6379"
-echo -e "  ${BLUE}📦 MinIO (S3):${NC}              localhost:9000"
-echo -e "  ${BLUE}🎛️  MinIO Console:${NC}          http://localhost:9001"
-echo -e "  ${BLUE}🗄️  Adminer (DB UI):${NC}        http://localhost:8080"
-echo ""
-echo -e "${YELLOW}Uwaga:${NC} Backend API i Frontend muszą być uruchomione osobno w trybie dev:"
-echo ""
-echo -e "  ${GREEN}Backend API:${NC}"
-echo -e "    cd backend"
-echo -e "    source venv/bin/activate"
-echo -e "    uvicorn main:app --reload --host 0.0.0.0 --port 8000"
-echo -e "    Dostępny pod: ${BLUE}http://localhost:8000${NC}"
-echo ""
-echo -e "  ${GREEN}Frontend:${NC}"
-echo -e "    cd frontend"
-echo -e "    npm run dev"
-echo -e "    Dostępny pod: ${BLUE}http://localhost:3000${NC}"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-log_info "Aby zatrzymać kontenery, użyj:"
-echo "  podman-compose -f docker-compose.dev.yml down"
-echo ""
-log_info "Aby zobaczyć logi kontenerów:"
-echo "  podman-compose -f docker-compose.dev.yml logs -f"
-echo ""
+main "$@"
