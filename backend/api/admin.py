@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_reviewer_user
+from api.deps import get_admin_user, get_reviewer_user
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -204,3 +204,23 @@ async def get_metrics(
 async def admin_health_check() -> dict:
     """Health check endpoint for admin API."""
     return {"status": "ok", "service": "admin"}
+
+
+@router.post("/sync-clauses", status_code=status.HTTP_202_ACCEPTED)
+async def trigger_clause_sync(
+    _current_user: User = Depends(get_admin_user),
+) -> dict:
+    """
+    Trigger manual synchronization of prohibited clauses from source database.
+
+    Requires admin privileges. The sync runs as a background Celery task.
+    """
+    from tasks.sync import sync_prohibited_clauses
+
+    task = sync_prohibited_clauses.delay()
+
+    return {
+        "message": "Clause synchronization started",
+        "task_id": task.id,
+        "status": "queued",
+    }

@@ -1,6 +1,7 @@
 """FairPact API - Contract Analysis Application."""
 from api.admin import router as admin_router
 from api.analysis import router as analysis_router
+from api.auth import router as auth_router
 from api.documents import router as documents_router
 from api.health import router as health_router
 from api.jobs import router as jobs_router
@@ -28,6 +29,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(documents_router)
 app.include_router(jobs_router)
 app.include_router(analysis_router)

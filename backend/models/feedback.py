@@ -30,7 +30,10 @@ class AnalysisFeedback(Base):
         Boolean, nullable=False, comment="Was this a true positive?"
     )
     reviewer_id: Mapped[Optional[UUID]] = mapped_column(
-        PG_UUID(as_uuid=True), nullable=True, comment="Admin user who reviewed"
+        PG_UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="Admin user who reviewed",
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
