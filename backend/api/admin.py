@@ -7,9 +7,12 @@ from database.connection import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.analysis import FlaggedClause
 from models.feedback import AnalysisFeedback, ModelMetrics
+from models.user import User
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.deps import get_reviewer_user
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -73,6 +76,7 @@ class PendingReviewItem(BaseModel):
 async def submit_feedback(
     feedback: FeedbackCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_reviewer_user),
 ) -> FeedbackResponse:
     """
     Submit feedback for a flagged clause.
@@ -112,8 +116,7 @@ async def submit_feedback(
         flagged_clause_id=feedback.flagged_clause_id,
         is_correct=feedback.is_correct,
         notes=feedback.notes,
-        # TODO: Get reviewer_id from auth
-        reviewer_id=None,
+        reviewer_id=current_user.id,
     )
 
     db.add(new_feedback)
@@ -127,6 +130,7 @@ async def submit_feedback(
 async def get_pending_reviews(
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(get_reviewer_user),
 ) -> List[PendingReviewItem]:
     """
     Get analyses awaiting review (completed analyses without full feedback).
@@ -179,6 +183,7 @@ async def get_pending_reviews(
 async def get_metrics(
     days: int = 30,
     db: AsyncSession = Depends(get_db),
+    _current_user: User = Depends(get_reviewer_user),
 ) -> List[MetricsResponse]:
     """
     Get model performance metrics for the last N days.

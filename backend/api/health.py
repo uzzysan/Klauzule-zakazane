@@ -1,4 +1,7 @@
 """Health check endpoints for load balancers and monitoring."""
+import redis.asyncio as redis
+
+from config import settings
 from database.connection import get_db
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import text
@@ -22,12 +25,12 @@ async def liveness_check() -> dict:
 async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
     """
     Readiness probe endpoint.
-    
+
     Returns 200 OK if the service is ready to handle requests.
     Checks:
     - Database connectivity
-    - Redis connectivity (TODO)
-    
+    - Redis connectivity
+
     Used by load balancers to determine if the instance is ready.
     """
     from fastapi import Response
@@ -41,15 +44,23 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
         checks["database"] = "ok"
     except Exception as e:
         checks["database"] = f"error: {str(e)}"
-        # Return 503 status for not ready
+
+    # Check Redis connection
+    try:
+        redis_client = redis.from_url(settings.redis_url)
+        await redis_client.ping()
+        await redis_client.aclose()
+        checks["redis"] = "ok"
+    except Exception as e:
+        checks["redis"] = f"error: {str(e)}"
+
+    # Return 503 if any check failed
+    has_errors = any("error" in str(v) for v in checks.values())
+    if has_errors:
         return Response(
-            content='{"status": "not_ready", "checks": ' + str(checks) + '}',
+            content='{"status": "not_ready", "checks": ' + str(checks).replace("'", '"') + '}',
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             media_type="application/json"
         )
-    
-    # TODO: Check Redis connection
-    # For now, assume Redis is ok if we got this far
-    checks["redis"] = "ok"
-    
+
     return {"status": "ready", "checks": checks}

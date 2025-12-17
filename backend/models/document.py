@@ -58,6 +58,11 @@ class Document(Base):
     deleted_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     # Relationships
+    user: Mapped[Optional["User"]] = relationship(
+        "User",
+        back_populates="documents",
+        foreign_keys=[user_id],
+    )
     metadata_record: Mapped[Optional["DocumentMetadata"]] = relationship(
         "DocumentMetadata",
         back_populates="document",

@@ -8,6 +8,7 @@ from config import settings
 from database.connection import get_db
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from models.document import Document
+from models.user import User
 from schemas.document import (
     ALLOWED_EXTENSIONS,
     ALLOWED_MIME_TYPES,
@@ -16,6 +17,8 @@ from schemas.document import (
 )
 from services.storage import storage_service
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.deps import get_optional_user
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -82,7 +85,7 @@ async def upload_document(
     analysis_mode: str = Form(default="offline", description="Analysis mode (offline or ai)"),
     custom_clauses: bool = Form(default=True, description="Include user's custom clauses"),
     save_to_drive: bool = Form(default=False, description="Save to Google Drive"),
-    user_id: Optional[str] = None,  # TODO: Get from auth dependency
+    current_user: Optional[User] = Depends(get_optional_user),
 ) -> DocumentUploadResponse:
     """
     Upload a document for analysis.
@@ -109,6 +112,9 @@ async def upload_document(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={"error": {"code": "INVALID_ANALYSIS_MODE", "message": "Invalid analysis mode"}},
         )
+
+    # Extract user_id from authenticated user (if any)
+    user_id = str(current_user.id) if current_user else None
 
     try:
         # Upload file to storage
