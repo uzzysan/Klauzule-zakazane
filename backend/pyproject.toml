@@ -11,7 +11,7 @@ dependencies = [
     "python-multipart==0.0.6",
     # Document processing
     "python-docx==1.1.0",
-    "pdfplumber==0.10.3",
+    "PyMuPDF==1.23.8",  # Faster and better structure preservation than pdfplumber
     "pytesseract==0.3.10",
     "Pillow==10.2.0",
     # ML/NLP
@@ -81,7 +81,7 @@ warn_return_any = true
 warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = ["sentence_transformers.*", "pgvector.*", "pdfplumber.*", "pytesseract.*", "minio.*"]
+module = ["sentence_transformers.*", "pgvector.*", "fitz", "pytesseract.*", "minio.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -1,11 +1,12 @@
 """FairPact API - Contract Analysis Application."""
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
+from api.admin import router as admin_router
 from api.analysis import router as analysis_router
 from api.documents import router as documents_router
+from api.health import router as health_router
 from api.jobs import router as jobs_router
 from config import settings
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create FastAPI app
 app = FastAPI(
@@ -26,9 +27,11 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(health_router)
 app.include_router(documents_router)
 app.include_router(jobs_router)
 app.include_router(analysis_router)
+app.include_router(admin_router)
 
 
 @app.get("/")
@@ -41,7 +44,3 @@ def read_root() -> dict:
     }
 
 
-@app.get("/health")
-def health_check() -> dict:
-    """Health check endpoint."""
-    return {"status": "ok", "environment": settings.app_env}

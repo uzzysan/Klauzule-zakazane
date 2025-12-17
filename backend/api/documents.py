@@ -4,11 +4,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from config import settings
 from database.connection import get_db
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from models.document import Document
 from schemas.document import (
     ALLOWED_EXTENSIONS,
@@ -17,6 +15,7 @@ from schemas.document import (
     DocumentUploadResponse,
 )
 from services.storage import storage_service
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -113,7 +112,7 @@ async def upload_document(
 
     try:
         # Upload file to storage
-        object_name, checksum, actual_file_size = storage_service.upload_file(
+        object_name, checksum, actual_file_size = await storage_service.upload_file(
             file_data=file.file,
             original_filename=file.filename or "unknown",
             content_type=file.content_type or "application/octet-stream",

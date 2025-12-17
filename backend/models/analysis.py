@@ -3,13 +3,20 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Float, ForeignKey, Integer, String, Text
+from database.connection import Base
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-
-from database.connection import Base
 
 
 class Analysis(Base):
@@ -116,6 +123,9 @@ class FlaggedClause(Base):
     # Relationships
     analysis: Mapped["Analysis"] = relationship("Analysis", back_populates="flagged_clauses")
     matched_clause: Mapped[Optional["ProhibitedClause"]] = relationship("ProhibitedClause")
+    feedback: Mapped[List["AnalysisFeedback"]] = relationship(
+        "AnalysisFeedback", back_populates="flagged_clause", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         CheckConstraint("risk_level IN ('high', 'medium', 'low')", name="valid_flagged_risk_level"),
@@ -130,4 +140,6 @@ class FlaggedClause(Base):
 
 
 # Import Document here to avoid circular import
+from models.clause import ProhibitedClause  # noqa: E402, F401
 from models.document import Document  # noqa: E402, F401
+from models.feedback import AnalysisFeedback  # noqa: E402, F401

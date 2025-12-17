@@ -94,7 +94,19 @@ export interface DocumentAnalysisResponse {
 export interface JobStatus {
     job_id: string;
     status: "queued" | "processing" | "completed" | "failed";
-    result: Record<string, unknown> | null;
+    result: {
+        document_id?: string;
+        status?: string;
+        analysis?: {
+            analysis_id: string;
+            total_clauses_found?: number;
+            high_risk_count?: number;
+            medium_risk_count?: number;
+            low_risk_count?: number;
+            risk_score?: number;
+        };
+        [key: string]: unknown;
+    } | null;
     error: string | null;
     meta: {
         stage?: string;

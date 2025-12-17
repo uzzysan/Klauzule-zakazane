@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import pdfplumber
+import fitz  # PyMuPDF
 from docx import Document as DocxDocument
 
 from services.ocr import OCRResult, ocr_service
@@ -51,70 +51,76 @@ class DocumentParser:
 
     def parse_pdf(self, file_path: str, language: str = "pol") -> ParsedDocument:
         """
-        Parse PDF document.
+        Parse PDF document using PyMuPDF (fitz).
 
         Strategy:
         1. Try to extract native text layer
         2. If no text or low quality, use OCR
         3. Extract metadata and structure
+        
+        PyMuPDF is faster and better preserves document structure than pdfplumber.
         """
         try:
-            with pdfplumber.open(file_path) as pdf:
-                pages_count = len(pdf.pages)
+            doc = fitz.open(file_path)
+            pages_count = len(doc)
 
-                # Extract metadata
-                metadata = {
-                    "title": pdf.metadata.get("Title", ""),
-                    "author": pdf.metadata.get("Author", ""),
-                    "subject": pdf.metadata.get("Subject", ""),
-                    "creator": pdf.metadata.get("Creator", ""),
-                    "producer": pdf.metadata.get("Producer", ""),
-                    "creation_date": pdf.metadata.get("CreationDate", ""),
-                }
+            # Extract metadata
+            metadata = {
+                "title": doc.metadata.get("title", ""),
+                "author": doc.metadata.get("author", ""),
+                "subject": doc.metadata.get("subject", ""),
+                "creator": doc.metadata.get("creator", ""),
+                "producer": doc.metadata.get("producer", ""),
+                "creation_date": doc.metadata.get("creationDate", ""),
+            }
 
-                # Try native text extraction
-                all_text = []
-                sections = []
+            # Try native text extraction
+            all_text = []
+            sections = []
 
-                for i, page in enumerate(pdf.pages):
-                    page_text = page.extract_text()
+            for page_num in range(pages_count):
+                page = doc[page_num]
+                page_text = page.get_text("text")  # Extract plain text
 
-                    if page_text:
-                        all_text.append(page_text)
+                if page_text:
+                    all_text.append(page_text)
 
-                        # Create section per page
-                        section = DocumentSection(
-                            title=f"Page {i + 1}",
-                            content=page_text,
-                            start_position=len("\n\n".join(all_text[:-1])),
-                            end_position=len("\n\n".join(all_text)),
-                            page_number=i + 1,
-                        )
-                        sections.append(section)
+                    # Create section per page
+                    section = DocumentSection(
+                        title=f"Page {page_num + 1}",
+                        content=page_text,
+                        start_position=len("\n\n".join(all_text[:-1])),
+                        end_position=len("\n\n".join(all_text)),
+                        page_number=page_num + 1,
+                    )
+                    sections.append(section)
 
-                full_text = "\n\n".join(all_text)
+            full_text = "\n\n".join(all_text)
 
-                # Check if we got meaningful text
-                ocr_result = None
-                if len(full_text.strip()) < 100:
-                    # Low quality or no text - use OCR
-                    ocr_result = ocr_service.extract_from_pdf_pages(file_path, language)
-                    full_text = ocr_result.text
+            # Check if we got meaningful text
+            ocr_result = None
+            if len(full_text.strip()) < 100:
+                # Low quality or no text - use OCR
+                doc.close()  # Close before OCR
+                ocr_result = ocr_service.extract_from_pdf_pages(file_path, language)
+                full_text = ocr_result.text
 
-                    # Recreate sections from OCR text
-                    sections = self._create_sections_from_text(full_text, pages_count)
+                # Recreate sections from OCR text
+                sections = self._create_sections_from_text(full_text, pages_count)
+            else:
+                doc.close()
 
-                # Count words
-                word_count = len(full_text.split())
+            # Count words
+            word_count = len(full_text.split())
 
-                return ParsedDocument(
-                    full_text=full_text,
-                    pages=pages_count,
-                    sections=sections,
-                    metadata=metadata,
-                    word_count=word_count,
-                    ocr_result=ocr_result,
-                )
+            return ParsedDocument(
+                full_text=full_text,
+                pages=pages_count,
+                sections=sections,
+                metadata=metadata,
+                word_count=word_count,
+                ocr_result=ocr_result,
+            )
 
         except Exception as e:
             # Return empty document on error

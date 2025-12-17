@@ -77,6 +77,53 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: postgres
 
+  # Celery Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fairpact-dev-worker
+    command: celery -A celery_app worker -Q documents,sync,celery --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://fairpact:fairpact_dev_pass@postgres:5432/fairpact
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: fairpact_admin
+      MINIO_SECRET_KEY: fairpact_admin_pass
+      MINIO_SECURE: "false"
+      MINIO_BUCKET_NAME: fairpact-uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - fairpact-dev
+    restart: unless-stopped
+
+  # Celery Beat (Scheduler)
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fairpact-dev-beat
+    command: celery -A celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://fairpact:fairpact_dev_pass@postgres:5432/fairpact
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fairpact-dev
+    restart: unless-stopped
+
 volumes:
   postgres_dev_data:
   redis_dev_data:

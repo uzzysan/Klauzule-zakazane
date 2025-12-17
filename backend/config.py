@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     tesseract_cmd: str = "/usr/bin/tesseract"
     tesseract_languages: str = "pol+eng"
 
+    # Analysis thresholds
+    analysis_threshold_low: float = 0.80  # Minimum similarity to flag a clause
+    analysis_threshold_medium: float = 0.86  # Threshold for medium risk
+    analysis_threshold_high: float = 0.93  # Threshold for high risk
+
     # CORS
     allowed_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 

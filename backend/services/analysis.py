@@ -4,12 +4,11 @@ from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
+from models.clause import ClauseLegalReference, LegalReference, ProhibitedClause
 from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 from sqlalchemy import text as sql_text
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from models.clause import ClauseLegalReference, LegalReference, ProhibitedClause
 
 # Embedding model (same as used for import)
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -57,11 +56,6 @@ class AnalysisResult:
 class ClauseAnalysisService:
     """Service for analyzing documents against prohibited clause database."""
 
-    # Similarity thresholds for risk level classification based on match quality
-    VECTOR_THRESHOLD_HIGH = 0.93  # Very high similarity - high risk
-    VECTOR_THRESHOLD_MEDIUM = 0.86  # Good similarity - medium risk
-    VECTOR_THRESHOLD_LOW = 0.80  # Moderate similarity - low risk (also minimum threshold)
-
     # Minimum segment length for analysis
     MIN_SEGMENT_LENGTH = 50
 
@@ -70,7 +64,14 @@ class ClauseAnalysisService:
 
     def __init__(self) -> None:
         """Initialize the analysis service."""
+        from config import settings
+        
         self.model = get_embedding_model()
+        
+        # Load thresholds from configuration (can be adjusted via environment variables)
+        self.VECTOR_THRESHOLD_LOW = settings.analysis_threshold_low
+        self.VECTOR_THRESHOLD_MEDIUM = settings.analysis_threshold_medium
+        self.VECTOR_THRESHOLD_HIGH = settings.analysis_threshold_high
 
     def segment_text(self, text: str) -> List[tuple[str, int, int]]:
         """

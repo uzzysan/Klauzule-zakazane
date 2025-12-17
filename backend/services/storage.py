@@ -5,12 +5,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import BinaryIO, Optional
 
+from config import settings
 from minio import Minio
 from minio.commonconfig import Filter
 from minio.error import S3Error
 from minio.lifecycleconfig import Expiration, LifecycleConfig, Rule
-
-from config import settings
 
 
 class StorageService:
@@ -18,14 +17,29 @@ class StorageService:
 
     def __init__(self) -> None:
         """Initialize MinIO client."""
-        self.client = Minio(
-            settings.minio_endpoint,
-            access_key=settings.minio_access_key,
-            secret_key=settings.minio_secret_key.get_secret_value(),
-            secure=settings.minio_secure,
-        )
-        self.bucket_name = settings.minio_bucket_name
-        self._ensure_bucket()
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        try:
+            self.client = Minio(
+                settings.minio_endpoint,
+                access_key=settings.minio_access_key,
+                secret_key=settings.minio_secret_key.get_secret_value(),
+                secure=settings.minio_secure,
+            )
+            self.bucket_name = settings.minio_bucket_name
+            self._ensure_bucket()
+            logger.info(f"MinIO storage service initialized successfully (bucket: {self.bucket_name})")
+        except Exception as e:
+            logger.warning(
+                f"Failed to initialize MinIO storage service: {e}. "
+                "Storage operations will fail until MinIO is available. "
+                "Please ensure MinIO is running and accessible."
+            )
+            # Set client to None to allow graceful degradation
+            self.client = None
+            self.bucket_name = settings.minio_bucket_name
 
     def _ensure_bucket(self) -> None:
         """Ensure bucket exists, create if not."""
@@ -68,7 +82,7 @@ class StorageService:
 
         return f"{namespace}/{random_part}{extension}"
 
-    def upload_file(
+    async def upload_file(
         self,
         file_data: BinaryIO,
         original_filename: str,
@@ -76,11 +90,23 @@ class StorageService:
         user_id: Optional[str] = None,
     ) -> tuple[str, str, int]:
         """
-        Upload file to MinIO.
+        Upload file to MinIO asynchronously.
 
         Returns:
             Tuple of (object_name, checksum, file_size)
+        
+        Raises:
+            ValueError: If MinIO client is not available
         """
+        import asyncio
+        from io import BytesIO
+
+        if self.client is None:
+            raise ValueError(
+                "MinIO storage service is not available. "
+                "Please ensure MinIO is running and restart the application."
+            )
+
         # Generate secure object name
         object_name = self.generate_secure_filename(original_filename, user_id)
 
@@ -92,21 +118,24 @@ class StorageService:
         # Calculate checksum
         checksum = hashlib.sha256(file_content).hexdigest()
 
-        # Upload to MinIO
-        from io import BytesIO
+        # Define blocking upload operation
+        def _blocking_upload():
+            self.client.put_object(
+                bucket_name=self.bucket_name,
+                object_name=object_name,
+                data=BytesIO(file_content),
+                length=file_size,
+                content_type=content_type,
+                metadata={
+                    "original-filename": original_filename,
+                    "sha256": checksum,
+                    "uploaded-at": datetime.utcnow().isoformat(),
+                },
+            )
 
-        self.client.put_object(
-            bucket_name=self.bucket_name,
-            object_name=object_name,
-            data=BytesIO(file_content),
-            length=file_size,
-            content_type=content_type,
-            metadata={
-                "original-filename": original_filename,
-                "sha256": checksum,
-                "uploaded-at": datetime.utcnow().isoformat(),
-            },
-        )
+        # Run blocking operation in thread pool executor
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _blocking_upload)
 
         return object_name, checksum, file_size
 

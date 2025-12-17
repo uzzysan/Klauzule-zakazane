@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FileText, Shield, Clock, ArrowRight } from "lucide-react";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, FileUpload } from "@/components/ui";
-import { useUploadStore } from "@/lib/store";
 import api from "@/lib/api";
+import { useUploadStore } from "@/lib/store";
+import { ArrowRight, Clock, FileText, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function UploadPage() {
     const router = useRouter();
@@ -60,24 +60,27 @@ export default function UploadPage() {
                 const doc = await api.getDocument(uploadResponse.document_id);
 
                 if (doc.celery_task_id) {
-                    await api.pollJobStatus(doc.celery_task_id, {
+                    const jobResult = await api.pollJobStatus(doc.celery_task_id, {
                         interval: 2000,
                         timeout: 300000,
                         onStatusChange: updateProcessingStatus,
                     });
-                }
 
-                // Get analysis result
-                const analysisResponse = await api.getDocumentAnalysis(uploadResponse.document_id);
+                    // Extract analysis_id from job result
+                    const analysisId = jobResult.result?.analysis?.analysis_id;
 
-                if (analysisResponse.latest_analysis) {
-                    const analysis = await api.getAnalysis(analysisResponse.latest_analysis.id);
-                    setProcessingComplete(analysis);
+                    if (analysisId) {
+                        // Get full analysis details
+                        const analysis = await api.getAnalysis(analysisId);
+                        setProcessingComplete(analysis);
 
-                    // Navigate to results page
-                    router.push(`/analysis/${analysis.id}`);
+                        // Navigate to results page
+                        router.push(`/analysis/${analysisId}`);
+                    } else {
+                        setProcessingError("Nie znaleziono ID analizy w wyniku zadania");
+                    }
                 } else {
-                    setProcessingError("Nie znaleziono wyników analizy");
+                    setProcessingError("Brak ID zadania Celery");
                 }
             }
         } catch (error) {

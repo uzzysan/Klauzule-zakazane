@@ -15,6 +15,8 @@ htmlcov/
 *.egg-info/
 dist/
 build/
+dane_testowe/
+role_ai/
 
 # Node
 node_modules/
