@@ -33,10 +33,11 @@ The system now includes **7,233 prohibited clauses** from Polish court decisions
 - **Import Tool**: Automated import script at `backend/database/import_clauses.py`
 
 ### Data Storage Strategy
-- **Guest users**: Temporary storage with 24h retention (local filesystem or MinIO/S3)
-- **Authenticated users**: Documents stored in user's Google Drive via Drive API
+
+- **Guest users**: Temporary storage with 24h retention (MinIO/S3)
+- **Authenticated users**: Documents linked to user account in PostgreSQL
 - **Clause Database**: PostgreSQL with vector embeddings for semantic search
-- **Authentication**: NextAuth.js with Google OAuth as primary provider
+- **Authentication**: JWT tokens with bcrypt password hashing
 
 ## Development Commands
 
@@ -102,67 +103,71 @@ The app uses `sentence-transformers` with local inference (no external API) to p
 
 ### Backend (✅ Complete)
 - ✅ **Clause Database**: 7,233 prohibited clauses with vector embeddings
-- ✅ **Database Models**: Document, Analysis, FlaggedClause, ProhibitedClause, LegalReference
+- ✅ **Database Models**: Document, Analysis, FlaggedClause, ProhibitedClause, LegalReference, User, AnalysisFeedback, ModelMetrics
 - ✅ **Vector Search**: pgvector extension for semantic similarity
 - ✅ **Document Upload API**: `POST /api/v1/documents/upload` (PDF, DOCX, images)
 - ✅ **Analysis Service**: Hybrid search (vector + keyword matching)
 - ✅ **Analysis API**: Results retrieval endpoints
 - ✅ **Celery Pipeline**: Async document processing with OCR/parsing
 - ✅ **Database Migrations**: Alembic setup with full schema
+- ✅ **Authentication System**: JWT-based auth with bcrypt password hashing
+  - `POST /api/v1/auth/register` - User registration
+  - `POST /api/v1/auth/login` - User login
+  - `GET /api/v1/auth/me` - Current user info
+  - `POST /api/v1/auth/refresh` - Token refresh
+  - `POST /api/v1/auth/change-password` - Password change
+- ✅ **Admin API**: Role-based access control (admin/reviewer)
+  - `GET /api/v1/admin/metrics` - Model performance metrics
+  - `GET /api/v1/admin/pending-reviews` - Analyses awaiting review
+  - `POST /api/v1/admin/feedback` - Submit clause feedback (TP/FP)
+  - `POST /api/v1/admin/sync-clauses` - Trigger clause sync (admin only)
+- ✅ **Test Suite**: 41 tests (pytest) covering auth, admin, and documents
 
-### Frontend (🚧 In Progress)
+### Frontend (✅ Complete)
+
 - ✅ **Project Setup**: Next.js 14 + TailwindCSS + Zustand
 - ✅ **Theme System**: Light/Dark mode with CSS variables
-- 🚧 **Upload Page**: File upload with drag & drop
-- 🚧 **Results Page**: Analysis results with risk highlighting
-- ⏳ **Navigation & Layout**: Header, footer, responsive design
-
-## Current Development Phase: Frontend MVP
-
-### Phase 1: Core UI Components
-- [ ] Button, Card, Input components
-- [ ] FileUpload with drag & drop
-- [ ] RiskBadge, ProgressBar components
-- [ ] Loading states and error handling
-
-### Phase 2: Upload Flow
-- [ ] Upload page with file selection
-- [ ] File validation (type, size)
-- [ ] Upload progress indicator
-- [ ] Redirect to results on completion
-
-### Phase 3: Results Display
-- [ ] Analysis summary (risk score, counts)
-- [ ] Flagged clauses list with highlighting
-- [ ] Document text viewer with markers
-- [ ] Export/download functionality
-
-### Phase 4: Polish & Navigation
-- [ ] Header with theme toggle
-- [ ] Landing page improvements
-- [ ] Mobile responsiveness
-- [ ] Error pages (404, 500)
+- ✅ **UI Components**: Button, Card, FileUpload, RiskBadge, RiskScore, RiskCounts
+- ✅ **Upload Page**: File upload with drag & drop and progress tracking
+- ✅ **Results Page**: Analysis results with risk highlighting and clause details
+- ✅ **Authentication**: Login form with JWT token management (Zustand store)
+- ✅ **Admin Dashboard** (`/admin`):
+  - Login form for admin/reviewer users
+  - Metrics overview with confusion matrix
+  - Pending reviews list
+  - Clause sync trigger (admin only)
+- ✅ **Review Interface** (`/admin/review/[analysisId]`):
+  - View analysis with all flagged clauses
+  - Mark clauses as correct (TP) or incorrect (FP)
+  - Add optional notes to feedback
+  - Progress tracking (reviewed vs total)
+  - Filter by risk level or review status
 
 ## Planned Features (Future)
-- Clause database CRUD API endpoints
-- Google Drive integration
+
+- Google Drive integration for authenticated users
 - Camera capture for mobile
-- Feedback loop system
-- Admin panel for clause management
+- Clause database CRUD API endpoints (public management)
 - Cron job for guest file cleanup
-- User authentication (NextAuth.js)
+- Email notifications
 
 ## Database Schema (✅ IMPLEMENTED)
+
 PostgreSQL with `pgvector` extension stores:
-- **Documents**: Upload metadata, status tracking
+
+- **Users**: Authentication, roles (admin/reviewer), password hashes
+- **Documents**: Upload metadata, status tracking, user ownership
 - **Document Metadata**: Extracted text, word count, sections
 - **Analyses**: Analysis jobs with results summary
 - **Flagged Clauses**: Individual matches with confidence scores
+- **Analysis Feedback**: Reviewer feedback (TP/FP) for flagged clauses
+- **Model Metrics**: Daily aggregated metrics (precision, recall, F1, accuracy)
 - **Prohibited Clauses**: 7,233 entries with 384-dim embeddings
 - **Legal References**: 5,009 court decisions
 - **Clause Categories**: Industry and risk classification
 
 ## Deployment Plan
+
 - **Frontend**: Vercel or Dockerized VPS
 - **Backend**: Docker container on Hetzner/DigitalOcean/Railway
 - **Database**: Managed Postgres (Supabase/Neon) or self-hosted
