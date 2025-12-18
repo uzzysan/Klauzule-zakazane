@@ -99,7 +99,7 @@ function ReviewItem({ review, onReviewComplete: _onReviewComplete }: ReviewItemP
                         Ma feedback
                     </span>
                 )}
-                <Link href={`/analysis/${review.analysis_id}`}>
+                <Link href={`/admin/review/${review.analysis_id}`}>
                     <Button variant="ghost" size="sm">
                         Przejrzyj
                         <ChevronRight className="ml-1 h-4 w-4" />
