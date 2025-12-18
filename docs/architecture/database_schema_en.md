@@ -775,6 +775,42 @@ CREATE INDEX idx_webhook_deliveries_failed ON webhook_deliveries(delivered) WHER
 
 ---
 
+### 3.16 model_metrics
+
+Track model performance metrics based on reviewer feedback.
+
+```sql
+CREATE TABLE model_metrics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- Date of metrics
+    date DATE NOT NULL UNIQUE,
+
+    -- Metrics
+    true_positives INTEGER DEFAULT 0 NOT NULL,
+    false_positives INTEGER DEFAULT 0 NOT NULL,
+    true_negatives INTEGER DEFAULT 0 NOT NULL,
+    false_negatives INTEGER DEFAULT 0 NOT NULL,
+
+    -- Calculated stats
+    precision FLOAT,
+    recall FLOAT,
+    f1_score FLOAT,
+    accuracy FLOAT,
+
+    -- Metadata
+    total_reviews INTEGER DEFAULT 0 NOT NULL,
+    notes TEXT,
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_model_metrics_date ON model_metrics(date);
+```
+
+---
+
 ## 4. Indexes
 
 ### Performance Optimization Indexes

@@ -1,61 +1,60 @@
-# FairPact - API Specification v1.0
+# FairPact - Specyfikacja API v1.0
 
-## Document Information
-- **Version:** 1.0
-- **Last Updated:** 2025-12-08
-- **Base URL:** `https://api.fairpact.com` (Production)
-- **Base URL:** `http://localhost:8000` (Development)
-- **API Version:** v1
-- **Related Documents:** [Implementation Plan](./implementation_plan_v2.md)
+## Informacje o Dokumencie
+- **Wersja:** 1.0
+- **Ostatnia aktualizacja:** 2025-12-18
+- **Bazowy URL:** `https://api.fairpact.com` (Produkcja)
+- **Bazowy URL:** `http://localhost:8000` (Development)
+- **Wersja API:** v1
 
 ---
 
-## Table of Contents
-1. [Authentication](#1-authentication)
-2. [Documents API](#2-documents-api)
-3. [Analysis API](#3-analysis-api)
-4. [Clauses API](#4-clauses-api)
-5. [Users API](#5-users-api)
-6. [Jobs API](#6-jobs-api)
-7. [Error Handling](#7-error-handling)
-8. [Rate Limiting](#8-rate-limiting)
-9. [Admin API](#9-admin-api)
+## Spis Treści
+1. [Uwierzytelnianie](#1-uwierzytelnianie)
+2. [API Dokumentów](#2-api-dokumentów)
+3. [API Analizy](#3-api-analizy)
+4. [API Klauzul](#4-api-klauzul)
+5. [API Użytkowników](#5-api-użytkowników)
+6. [API Zadań](#6-api-zadań)
+7. [Obsługa Błędów](#7-obsługa-błędów)
+8. [Limitowanie Zapytań](#8-limitowanie-zapytań)
+9. [API Administracyjne](#9-api-administracyjne)
 10. [Webhooks](#10-webhooks)
 
 ---
 
-## 1. Authentication
+## 1. Uwierzytelnianie
 
-### Authentication Methods
+### Metody Uwierzytelniania
 
-#### 1.1 Session-Based (Frontend)
-- **Method:** HTTP-only cookies managed by NextAuth.js
-- **Header:** `Cookie: next-auth.session-token=<token>`
-- **Expiry:** 30 days (sliding)
+#### 1.1 Oparte na Sesji (Frontend)
+- **Metoda:** Ciasteczka HTTP-only zarządzane przez NextAuth.js
+- **Nagłówek:** `Cookie: next-auth.session-token=<token>`
+- **Wygasa:** 30 dni (przesuwne)
 
-#### 1.2 API Key (Third-party integrations)
-- **Method:** Bearer token
-- **Header:** `Authorization: Bearer <api_key>`
-- **Expiry:** Never (unless revoked)
+#### 1.2 Klucz API (Integracje zewnętrzne)
+- **Metoda:** Token Bearer
+- **Nagłówek:** `Authorization: Bearer <api_key>`
+- **Wygasa:** Nigdy (chyba że odwołany)
 
-#### 1.3 Guest Access
-- **Method:** Anonymous session ID
-- **Header:** `X-Guest-Session: <guest_id>`
-- **Expiry:** 24 hours
+#### 1.3 Dostęp Gościnny
+- **Metoda:** Anonimowe ID sesji
+- **Nagłówek:** `X-Guest-Session: <guest_id>`
+- **Wygasa:** 24 godziny
 
-### Endpoints
+### Endpointy
 
 #### POST `/auth/session`
-Create guest session or validate user session.
+Utwórz sesję gościa lub zweryfikuj sesję użytkownika.
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "mode": "guest" | "user"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "session_id": "guest_abc123xyz",
@@ -69,30 +68,30 @@ Create guest session or validate user session.
 
 ---
 
-## 2. Documents API
+## 2. API Dokumentów
 
 ### POST `/api/v1/documents/upload`
-Upload a document for analysis.
+Prześlij dokument do analizy.
 
-**Authentication:** Required (session or API key)
+**Uwierzytelnianie:** Wymagane (sesja lub klucz API)
 
-**Request:**
+**Żądanie:**
 - **Content-Type:** `multipart/form-data`
 
-**Form Fields:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | File | Yes | Document file (PDF, DOCX, JPG, PNG) |
-| `language` | String | No | Document language (`pl`, `en`). Default: `pl` |
-| `analysis_mode` | String | No | `offline` or `ai`. Default: `offline` |
-| `custom_clauses` | Boolean | No | Include user's custom clauses. Default: `true` |
-| `save_to_drive` | Boolean | No | Save to Google Drive (requires auth). Default: `false` |
+**Pola Formularza:**
+| Pole | Typ | Wymagane | Opis |
+|------|-----|----------|------|
+| `file` | Plik | Tak | Plik dokumentu (PDF, DOCX, JPG, PNG) |
+| `language` | String | Nie | Język dokumentu (`pl`, `en`). Domyślnie: `pl` |
+| `analysis_mode` | String | Nie | `offline` lub `ai`. Domyślnie: `offline` |
+| `custom_clauses` | Boolean | Nie | Uwzględnij własne klauzule użytkownika. Domyślnie: `true` |
+| `save_to_drive` | Boolean | Nie | Zapisz na Google Drive (wymaga autoryzacji). Domyślnie: `false` |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "document_id": "doc_9f8e7d6c",
-  "filename": "contract.pdf",
+  "filename": "umowa.pdf",
   "size_bytes": 245760,
   "pages": 5,
   "upload_url": "https://storage.fairpact.com/uploads/doc_9f8e7d6c.pdf",
@@ -100,29 +99,29 @@ Upload a document for analysis.
 }
 ```
 
-**Error Codes:**
-- `400` - Invalid file type or size
-- `402` - Quota exceeded (guest users)
-- `413` - File too large
-- `429` - Rate limit exceeded
+**Kody Błędów:**
+- `400` - Nieprawidłowy typ pliku lub rozmiar
+- `402` - Przekroczono limit (użytkownicy gościnni)
+- `413` - Plik zbyt duży
+- `429` - Przekroczono limit zapytań
 
 ---
 
 ### GET `/api/v1/documents/{document_id}`
-Retrieve document metadata.
+Pobierz metadane dokumentu.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `document_id` | String | Unique document identifier |
+**Parametry Ścieżki:**
+| Parametr | Typ | Opis |
+|----------|-----|------|
+| `document_id` | String | Unikalny identyfikator dokumentu |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "document_id": "doc_9f8e7d6c",
-  "filename": "contract.pdf",
+  "filename": "umowa.pdf",
   "size_bytes": 245760,
   "pages": 5,
   "language": "pl",
@@ -137,26 +136,26 @@ Retrieve document metadata.
 ---
 
 ### GET `/api/v1/documents`
-List user's documents.
+Pobierz listę dokumentów użytkownika.
 
-**Authentication:** Required (user only)
+**Uwierzytelnianie:** Wymagane (tylko użytkownik)
 
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `page` | Integer | No | Page number (1-indexed). Default: `1` |
-| `limit` | Integer | No | Items per page (1-100). Default: `20` |
-| `status` | String | No | Filter by status |
-| `sort` | String | No | Sort field (`created_at`, `filename`). Default: `created_at` |
-| `order` | String | No | Sort order (`asc`, `desc`). Default: `desc` |
+**Parametry Query:**
+| Parametr | Typ | Wymagane | Opis |
+|----------|-----|----------|------|
+| `page` | Integer | Nie | Numer strony (indeksowany od 1). Domyślnie: `1` |
+| `limit` | Integer | Nie | Elementów na stronę (1-100). Domyślnie: `20` |
+| `status` | String | Nie | Filtruj po statusie |
+| `sort` | String | Nie | Pole sortowania (`created_at`, `filename`). Domyślnie: `created_at` |
+| `order` | String | Nie | Kolejność sortowania (`asc`, `desc`). Domyślnie: `desc` |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "documents": [
     {
       "document_id": "doc_9f8e7d6c",
-      "filename": "contract.pdf",
+      "filename": "umowa.pdf",
       "pages": 5,
       "status": "completed",
       "created_at": "2025-12-08T14:30:00Z",
@@ -179,28 +178,28 @@ List user's documents.
 ---
 
 ### DELETE `/api/v1/documents/{document_id}`
-Delete a document and its analysis.
+Usuń dokument i jego analizę.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "success": true,
-  "message": "Document deleted successfully"
+  "message": "Dokument usunięty pomyślnie"
 }
 ```
 
 ---
 
-## 3. Analysis API
+## 3. API Analizy
 
 ### POST `/api/v1/analysis/start`
-Start document analysis.
+Rozpocznij analizę dokumentu.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "document_id": "doc_9f8e7d6c",
@@ -214,7 +213,7 @@ Start document analysis.
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "job_id": "job_xyz789",
@@ -224,24 +223,24 @@ Start document analysis.
 }
 ```
 
-**Status Codes:**
-- `202` - Analysis job created
-- `400` - Invalid request
-- `404` - Document not found
+**Kody Statusu:**
+- `202` - Zadanie analizy utworzone
+- `400` - Nieprawidłowe żądanie
+- `404` - Dokument nie znalezion
 
 ---
 
 ### GET `/api/v1/analysis/{analysis_id}`
-Retrieve analysis results.
+Pobierz wyniki analizy.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `analysis_id` | String | Unique analysis identifier |
+**Parametry Ścieżki:**
+| Parametr | Typ | Opis |
+|----------|-----|------|
+| `analysis_id` | String | Unikalny identyfikator analizy |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "analysis_id": "analysis_abc123",
@@ -305,67 +304,67 @@ Retrieve analysis results.
 ---
 
 ### GET `/api/v1/analysis/{analysis_id}/export`
-Export analysis report.
+Eksportuj raport analizy.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `format` | String | Yes | Export format (`pdf`, `json`, `csv`) |
-| `include_original` | Boolean | No | Include original document. Default: `false` |
+**Parametry Query:**
+| Parametr | Typ | Wymagane | Opis |
+|----------|-----|----------|------|
+| `format` | String | Tak | Format eksportu (`pdf`, `json`, `csv`) |
+| `include_original` | Boolean | Nie | Dołącz oryginalny dokument. Domyślnie: `false` |
 
-**Response:**
-- **Content-Type:** `application/pdf` or `application/json` or `text/csv`
+**Odpowiedź:**
+- **Content-Type:** `application/pdf` lub `application/json` lub `text/csv`
 - **Headers:** `Content-Disposition: attachment; filename="analysis_report.pdf"`
 
 ---
 
 ### POST `/api/v1/analysis/{analysis_id}/feedback`
-Submit feedback on analysis results.
+Prześlij feedback do wyników analizy.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "helpful": true,
   "flagged_clause_id": "clause_001",
   "feedback_type": "false_positive" | "false_negative" | "incorrect_category" | "other",
-  "comment": "This clause is actually standard arbitration language",
+  "comment": "Ta klauzula jest standardowym zapisem arbitrażowym",
   "corrected_category": "standard_arbitration"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "success": true,
   "feedback_id": "fb_456def",
-  "message": "Thank you for your feedback"
+  "message": "Dziękujemy za Twój feedback"
 }
 ```
 
 ---
 
-## 4. Clauses API
+## 4. API Klauzul
 
 ### GET `/api/v1/clauses`
-List prohibited clauses database.
+Pobierz listę klauzul niedozwolonych.
 
-**Authentication:** Optional (public clauses) / Required (custom clauses)
+**Uwierzytelnianie:** Opcjonalne (klauzule publiczne) / Wymagane (własne klauzule)
 
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `category` | String | No | Filter by category |
-| `language` | String | No | Filter by language (`pl`, `en`) |
-| `source` | String | No | `standard`, `user`, `all`. Default: `standard` |
-| `search` | String | No | Text search query |
-| `page` | Integer | No | Page number |
-| `limit` | Integer | No | Items per page (max 100) |
+**Parametry Query:**
+| Parametr | Typ | Wymagane | Opis |
+|----------|-----|----------|------|
+| `category` | String | Nie | Filtruj po kategorii |
+| `language` | String | Nie | Filtruj po języku (`pl`, `en`) |
+| `source` | String | Nie | `standard`, `user`, `all`. Domyślnie: `standard` |
+| `search` | String | Nie | Wyszukiwanie tekstowe |
+| `page` | Integer | Nie | Numer strony |
+| `limit` | Integer | Nie | Elementów na stronę (max 100) |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "clauses": [
@@ -399,17 +398,17 @@ List prohibited clauses database.
 ---
 
 ### POST `/api/v1/clauses`
-Add custom clause to user's database.
+Dodaj własną klauzulę do bazy użytkownika.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "text": "Sprzedający zastrzega sobie prawo do zmiany cen bez uprzedzenia",
   "category": "unilateral_change",
   "risk_level": "medium",
-  "notes": "Common in B2B contracts but unfair for consumers",
+  "notes": "Częste w B2B, ale nieuczciwe dla konsumentów",
   "variations": [
     "ceny mogą ulec zmianie",
     "zastrzegamy prawo do modyfikacji cen"
@@ -417,7 +416,7 @@ Add custom clause to user's database.
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "clause_id": "clause_user_abc123",
@@ -433,11 +432,11 @@ Add custom clause to user's database.
 ---
 
 ### GET `/api/v1/clauses/{clause_id}`
-Get detailed clause information.
+Pobierz szczegółowe informacje o klauzuli.
 
-**Authentication:** Optional (public) / Required (user clauses)
+**Uwierzytelnianie:** Opcjonalne (publiczne) / Wymagane (klauzule użytkownika)
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "clause_id": "clause_001",
@@ -470,21 +469,21 @@ Get detailed clause information.
 ---
 
 ### PUT `/api/v1/clauses/{clause_id}`
-Update custom clause.
+Zaktualizuj własną klauzulę.
 
-**Authentication:** Required (owner only)
+**Uwierzytelnianie:** Wymagane (tylko właściciel)
 
-**Request:**
+**Żądanie:**
 ```json
 {
-  "text": "Updated clause text",
+  "text": "Zaktualizowany tekst klauzuli",
   "category": "new_category",
   "risk_level": "high",
-  "notes": "Updated notes"
+  "notes": "Zaktualizowane notatki"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "clause_id": "clause_user_abc123",
@@ -496,26 +495,26 @@ Update custom clause.
 ---
 
 ### DELETE `/api/v1/clauses/{clause_id}`
-Delete custom clause.
+Usuń własną klauzulę.
 
-**Authentication:** Required (owner only)
+**Uwierzytelnianie:** Wymagane (tylko właściciel)
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "success": true,
-  "message": "Clause deleted successfully"
+  "message": "Klauzula usunięta pomyślnie"
 }
 ```
 
 ---
 
 ### GET `/api/v1/clauses/categories`
-List available clause categories.
+Lista dostępnych kategorii klauzul.
 
-**Authentication:** None
+**Uwierzytelnianie:** Brak
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "categories": [
@@ -541,14 +540,14 @@ List available clause categories.
 
 ---
 
-## 5. Users API
+## 5. API Użytkowników
 
 ### GET `/api/v1/users/me`
-Get current user profile.
+Pobierz profil obecnego użytkownika.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "user_id": "user_789xyz",
@@ -582,11 +581,11 @@ Get current user profile.
 ---
 
 ### PATCH `/api/v1/users/me`
-Update user preferences.
+Zaktualizuj preferencje użytkownika.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "preferences": {
@@ -597,7 +596,7 @@ Update user preferences.
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "success": true,
@@ -609,11 +608,11 @@ Update user preferences.
 ---
 
 ### GET `/api/v1/users/me/stats`
-Get user statistics.
+Pobierz statystyki użytkownika.
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "user_id": "user_789xyz",
@@ -645,42 +644,42 @@ Get user statistics.
 ---
 
 ### DELETE `/api/v1/users/me`
-Delete user account (GDPR compliance).
+Usuń konto użytkownika (Zgodność z RODO).
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "confirmation": "DELETE",
-  "reason": "optional reason for deletion"
+  "reason": "opcjonalny powód usunięcia"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "success": true,
-  "message": "Account scheduled for deletion",
+  "message": "Konto zaplanowane do usunięcia",
   "deletion_date": "2025-12-15T00:00:00Z"
 }
 ```
 
 ---
 
-## 6. Jobs API
+## 6. API Zadań
 
 ### GET `/api/v1/jobs/{job_id}`
-Get job status (for async operations).
+Pobierz status zadania (dla operacji asynchronicznych).
 
-**Authentication:** Required
+**Uwierzytelnianie:** Wymagane
 
-**Path Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `job_id` | String | Unique job identifier |
+**Parametry Ścieżki:**
+| Parametr | Typ | Opis |
+|----------|-----|------|
+| `job_id` | String | Unikalny identyfikator zadania |
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "job_id": "job_xyz789",
@@ -699,7 +698,7 @@ Get job status (for async operations).
 }
 ```
 
-**When completed:**
+**Po zakończeniu:**
 ```json
 {
   "job_id": "job_xyz789",
@@ -721,19 +720,19 @@ Get job status (for async operations).
 
 ---
 
-## 7. Error Handling
+## 7. Obsługa Błędów
 
-### Error Response Format
+### Format Odpowiedzi Błędu
 
-All errors follow this structure:
+Wszystkie błędy mają następującą strukturę:
 
 ```json
 {
   "error": {
     "code": "ERROR_CODE",
-    "message": "Human-readable error message",
+    "message": "Czytelny komunikat błędu",
     "details": {
-      "field": "Additional context"
+      "field": "Dodatkowy kontekst"
     },
     "request_id": "req_abc123xyz",
     "timestamp": "2025-12-08T15:00:00Z"
@@ -741,45 +740,28 @@ All errors follow this structure:
 }
 ```
 
-### Standard Error Codes
+### Standardowe Kody Błędów
 
-| HTTP Status | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `INVALID_REQUEST` | Malformed request body or parameters |
-| 401 | `UNAUTHORIZED` | Missing or invalid authentication |
-| 403 | `FORBIDDEN` | Insufficient permissions |
-| 404 | `NOT_FOUND` | Resource not found |
-| 409 | `CONFLICT` | Resource already exists |
-| 413 | `PAYLOAD_TOO_LARGE` | File exceeds size limit |
-| 422 | `VALIDATION_ERROR` | Request validation failed |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests |
-| 500 | `INTERNAL_ERROR` | Server error |
-| 503 | `SERVICE_UNAVAILABLE` | Temporary service outage |
-
-### Example Error Response
-
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid document format",
-    "details": {
-      "file": "Only PDF, DOCX, JPG, PNG files are supported",
-      "received_type": "application/zip"
-    },
-    "request_id": "req_abc123xyz",
-    "timestamp": "2025-12-08T15:00:00Z"
-  }
-}
-```
+| HTTP Status | Kod Błędu | Opis |
+|-------------|------------|------|
+| 400 | `INVALID_REQUEST` | Nieprawidłowe żądanie lub parametry |
+| 401 | `UNAUTHORIZED` | Brak lub nieprawidłowe uwierzytelnienie |
+| 403 | `FORBIDDEN` | Brak uprawnień |
+| 404 | `NOT_FOUND` | Zasób nie znaleziony |
+| 409 | `CONFLICT` | Zasób już istnieje |
+| 413 | `PAYLOAD_TOO_LARGE` | Plik przekracza limit rozmiaru |
+| 422 | `VALIDATION_ERROR` | Błąd walidacji żądania |
+| 429 | `RATE_LIMIT_EXCEEDED` | Zbyt wiele zapytań |
+| 500 | `INTERNAL_ERROR` | Błąd serwera |
+| 503 | `SERVICE_UNAVAILABLE` | Tymczasowa niedostępność serwisu |
 
 ---
 
-## 8. Rate Limiting
+## 8. Limitowanie Zapytań
 
-### Rate Limit Headers
+### Nagłówki Limitów
 
-All responses include rate limit headers:
+Wszystkie odpowiedzi zawierają nagłówki limitów:
 
 ```
 X-RateLimit-Limit: 100
@@ -787,22 +769,22 @@ X-RateLimit-Remaining: 95
 X-RateLimit-Reset: 1733673600
 ```
 
-### Rate Limits by Tier
+### Limity według Planu
 
-| Tier | Requests/Minute | Analyses/Day | File Uploads/Hour |
-|------|-----------------|--------------|-------------------|
+| Plan | Zapytania/Minutę | Analizy/Dzień | Upload Plików/Godzinę |
+|------|------------------|---------------|-----------------------|
 | Guest | 10 | 3 | 5 |
 | Free | 60 | 10 | 20 |
 | Pro | 300 | 100 | 100 |
-| Enterprise | 1000 | Unlimited | 500 |
+| Enterprise | 1000 | Bez limitu | 500 |
 
-### Rate Limit Response
+### Odpowiedź Limitu
 
 ```json
 {
   "error": {
     "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Too many requests. Please try again later.",
+    "message": "Zbyt wiele zapytań. Spróbuj ponownie później.",
     "details": {
       "limit": 10,
       "reset_at": "2025-12-08T15:01:00Z"
@@ -815,30 +797,30 @@ X-RateLimit-Reset: 1733673600
 
 ---
 
-## 9. Admin API
+## 9. API Administracyjne
 
 ### POST `/api/v1/admin/feedback`
-Submit feedback for a flagged clause.
+Prześlij feedback dla oflagowanej klauzuli.
 
-**Authentication:** Required (Reviewer/Admin)
+**Uwierzytelnianie:** Wymagane (Recenzent/Admin)
 
-**Request:**
+**Żądanie:**
 ```json
 {
   "flagged_clause_id": "cla_123abc",
   "is_correct": true,
-  "notes": "Optional feedback notes"
+  "notes": "Opcjonalne notatki"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "id": "fb_xyz789",
   "flagged_clause_id": "cla_123abc",
   "is_correct": true,
   "reviewer_id": "user_admin1",
-  "notes": "Optional feedback notes",
+  "notes": "Opcjonalne notatki",
   "created_at": "2025-12-18T10:00:00Z"
 }
 ```
@@ -846,22 +828,22 @@ Submit feedback for a flagged clause.
 ---
 
 ### GET `/api/v1/admin/pending-reviews`
-Get analyses awaiting review.
+Pobierz analizy oczekujące na recenzję.
 
-**Authentication:** Required (Reviewer/Admin)
+**Uwierzytelnianie:** Wymagane (Recenzent/Admin)
 
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `limit` | Integer | No | Max items (default: 20) |
+**Parametry Query:**
+| Parametr | Typ | Wymagane | Opis |
+|----------|-----|----------|------|
+| `limit` | Integer | Nie | Max elementów (domyślnie: 20) |
 
-**Response:**
+**Odpowiedź:**
 ```json
 [
   {
     "analysis_id": "an_123",
     "document_id": "doc_456",
-    "filename": "contract.pdf",
+    "filename": "umowa.pdf",
     "total_clauses": 15,
     "high_risk_count": 2,
     "completed_at": "2025-12-18T09:30:00Z",
@@ -873,16 +855,16 @@ Get analyses awaiting review.
 ---
 
 ### GET `/api/v1/admin/metrics`
-Get model performance metrics.
+Pobierz metryki wydajności modelu.
 
-**Authentication:** Required (Reviewer/Admin)
+**Uwierzytelnianie:** Wymagane (Recenzent/Admin)
 
-**Query Parameters:**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `days` | Integer | No | Number of days (default: 30) |
+**Parametry Query:**
+| Parametr | Typ | Wymagane | Opis |
+|----------|-----|----------|------|
+| `days` | Integer | Nie | Liczba dni (domyślnie: 30) |
 
-**Response:**
+**Odpowiedź:**
 ```json
 [
   {
@@ -904,14 +886,14 @@ Get model performance metrics.
 ---
 
 ### POST `/api/v1/admin/sync-clauses`
-Trigger manual synchronization of prohibited clauses.
+Wyzwól ręczną synchronizację klauzul niedozwolonych.
 
-**Authentication:** Required (Admin only)
+**Uwierzytelnianie:** Wymagane (Tylko Admin)
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
-  "message": "Clause synchronization started",
+  "message": "Synchronizacja klauzul rozpoczęta",
   "task_id": "task_sync_123",
   "status": "queued"
 }
@@ -922,31 +904,31 @@ Trigger manual synchronization of prohibited clauses.
 ## 10. Webhooks
 
 ### POST `/api/v1/webhooks`
-Register a webhook endpoint.
+Zarejestruj endpoint webhooka.
 
-**Authentication:** Required (Pro/Enterprise only)
+**Uwierzytelnianie:** Wymagane (Tylko Pro/Enterprise)
 
-**Request:**
+**Żądanie:**
 ```json
 {
-  "url": "https://your-server.com/webhooks/fairpact",
+  "url": "https://twoj-serwer.pl/webhooks/fairpact",
   "events": ["analysis.completed", "analysis.failed"],
-  "secret": "your_webhook_secret"
+  "secret": "twoj_sekret_webhooka"
 }
 ```
 
-**Response:**
+**Odpowiedź:**
 ```json
 {
   "webhook_id": "wh_789xyz",
-  "url": "https://your-server.com/webhooks/fairpact",
+  "url": "https://twoj-serwer.pl/webhooks/fairpact",
   "events": ["analysis.completed", "analysis.failed"],
   "active": true,
   "created_at": "2025-12-08T15:20:00Z"
 }
 ```
 
-### Webhook Event Payload
+### Payload Zdarzenia Webhook
 
 ```json
 {
@@ -962,9 +944,9 @@ Register a webhook endpoint.
 }
 ```
 
-### Webhook Signature Verification
+### Weryfikacja Podpisu Webhook
 
-Webhooks are signed using HMAC SHA256:
+Webhooki są podpisane przy użyciu HMAC SHA256:
 
 ```python
 import hmac
@@ -981,7 +963,7 @@ expected_signature = f"sha256={signature}"
 
 ---
 
-## Appendix: Data Models
+## Załącznik: Modele Danych
 
 ### Document
 ```typescript
@@ -1039,4 +1021,4 @@ interface FlaggedClause {
 
 ---
 
-**Document End**
+**Koniec Dokumentu**
