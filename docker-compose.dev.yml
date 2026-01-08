@@ -1,10 +1,5 @@
-# FairPact - Development Docker Compose
-# Usage: docker-compose -f docker-compose.dev.yml up -d
-
 version: '3.8'
-
 services:
-  # PostgreSQL with pgvector
   postgres:
     image: pgvector/pgvector:pg15
     container_name: fairpact-dev-db
@@ -14,36 +9,37 @@ services:
       POSTGRES_PASSWORD: fairpact_dev_pass
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
-      - ./backend/database/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql
+    - postgres_dev_data:/var/lib/postgresql/data
+    - ./backend/database/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql
     ports:
-      - "5432:5432"
+    - 5433:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fairpact -d fairpact"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U fairpact -d fairpact
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - fairpact-dev
-
-  # Redis
+    - fairpact-dev
   redis:
     image: redis:7-alpine
     container_name: fairpact-dev-redis
     command: redis-server --appendonly yes
     volumes:
-      - redis_dev_data:/data
+    - redis_dev_data:/data
     ports:
-      - "6379:6379"
+    - 6380:6379
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+      - CMD
+      - redis-cli
+      - ping
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - fairpact-dev
-
-  # MinIO (S3-compatible storage)
+    - fairpact-dev
   minio:
     image: minio/minio:latest
     container_name: fairpact-dev-minio
@@ -52,32 +48,32 @@ services:
       MINIO_ROOT_USER: fairpact_admin
       MINIO_ROOT_PASSWORD: fairpact_admin_pass
     volumes:
-      - minio_dev_data:/data
+    - minio_dev_data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+    - 9002:9000
+    - 9003:9001
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:9000/minio/health/live
       interval: 30s
       timeout: 20s
       retries: 3
     networks:
-      - fairpact-dev
-
-  # Adminer (Database UI)
+    - fairpact-dev
   adminer:
     image: adminer:latest
     container_name: fairpact-dev-adminer
     ports:
-      - "8080:8080"
+    - 8081:8080
     depends_on:
-      - postgres
+    - postgres
     networks:
-      - fairpact-dev
+    - fairpact-dev
     environment:
       ADMINER_DEFAULT_SERVER: postgres
-
-  # Celery Worker
   worker:
     build:
       context: ./backend
@@ -91,7 +87,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: fairpact_admin
       MINIO_SECRET_KEY: fairpact_admin_pass
-      MINIO_SECURE: "false"
+      MINIO_SECURE: 'false'
       MINIO_BUCKET_NAME: fairpact-uploads
     depends_on:
       postgres:
@@ -101,10 +97,10 @@ services:
       minio:
         condition: service_healthy
     networks:
-      - fairpact-dev
+    - fairpact-dev
     restart: unless-stopped
-
-  # Celery Beat (Scheduler)
+    profiles:
+    - celery
   beat:
     build:
       context: ./backend
@@ -121,14 +117,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - fairpact-dev
+    - fairpact-dev
     restart: unless-stopped
-
+    profiles:
+    - celery
 volumes:
-  postgres_dev_data:
-  redis_dev_data:
-  minio_dev_data:
-
+  postgres_dev_data: null
+  redis_dev_data: null
+  minio_dev_data: null
 networks:
   fairpact-dev:
     driver: bridge
