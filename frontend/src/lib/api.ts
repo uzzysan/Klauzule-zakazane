@@ -118,6 +118,7 @@ class ApiClient {
             });
 
             xhr.open("POST", `${this.baseUrl}/api/v1/documents/upload`);
+            xhr.withCredentials = true;
             xhr.send(formData);
         });
     }

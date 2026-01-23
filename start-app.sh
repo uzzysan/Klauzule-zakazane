@@ -37,6 +37,23 @@ CELERY_PID_FILE="$PID_DIR/celery.pid"
 # Funkcje pomocnicze
 #-------------------------------------------------------------------------------
 
+
+# Initialize environment variables
+init_environment() {
+    # Detect container engine
+    if command -v podman &> /dev/null; then
+        CONTAINER_ENGINE="podman"
+        COMPOSE_CMD="podman-compose"
+    elif command -v docker &> /dev/null; then
+        CONTAINER_ENGINE="docker"
+        if docker compose version &> /dev/null 2&>1; then
+            COMPOSE_CMD="docker compose"
+        else
+            COMPOSE_CMD="docker-compose"
+        fi
+    fi
+}
+
 print_header() {
     echo ""
     echo -e "${CYAN}╔════════════════════════════════════════════════════════════════╗${NC}"
@@ -160,7 +177,33 @@ start_containers() {
     print_step "Uruchamianie kontenerów (PostgreSQL, Redis, MinIO)..."
     cd "$SCRIPT_DIR"
     
-    $COMPOSE_CMD -f "$COMPOSE_FILE" up -d postgres redis minio adminer 2>&1 | grep -v "^podman" || true
+    # Sprawdź stan kontenerów i ustal akcję
+    local need_start=false
+    local need_remove=false
+    
+    for container in fairpact-dev-db fairpact-dev-redis fairpact-dev-minio fairpact-dev-adminer; do
+        if $CONTAINER_ENGINE ps -a --format "{{.Names}}" | grep -q "^${container}$"; then
+            # Kontener istnieje - sprawdź czy działa
+            if ! $CONTAINER_ENGINE ps --format "{{.Names}}" | grep -q "^${container}$"; then
+                # Kontener istnieje ale nie działa - usuń go
+                need_remove=true
+            fi
+        else
+            need_start=true
+        fi
+    done
+    
+    # Usuń zatrzymane kontenery jeśli potrzeba
+    if [ "$need_remove" = true ]; then
+        print_step "Usuwanie zatrzymanych kontenerów..."
+        $COMPOSE_CMD -f "$COMPOSE_FILE" down 2>&1 | grep -v "^podman" || true
+        need_start=true
+    fi
+    
+    # Uruchom kontenery jeśli potrzeba
+    if [ "$need_start" = true ]; then
+        $COMPOSE_CMD -f "$COMPOSE_FILE" up -d postgres redis minio adminer 2>&1 | grep -v "^podman" || true
+    fi
     
     print_success "Kontenery uruchomione"
 
@@ -292,14 +335,15 @@ stop_services() {
     for pid_file in "$BACKEND_PID_FILE" "$CELERY_PID_FILE" "$FRONTEND_PID_FILE"; do
         if [ -f "$pid_file" ]; then
             PID=$(cat "$pid_file")
-            kill "$PID" 2>/dev/null || true
+            kill -9 "$PID" 2>/dev/null || true
             rm -f "$pid_file"
         fi
     done
 
-    pkill -f "uvicorn main:app" 2>/dev/null || true
-    pkill -f "celery -A celery_app" 2>/dev/null || true
-    pkill -f "next dev" 2>/dev/null || true
+    pkill -9 -f "uvicorn main:app" 2>/dev/null || true
+    pkill -9 -f "celery -A celery_app" 2>/dev/null || true
+    pkill -9 -f "next dev" 2>/dev/null || true
+    pkill -9 -f "next-serv" 2>/dev/null || true
 
     stop_containers
 }
@@ -392,6 +436,7 @@ main() {
     case "${1:-}" in
         --stop)
             print_header
+            init_environment
             stop_services
             print_success "Wszystkie serwisy zatrzymane"
             ;;
