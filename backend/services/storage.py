@@ -127,7 +127,7 @@ class StorageService:
                 length=file_size,
                 content_type=content_type,
                 metadata={
-                    "original-filename": original_filename,
+                    "original-filename": original_filename.encode("ascii", "ignore").decode(),
                     "sha256": checksum,
                     "uploaded-at": datetime.utcnow().isoformat(),
                 },

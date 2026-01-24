@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     minio_secure: bool = False
 
     # Guest file retention
-    guest_file_retention_hours: int = 24
+    guest_file_retention_hours: int = 8
 
     # OCR
     tesseract_cmd: str = "/usr/bin/tesseract"

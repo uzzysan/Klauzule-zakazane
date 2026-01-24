@@ -1,12 +1,17 @@
 """API endpoints for document operations."""
+import base64
+import hashlib
+import hmac
+import json
 import os
+import traceback
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 from config import settings
 from database.connection import get_db
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
 from models.document import Document
 from models.user import User
 from schemas.document import (
@@ -21,6 +26,73 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.deps import get_optional_user
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
+
+
+# --- Cookie Helpers ---
+COOKIE_NAME = "fairpact_guest_access"
+
+
+def _sign_data(data: str) -> str:
+    """Sign data using HMAC-SHA256."""
+    key = settings.secret_key.get_secret_value().encode()
+    signature = hmac.new(key, data.encode(), hashlib.sha256).hexdigest()
+    return f"{base64.urlsafe_b64encode(data.encode()).decode()}.{signature}"
+
+
+def _verify_data(signed_data: str) -> Optional[str]:
+    """Verify signed data and return original string."""
+    try:
+        data_b64, signature = signed_data.split(".")
+        data = base64.urlsafe_b64decode(data_b64).decode()
+        expected_signature = hmac.new(
+            settings.secret_key.get_secret_value().encode(),
+            data.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        if hmac.compare_digest(signature, expected_signature):
+            return data
+    except Exception:
+        pass
+    return None
+
+
+def _get_guest_documents(request: Request) -> List[str]:
+    """Get list of allowed document IDs from cookie."""
+    cookie = request.cookies.get(COOKIE_NAME)
+    if not cookie:
+        return []
+    data = _verify_data(cookie)
+    if data:
+        try:
+            return json.loads(data)
+        except json.JSONDecodeError:
+            pass
+    return []
+
+
+def _add_guest_document(response: Response, request: Request, document_id: str) -> None:
+    """Add document ID to guest cookie."""
+    docs = _get_guest_documents(request)
+    if document_id not in docs:
+        docs.append(document_id)
+
+    # Store max 50 docs to prevent cookie bloat
+    if len(docs) > 50:
+        docs = docs[-50:]
+
+    data = json.dumps(docs)
+    signed = _sign_data(data)
+
+    # Set cookie with 8h expiry to match retention
+    max_age = settings.guest_file_retention_hours * 3600
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=signed,
+        max_age=max_age,
+        httponly=True,
+        samesite="lax",
+        secure=False,  # Set to True in production with HTTPS
+    )
 
 
 def validate_file(file: UploadFile) -> int:
@@ -79,6 +151,8 @@ def validate_file(file: UploadFile) -> int:
 
 @router.post("/upload", response_model=DocumentUploadResponse, status_code=status.HTTP_200_OK)
 async def upload_document(
+    request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     file: UploadFile = File(..., description="Document file to upload"),
     language: str = Form(default="pl", description="Document language (pl or en)"),
@@ -168,6 +242,10 @@ async def upload_document(
         document.celery_task_id = task.id
         await db.commit()
 
+        # Grant access to guest if applicable
+        if user_id is None:
+            _add_guest_document(response, request, str(document_id))
+
         return DocumentUploadResponse(
             document_id=document_id,
             filename=file.filename or "unknown",
@@ -179,12 +257,14 @@ async def upload_document(
 
     except ValueError as e:
         await db.rollback()
+        print(f"Storage Error Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": {"code": "STORAGE_ERROR", "message": str(e)}},
         )
     except Exception as e:
         await db.rollback()
+        print(f"Internal Error Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": {"code": "INTERNAL_ERROR", "message": str(e)}},
@@ -200,7 +280,9 @@ async def health_check() -> dict:
 @router.get("/{document_id}")
 async def get_document(
     document_id: UUID,
+    request: Request,
     db: AsyncSession = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user),
 ) -> dict:
     """Get document by ID."""
     from sqlalchemy import select
@@ -216,6 +298,35 @@ async def get_document(
             detail={"error": {"code": "NOT_FOUND", "message": "Document not found"}},
         )
 
+    # CHECK 1: Expiration
+    if document.expires_at and datetime.utcnow() > document.expires_at:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,  # Treat as not found/deleted
+            detail={"error": {"code": "EXPIRED", "message": "Document session expired"}},
+        )
+
+    # CHECK 2: Access Control
+    if document.user_id:
+        # Owned document - check user
+        if not current_user or current_user.id != document.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"error": {"code": "ACCESS_DENIED", "message": "Access denied"}},
+            )
+    else:
+        # Guest document - check cookie
+        allowed_docs = _get_guest_documents(request)
+        if str(document.id) not in allowed_docs:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": {
+                        "code": "ACCESS_DENIED",
+                        "message": "Access restricted to uploader session",
+                    }
+                },
+            )
+
     return {
         "document_id": str(document.id),
         "filename": document.original_filename,
@@ -229,4 +340,5 @@ async def get_document(
         "created_at": document.created_at.isoformat(),
         "upload_url": document.upload_url,
         "celery_task_id": document.celery_task_id,
+        "expires_at": document.expires_at.isoformat() if document.expires_at else None,
     }

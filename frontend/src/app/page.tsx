@@ -1,21 +1,21 @@
-import Link from "next/link";
-import Script from "next/script";
+import { Button, Card, CardContent } from "@/components/ui";
 import {
     ArrowRight,
-    Shield,
-    FileSearch,
-    Scale,
-    Database,
-    Zap,
-    Lock,
-    Building2,
-    ShoppingCart,
-    Home as HomeIcon,
     Briefcase,
+    Building2,
     CheckCircle2,
     ChevronDown,
+    Database,
+    FileSearch,
+    Home as HomeIcon,
+    Lock,
+    Scale,
+    Shield,
+    ShoppingCart,
+    Zap,
 } from "lucide-react";
-import { Button, Card, CardContent } from "@/components/ui";
+import Link from "next/link";
+import Script from "next/script";
 
 // FAQ data for SEO
 const faqs = [
@@ -29,7 +29,7 @@ const faqs = [
     },
     {
         question: "Czy analiza jest bezpłatna?",
-        answer: "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt sekund. Dokumenty gości są automatycznie usuwane po 24 godzinach.",
+        answer: "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt sekund. Dokumenty są dostępne tylko dla Ciebie i usuwane po zakończeniu sesji (max 8h).",
     },
     {
         question: "Jakie dokumenty mogę analizować?",
@@ -146,7 +146,7 @@ export default function Home() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                <span>Dokumenty usuwane po 24h</span>
+                                <span>Prywatna sesja (max 8h)</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -385,8 +385,8 @@ export default function Home() {
                                             Prywatność gwarantowana
                                         </h3>
                                         <p className="text-muted-foreground">
-                                            Dokumenty gości są automatycznie usuwane po 24
-                                            godzinach. Analiza odbywa się lokalnie, bez wysyłania
+                                            Dokumenty są widoczne tylko dla Ciebie i usuwane automatycznie
+                                            po zakończeniu sesji (maks. 8h). Analiza odbywa się lokalnie, bez wysyłania
                                             danych do zewnętrznych serwisów AI.
                                         </p>
                                     </div>
