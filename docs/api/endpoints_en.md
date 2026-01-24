@@ -321,32 +321,6 @@ Export analysis report.
 
 ---
 
-### POST `/api/v1/analysis/{analysis_id}/feedback`
-Submit feedback on analysis results.
-
-**Authentication:** Required
-
-**Request:**
-```json
-{
-  "helpful": true,
-  "flagged_clause_id": "clause_001",
-  "feedback_type": "false_positive" | "false_negative" | "incorrect_category" | "other",
-  "comment": "This clause is actually standard arbitration language",
-  "corrected_category": "standard_arbitration"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "feedback_id": "fb_456def",
-  "message": "Thank you for your feedback"
-}
-```
-
----
 
 ## 4. Clauses API
 
@@ -899,6 +873,24 @@ Get model performance metrics.
     "total_reviews": 53
   }
 ]
+```
+
+---
+
+
+---
+
+### GET `/api/v1/admin/health`
+Health check endpoint for admin API.
+
+**Authentication:** Optional
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "service": "admin"
+}
 ```
 
 ---

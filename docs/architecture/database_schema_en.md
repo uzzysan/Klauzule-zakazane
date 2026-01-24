@@ -619,39 +619,27 @@ CREATE INDEX idx_flagged_clauses_confidence ON flagged_clauses(confidence DESC);
 
 ### 3.12 analysis_feedback
 
-User feedback on analysis results.
+Admin feedback (review) on flagged clauses.
 
 ```sql
 CREATE TABLE analysis_feedback (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    analysis_id UUID NOT NULL REFERENCES analyses(id) ON DELETE CASCADE,
-    flagged_clause_id UUID REFERENCES flagged_clauses(id) ON DELETE SET NULL,
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-
+    flagged_clause_id UUID NOT NULL REFERENCES flagged_clauses(id) ON DELETE CASCADE,
+    
     -- Feedback
-    helpful BOOLEAN,
-    feedback_type VARCHAR(50), -- false_positive, false_negative, incorrect_category, other
+    is_correct BOOLEAN NOT NULL,
+    reviewer_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    notes TEXT,
 
-    -- Details
-    comment TEXT,
-    corrected_category_id UUID REFERENCES clause_categories(id),
-    corrected_risk_level VARCHAR(20),
-
-    -- Metadata
-    user_agent TEXT,
-    ip_address INET,
-
+    -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT valid_feedback_type CHECK (
-        feedback_type IN ('false_positive', 'false_negative', 'incorrect_category', 'unclear_explanation', 'other')
-    )
+    CONSTRAINT unique_feedback_per_clause UNIQUE(flagged_clause_id)
 );
 
-CREATE INDEX idx_analysis_feedback_analysis ON analysis_feedback(analysis_id);
 CREATE INDEX idx_analysis_feedback_clause ON analysis_feedback(flagged_clause_id);
-CREATE INDEX idx_analysis_feedback_user ON analysis_feedback(user_id);
-CREATE INDEX idx_analysis_feedback_type ON analysis_feedback(feedback_type);
+CREATE INDEX idx_analysis_feedback_reviewer ON analysis_feedback(reviewer_id);
 ```
 
 ---

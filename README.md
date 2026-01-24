@@ -4,100 +4,62 @@ FairPact is a web application designed to analyze contracts and identify prohibi
 
 ## Project Structure
 
-- `frontend/`: Next.js application (React, TailwindCSS)
-- `backend/`: FastAPI application (Python)
-- `docs/`: Documentation (Implementation Plan, Visual Concepts)
+- `frontend/`: Next.js application (React, TailwindCSS, TypeScript)
+- `backend/`: FastAPI application (Python, PostgreSQL, Celery, Redis)
+- `docs/`: Technical Documentation (API, Architecture, Guides)
+- `IMPLEMENTATION_SUMMARY.md`: Current implementation status and recent changes
 
 ## Setup Instructions
 
 ### Quick Start (Recommended)
 
-For automatic setup on a new machine, use the provided automation scripts:
+The project includes automation scripts for easy setup.
 
 1. **Install system dependencies** (requires sudo):
-
    ```bash
    ./install-dependencies.sh
    ```
-
-   This will install Podman, Python, Node.js, and all required development libraries.
+   This installs Podman, Python, Node.js, and development libraries.
 
 2. **Start the application**:
-
    ```bash
    ./start-app.sh
    ```
-
    This script will:
+   - Check requirements
+   - Setup Python virtual environment
+   - Install dependencies (Python & Node.js)
+   - Start all services (PostgreSQL, Redis, MinIO, Celery, API, Frontend)
 
-   - Check for required packages
-   - Create and activate Python virtual environment
-   - Install Python and npm dependencies
-   - Start all containers (PostgreSQL, Redis, MinIO, Celery workers)
+### Manual Setup
 
-3. **Run Backend API** (in a separate terminal):
-
-   ```bash
-   cd backend
-   source venv/bin/activate
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-4. **Run Frontend** (in another terminal):
-
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+See specific README files in subdirectories:
+- [Backend Setup](backend/README.md)
+- [Frontend Setup](frontend/README.md) (Note: Check `package.json` for scripts)
 
 The application will be available at:
-
 - Frontend: <http://localhost:3000>
 - Backend API: <http://localhost:8000>
 - API Documentation: <http://localhost:8000/docs>
 
+## Current Status
 
-### Manual Setup
-
-If you prefer manual setup or the automation scripts don't work on your system:
-
-### Frontend
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
+As of the latest update (see `IMPLEMENTATION_SUMMARY.md`):
 
 ### Backend
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create a virtual environment (if not already done):
-   ```bash
-   python3 -m venv venv
-   ```
-   *Note: If you encounter an error about `ensurepip`, you may need to install `python3-venv` on your system.*
-3. Activate the virtual environment:
-   ```bash
-   source venv/bin/activate
-   ```
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. Run the server:
-   ```bash
-   uvicorn main:app --reload
-   ```
+- **Analysis**: Configuration for similarity thresholds implemented.
+- **Admin API**: Endpoints for feedback, metrics, and pending reviews.
+- **Database**: Schemas for documents, analyses, prohibited clauses, and feedback.
+- **Services**: OCR, Vector Search (pgvector), Celery Tasks.
+
+### Frontend
+- **Upload**: File upload with drag-and-drop.
+- **Analysis View**: Display of results, risk scores, and flagged clauses.
+- **Navigation**: Improved flow after upload.
 
 ## Documentation
-- [Implementation Plan](docs/implementation_plan.md)
-- [UI Mockup](docs/mockup.png)
+
+- **[Documentation Index](docs/README_en.md)** - Start here
+- [API Specification](docs/api/endpoints_en.md)
+- [Database Schema](docs/architecture/database_schema_en.md)
+- [Implementation Summary](IMPLEMENTATION_SUMMARY.md)

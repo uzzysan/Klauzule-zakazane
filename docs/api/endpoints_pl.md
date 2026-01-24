@@ -320,32 +320,6 @@ Eksportuj raport analizy.
 
 ---
 
-### POST `/api/v1/analysis/{analysis_id}/feedback`
-Prześlij feedback do wyników analizy.
-
-**Uwierzytelnianie:** Wymagane
-
-**Żądanie:**
-```json
-{
-  "helpful": true,
-  "flagged_clause_id": "clause_001",
-  "feedback_type": "false_positive" | "false_negative" | "incorrect_category" | "other",
-  "comment": "Ta klauzula jest standardowym zapisem arbitrażowym",
-  "corrected_category": "standard_arbitration"
-}
-```
-
-**Odpowiedź:**
-```json
-{
-  "success": true,
-  "feedback_id": "fb_456def",
-  "message": "Dziękujemy za Twój feedback"
-}
-```
-
----
 
 ## 4. API Klauzul
 
@@ -881,6 +855,24 @@ Pobierz metryki wydajności modelu.
     "total_reviews": 53
   }
 ]
+```
+
+---
+
+
+---
+
+### GET `/api/v1/admin/health`
+Endpoint sprawdzenia stanu (health check) API administracyjnego.
+
+**Uwierzytelnianie:** Opcjonalne
+
+**Odpowiedź:**
+```json
+{
+  "status": "ok",
+  "service": "admin"
+}
 ```
 
 ---
