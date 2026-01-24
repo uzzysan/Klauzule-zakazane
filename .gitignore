@@ -65,3 +65,9 @@ temp/
 # Docker
 docker-compose.override.yml
 *.pid
+.pids/
+
+# Temporary
+.logs/
+dummy.pdf
+backend/test_json.txt
