@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 # Import Base and all models for autogenerate support
 from database.connection import Base
+from config import settings
 from models.analysis import Analysis, FlaggedClause  # noqa: F401
 from models.clause import (  # noqa: F401
     ClauseCategory,
@@ -33,6 +34,11 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+def get_url():
+    # Force sync driver for Alembic
+    return settings.database_url.get_secret_value().replace("postgresql+asyncpg://", "postgresql://")
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -45,7 +51,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -64,8 +70,11 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = get_url()
+    
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
