@@ -80,7 +80,11 @@ services:
       dockerfile: Dockerfile
     container_name: fairpact-dev-worker
     command: celery -A celery_app worker -Q documents,sync,celery --loglevel=info
+    env_file:
+      - .env
     environment:
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT}
       DATABASE_URL: postgresql://fairpact:fairpact_dev_pass@postgres:5432/fairpact
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
@@ -107,7 +111,11 @@ services:
       dockerfile: Dockerfile
     container_name: fairpact-dev-beat
     command: celery -A celery_app beat --loglevel=info
+    env_file:
+      - .env
     environment:
+      SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT}
       DATABASE_URL: postgresql://fairpact:fairpact_dev_pass@postgres:5432/fairpact
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0

@@ -736,6 +736,7 @@ dependencies = [
     { name = "python-multipart" },
     { name = "redis" },
     { name = "sentence-transformers" },
+    { name = "sentry-sdk", extra = ["celery"] },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "torch" },
     { name = "uvicorn", extra = ["standard"] },
@@ -799,6 +800,7 @@ requires-dist = [
     { name = "python-multipart", specifier = "==0.0.6" },
     { name = "redis", specifier = "==5.0.1" },
     { name = "sentence-transformers", specifier = ">=3.0.0,<4.0.0" },
+    { name = "sentry-sdk", extras = ["celery"], specifier = ">=2.13.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = "==2.0.25" },
     { name = "torch", specifier = ">=2.2.0,<3.0.0" },
     { name = "types-pillow", marker = "extra == 'dev'", specifier = "==10.1.0.2" },
@@ -2566,6 +2568,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/16/74/aca6f8a2b8d62b4daf8c9a0c49d2aa573381caf47dc35cbb343389229376/sentence_transformers-3.4.1.tar.gz", hash = "sha256:68daa57504ff548340e54ff117bd86c1d2f784b21e0fb2689cf3272b8937b24b", size = 223898, upload-time = "2025-01-29T14:25:55.982Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/05/89/7eb147a37b7f31d3c815543df539d8b8d0425e93296c875cc87719d65232/sentence_transformers-3.4.1-py3-none-any.whl", hash = "sha256:e026dc6d56801fd83f74ad29a30263f401b4b522165c19386d8bc10dcca805da", size = 275896, upload-time = "2025-01-29T14:25:53.614Z" },
+]
+
+[[package]]
+name = "sentry-sdk"
+version = "2.51.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6f/9f/094bbb6be5cf218ab6712c6528310687f3d3fe8818249fcfe1d74192f7c5/sentry_sdk-2.51.0.tar.gz", hash = "sha256:b89d64577075fd8c13088bc3609a2ce77a154e5beb8cba7cc16560b0539df4f7", size = 407447, upload-time = "2026-01-28T10:29:50.962Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/da/df379404d484ca9dede4ad8abead5de828cdcff35623cd44f0351cf6869c/sentry_sdk-2.51.0-py2.py3-none-any.whl", hash = "sha256:e21016d318a097c2b617bb980afd9fc737e1efc55f9b4f0cdc819982c9717d5f", size = 431426, upload-time = "2026-01-28T10:29:48.868Z" },
+]
+
+[package.optional-dependencies]
+celery = [
+    { name = "celery" },
 ]
 
 [[package]]
