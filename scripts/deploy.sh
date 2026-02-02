@@ -22,15 +22,15 @@ git pull origin "$BRANCH"
 
 # Build images
 echo "Building Docker images..." | tee -a "$LOG_FILE"
-docker compose -f docker-compose.prod.yml build
+docker compose --env-file .env.production -f docker-compose.prod.yml build
 
 # Stop existing containers
 echo "Stopping existing containers..." | tee -a "$LOG_FILE"
-docker compose -f docker-compose.prod.yml down --remove-orphans
+docker compose --env-file .env.production -f docker-compose.prod.yml down --remove-orphans
 
 # Start services
 echo "Starting services..." | tee -a "$LOG_FILE"
-docker compose -f docker-compose.prod.yml up -d
+docker compose --env-file .env.production -f docker-compose.prod.yml up -d
 
 # Wait for services to start
 echo "Waiting for services to initialize..." | tee -a "$LOG_FILE"
@@ -38,7 +38,7 @@ sleep 15
 
 # Run Migrations
 echo "Running database migrations..." | tee -a "$LOG_FILE"
-if docker compose -f docker-compose.prod.yml exec -T backend-1 alembic upgrade head; then
+if docker compose --env-file .env.production -f docker-compose.prod.yml exec -T backend-1 alembic upgrade head; then
     echo "Migrations applied successfully." | tee -a "$LOG_FILE"
 else
     echo "ERROR: Migrations failed!" | tee -a "$LOG_FILE"
@@ -47,7 +47,7 @@ fi
 
 # Seed Database
 echo "Seeding initial data..." | tee -a "$LOG_FILE"
-if docker compose -f docker-compose.prod.yml exec -T backend-1 python database/seed_clauses.py; then
+if docker compose --env-file .env.production -f docker-compose.prod.yml exec -T backend-1 python database/seed_clauses.py; then
     echo "Database seeded successfully." | tee -a "$LOG_FILE"
 else
     echo "WARNING: Database seeding failed (might already be seeded)." | tee -a "$LOG_FILE"
@@ -56,7 +56,7 @@ fi
 
 # Check health (hitting backend inside container to verify it's up)
 echo "Checking system health..." | tee -a "$LOG_FILE"
-if docker compose -f docker-compose.prod.yml exec -T backend-1 curl -f http://localhost:8000/health/live > /dev/null 2>&1; then
+if docker compose --env-file .env.production -f docker-compose.prod.yml exec -T backend-1 curl -f http://localhost:8000/health/live > /dev/null 2>&1; then
     echo "Backend is healthy." | tee -a "$LOG_FILE"
 else
     echo "WARNING: Backend health check failed!" | tee -a "$LOG_FILE"
@@ -65,6 +65,6 @@ fi
 
 # Show status
 echo "Deployment complete. Current status:" | tee -a "$LOG_FILE"
-docker compose -f docker-compose.prod.yml ps
+docker compose --env-file .env.production -f docker-compose.prod.yml ps
 
 echo "Done at $(date)." | tee -a "$LOG_FILE"
