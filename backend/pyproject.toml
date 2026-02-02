@@ -35,6 +35,8 @@ dependencies = [
     # Authentication
     "python-jose[cryptography]==3.3.0",
     "passlib[bcrypt]==1.7.4",
+    # Monitoring
+    "sentry-sdk[celery]>=2.13.0",
 ]
 
 [project.optional-dependencies]

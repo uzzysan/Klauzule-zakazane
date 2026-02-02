@@ -2,6 +2,16 @@
 from celery import Celery
 from celery.schedules import crontab
 from config import settings
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+
+# Initialize Sentry if DSN is configured
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment,
+        integrations=[CeleryIntegration()],
+    )
 
 # Create Celery app
 celery_app = Celery(

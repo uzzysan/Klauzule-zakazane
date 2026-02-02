@@ -64,3 +64,16 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
         )
 
     return {"status": "ready", "checks": checks}
+
+
+@router.get("/sentry-test", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+async def sentry_test() -> dict:
+    """
+    Test endpoint to verify Sentry error tracking.
+    
+    Raises a deliberate exception that should be captured by Sentry.
+    Use this endpoint to confirm Sentry integration is working correctly.
+    
+    **Warning:** This endpoint intentionally raises an error.
+    """
+    raise ValueError("Sentry test error - if you see this in Sentry, integration is working!")

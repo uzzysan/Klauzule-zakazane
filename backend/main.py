@@ -8,6 +8,23 @@ from api.jobs import router as jobs_router
 from config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+
+# Initialize Sentry if DSN is configured
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment,
+        traces_sample_rate=1.0,  # Capture 100% of transactions for performance monitoring
+        profiles_sample_rate=1.0,  # Enable profiling
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),  # Track requests by endpoint
+            CeleryIntegration(),  # Automatically capture Celery task errors
+        ],
+        send_default_pii=True,  # Include user IP and headers (optional, adjust for privacy)
+    )
 
 # Create FastAPI app
 app = FastAPI(
