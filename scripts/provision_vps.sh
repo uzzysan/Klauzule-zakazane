@@ -79,12 +79,12 @@ set_ssh_config() {
 }
 
 set_ssh_config "PermitRootLogin" "no"
-set_ssh_config "PasswordAuthentication" "no"
+set_ssh_config "PasswordAuthentication" "yes"
 set_ssh_config "PubkeyAuthentication" "yes"
 set_ssh_config "X11Forwarding" "no"
 set_ssh_config "MaxAuthTries" "3"
 
-systemctl restart sshd
+systemctl restart ssh
 echo "SSH configuration updated and service restarted."
 
 # 1.4 Configure Firewall (UFW)
