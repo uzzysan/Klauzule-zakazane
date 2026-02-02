@@ -40,4 +40,5 @@ httpx==0.26.0
 sentry-sdk>=2.13.0
 
 # Authentication
+bcrypt==4.1.2
 python-jose[cryptography]==3.3.0
