@@ -47,7 +47,7 @@ fi
 
 # Seed Database
 echo "Seeding initial data..." | tee -a "$LOG_FILE"
-if docker compose --env-file .env.production -f docker-compose.prod.yml exec -T backend-1 python database/seed_clauses.py; then
+if docker compose --env-file .env.production -f docker-compose.prod.yml exec -T backend-1 python -m database.seed_clauses; then
     echo "Database seeded successfully." | tee -a "$LOG_FILE"
 else
     echo "WARNING: Database seeding failed (might already be seeded)." | tee -a "$LOG_FILE"
