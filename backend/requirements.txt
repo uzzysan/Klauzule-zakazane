@@ -11,7 +11,7 @@ pdf2image==1.17.0
 
 # ML/NLP
 sentence-transformers==2.2.2
-torch==2.1.2
+torch==2.2.2
 
 # Database
 sqlalchemy[asyncio]==2.0.25
