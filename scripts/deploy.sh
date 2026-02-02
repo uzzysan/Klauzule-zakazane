@@ -6,7 +6,7 @@
 set -e
 
 APP_DIR="/opt/fairpact"
-BRANCH=${1:-main}
+BRANCH=${1:-master}
 LOG_FILE="/var/log/fairpact/deploy.log"
 
 echo "Starting deployment at $(date)..." | tee -a "$LOG_FILE"
@@ -56,7 +56,7 @@ fi
 
 # Check health (hitting backend inside container to verify it's up)
 echo "Checking system health..." | tee -a "$LOG_FILE"
-if docker compose -f docker-compose.prod.yml exec -T backend-1 curl -f http://localhost:8000/health > /dev/null 2>&1; then
+if docker compose -f docker-compose.prod.yml exec -T backend-1 curl -f http://localhost:8000/health/live > /dev/null 2>&1; then
     echo "Backend is healthy." | tee -a "$LOG_FILE"
 else
     echo "WARNING: Backend health check failed!" | tee -a "$LOG_FILE"

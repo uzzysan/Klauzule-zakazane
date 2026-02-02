@@ -2,7 +2,7 @@
 
 # Simple Health Check Script
 
-URL="https://fairpact.pl/health"
+URL="https://fairpact.pl/health/live"
 LOG_FILE="/var/log/fairpact/health.log"
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 

@@ -95,6 +95,8 @@ services:
     networks:
       - fairpact-network
     mem_limit: 2560m
+    env_file:
+      - .env.production
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -111,6 +113,8 @@ services:
     networks:
       - fairpact-network
     mem_limit: 1g
+    env_file:
+      - .env.production
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
@@ -130,6 +134,8 @@ services:
     networks:
       - fairpact-network
     mem_limit: 1g
+    env_file:
+      - .env.production
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s

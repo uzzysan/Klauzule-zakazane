@@ -32,7 +32,7 @@ uptime
 echo ""
 
 echo "[Health Check]"
-curl -s --max-time 2 http://localhost:8000/health && echo " - OK" || echo " - ERROR"
+curl -s --max-time 2 http://localhost:8000/health/live && echo " - OK" || echo " - ERROR"
 echo ""
 
 echo "[Recent Errors (Last 10 lines)]"
