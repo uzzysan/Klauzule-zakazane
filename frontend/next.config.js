@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -6,4 +8,5 @@ const nextConfig = {
   swcMinify: true,
 };
 
-module.exports = nextConfig;
+
+module.exports = withSentryConfig(nextConfig, { silent: true, hideSourceMaps: true });

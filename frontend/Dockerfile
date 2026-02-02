@@ -21,6 +21,10 @@ COPY . .
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG NEXT_PUBLIC_SENTRY_DSN
+ARG SENTRY_DSN
+ARG SENTRY_ENVIRONMENT
+
 # Build the application
 RUN npm run build
 
