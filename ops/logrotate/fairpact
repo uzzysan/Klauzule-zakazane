@@ -1,0 +1,10 @@
+/var/log/fairpact/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 deploy deploy
+    sharedscripts
+}
