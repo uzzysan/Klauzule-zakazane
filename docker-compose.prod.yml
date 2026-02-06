@@ -23,7 +23,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=https://fairpact.pl/api/v1
+        - NEXT_PUBLIC_API_URL=https://fairpact.pl
     container_name: fairpact-frontend
     restart: unless-stopped
     env_file:
