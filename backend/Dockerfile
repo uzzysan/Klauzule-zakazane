@@ -45,12 +45,17 @@ COPY . .
 # Set ownership
 RUN chown -R appuser:appuser /app
 
+# Create HuggingFace cache directory with correct permissions
+RUN mkdir -p /app/.cache/huggingface && chown -R appuser:appuser /app/.cache
+
 # Switch to non-root user
 USER appuser
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV HF_HOME=/app/.cache/huggingface
+ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

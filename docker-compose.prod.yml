@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
     container_name: fairpact-worker
     restart: unless-stopped
-    command: celery -A celery_app worker --loglevel=info --concurrency=2
+    command: celery -A celery_app worker --loglevel=info --concurrency=2 -Q celery,documents,sync
     env_file:
       - .env.production
     depends_on:
