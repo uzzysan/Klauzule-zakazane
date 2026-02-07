@@ -7,6 +7,7 @@ import {
     ChevronDown,
     Database,
     FileSearch,
+    Gem,
     Home as HomeIcon,
     Lock,
     Scale,
@@ -101,56 +102,82 @@ export default function Home() {
             <div className="flex flex-col">
                 {/* Hero Section */}
                 <section className="container py-20 md:py-28">
-                    <div className="mx-auto max-w-4xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
-                            <Shield className="h-4 w-4" />
-                            <span>Bezpłatna analiza bez rejestracji</span>
+                    <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="mx-auto max-w-4xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
+                            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
+                                <Shield className="h-4 w-4" />
+                                <span>Bezpłatna analiza bez rejestracji</span>
+                            </div>
+
+                            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                                Sprawdź umowę pod kątem{" "}
+                                <span className="text-accent">klauzul niedozwolonych</span>
+                            </h1>
+
+                            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl lg:mx-0">
+                                Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact
+                                przeanalizuje go na podstawie{" "}
+                                <strong>7,233 orzeczeń polskich sądów</strong> i wskaże
+                                potencjalnie niebezpieczne zapisy.
+                            </p>
+
+                            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+                                <Link href="/upload">
+                                    <Button size="lg" className="w-full px-8 text-base sm:w-auto">
+                                        Analizuj dokument za darmo
+                                        <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                </Link>
+                                <Link href="#jak-to-dziala">
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="w-full px-8 text-base sm:w-auto"
+                                    >
+                                        Jak to działa?
+                                        <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            </div>
+
+                            {/* Trust indicators */}
+                            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground lg:justify-start">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                    <span>Bez rejestracji</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                    <span>Prywatna sesja (max 8h)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                    <span>PDF, Word, zdjęcia</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                            Sprawdź umowę pod kątem{" "}
-                            <span className="text-accent">klauzul niedozwolonych</span>
-                        </h1>
-
-                        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-                            Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact
-                            przeanalizuje go na podstawie{" "}
-                            <strong>7,233 orzeczeń polskich sądów</strong> i wskaże
-                            potencjalnie niebezpieczne zapisy.
-                        </p>
-
-                        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href="/upload">
-                                <Button size="lg" className="w-full sm:w-auto text-base px-8">
-                                    Analizuj dokument za darmo
-                                    <ArrowRight className="ml-2 h-5 w-5" />
-                                </Button>
-                            </Link>
-                            <Link href="#jak-to-dziala">
-                                <Button
-                                    variant="outline"
-                                    size="lg"
-                                    className="w-full sm:w-auto text-base px-8"
-                                >
-                                    Jak to działa?
-                                    <ChevronDown className="ml-2 h-4 w-4" />
-                                </Button>
-                            </Link>
-                        </div>
-
-                        {/* Trust indicators */}
-                        <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                <span>Bez rejestracji</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                <span>Prywatna sesja (max 8h)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                <span>PDF, Word, zdjęcia</span>
+                        {/* Sponsor Slot */}
+                        <div className="hidden shrink-0 lg:block lg:w-[320px]">
+                            <div className="group relative overflow-hidden rounded-2xl border border-dashed border-accent/20 bg-accent/5 p-8 text-center transition-all hover:border-accent/40 hover:bg-accent/10">
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="rounded-full bg-accent/10 p-3">
+                                        <Gem className="h-8 w-8 text-accent" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="font-medium text-foreground">
+                                            Ta strona będzie zawsze darmowa
+                                        </p>
+                                        <p className="text-sm leading-relaxed text-muted-foreground">
+                                            a to miejsce czeka na jedną firmę chętną umieścić tu
+                                            swoje logo z podpisem{" "}
+                                            <span className="font-semibold text-accent">
+                                                dumny sponsor
+                                            </span>
+                                            .
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

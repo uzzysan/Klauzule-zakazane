@@ -1,0 +1,62 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'fairpact-production'
+    environment: 'production'
+
+# Load alerting rules
+rule_files:
+  - '/etc/prometheus/alerts.yml'
+
+# Scrape configurations
+scrape_configs:
+  # FastAPI Backend - Prometheus metrics
+  - job_name: 'backend-api'
+    static_configs:
+      - targets: ['backend-1:8000']
+        labels:
+          service: 'api'
+          instance: 'backend-1'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Nginx exporter - Web server metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx'
+    scrape_interval: 15s
+
+  # Node exporter - System metrics (CPU, RAM, Disk, Network)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+          hostname: 'fairpact-server'
+    scrape_interval: 15s
+
+  # PostgreSQL exporter (optional - uncomment if you add postgres-exporter)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+  #       labels:
+  #         service: 'postgres'
+  #   scrape_interval: 30s
+
+  # Redis exporter (optional - uncomment if you add redis-exporter)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+  #       labels:
+  #         service: 'redis'
+  #   scrape_interval: 30s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
