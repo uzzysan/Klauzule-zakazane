@@ -67,10 +67,10 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
             # Try to find the table with prohibited clauses
             # Common table names in Polish databases
             possible_tables = [
+                "klauzule_niedozwolone",
                 "postanowienia_niedozwolone",
                 "klauzule",
                 "clauses",
-                "prohibited_clauses",
             ]
 
             table_name = None

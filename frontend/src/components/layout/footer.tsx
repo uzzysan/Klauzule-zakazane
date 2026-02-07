@@ -61,33 +61,17 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    {/* Legal & Contact */}
+                    {/* Contact */}
                     <div>
-                        <h3 className="font-semibold mb-4">Informacje</h3>
+                        <h3 className="font-semibold mb-4">Kontakt</h3>
                         <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link
-                                    href="/polityka-prywatnosci"
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                >
-                                    Polityka prywatności
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/regulamin"
-                                    className="text-muted-foreground hover:text-foreground transition-colors"
-                                >
-                                    Regulamin
-                                </Link>
-                            </li>
                             <li>
                                 <a
                                     href="mailto:rafal.maculewicz@gmail.com"
                                     className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
                                 >
                                     <Mail className="h-3 w-3" />
-                                    Kontakt
+                                    E-mail
                                 </a>
                             </li>
                             <li>
