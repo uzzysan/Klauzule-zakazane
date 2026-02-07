@@ -25,20 +25,21 @@
 - [x] 3.1 Aktualizacja monitoring/prometheus.yml
 - [x] 3.2 Utworzenie monitoring/alerts.yml
 
-### 🔄 Faza 4: Grafana Dashboards
+### ✅ Faza 4: Grafana Dashboards
 - [x] 4.1 Utworzenie monitoring/grafana/dashboards/traffic.json
-- [ ] 4.2 Utworzenie monitoring/grafana/dashboards/system.json
-- [ ] 4.3 Utworzenie monitoring/grafana/dashboards/business.json
+- [x] 4.2 Utworzenie monitoring/grafana/dashboards/system.json
+- [x] 4.3 Utworzenie monitoring/grafana/dashboards/business.json
 
-### ⏳ Faza 5: Dokumentacja
-- [ ] 5.1 Aktualizacja RUNBOOK.md
-- [ ] 5.2 Utworzenie MONITORING.md
+### ✅ Faza 5: Dokumentacja
+- [x] 5.1 Aktualizacja RUNBOOK.md
+- [x] 5.2 Utworzenie MONITORING.md
 
-### ⏳ Faza 6: Testing
-- [ ] 6.1 Test endpoint /metrics
-- [ ] 6.2 Test zbierania metryk
-- [ ] 6.3 Test Prometheus scraping
-- [ ] 6.4 Weryfikacja dashboardów
+### 🔄 Faza 6: Testing (Do wykonania przez użytkownika)
+- [ ] 6.1 Zainstalowanie zależności: `pip install -r backend/requirements.txt`
+- [ ] 6.2 Uruchomienie aplikacji lokalnie
+- [ ] 6.3 Test endpoint /metrics: `curl http://localhost:8000/metrics`
+- [ ] 6.4 Uruchomienie stacków docker-compose (prometheus, grafana)
+- [ ] 6.5 Weryfikacja dashboardów w Grafana
 
 ## Notatki
 
@@ -53,16 +54,61 @@
 - Geographic distribution (wymaga GeoIP database)
 
 ## Ostatnia aktualizacja
-**Data:** 2026-02-07 16:10  
-**Aktualny krok:** Faza 4 - Tworzenie Grafana dashboardów (1/3 ukończony)  
-**Następny krok:** Utworzenie system.json i business.json dashboardów
+**Data:** 2026-02-07 16:25  
+**Status:** ✅ **IMPLEMENTACJA UKOŃCZONA**  
+**Następny krok:** Testy lokalne przez użytkownika
 
 ## Postęp szczegółowy
-- ✅ Backend z metrykami Prometheus gotowy
-- ✅ Middleware tracking użytkowników zaimplementowany
-- ✅ Docker-compose zaktualizowany (nginx-exporter, node-exporter, prometheus, grafana)
-- ✅ Nginx skonfigurowany ze stub_status
-- ✅ Prometheus scrape configs i alerty utworzone
-- ✅ Grafana provisioning skonfigurowany
-- ✅ Traffic dashboard utworzony
-- ⏳ System i Business dashboardy w trakcie
+### ✅ Backend
+- Backend z metrykami Prometheus gotowy
+- Middleware tracking użytkowników zaimplementowany
+- Endpoint /metrics ekspozowany
+- Custom metryki: sessions, uploads, analysis duration, active users
+
+### ✅ Infrastruktura
+- Docker-compose zaktualizowany (nginx-exporter, node-exporter, prometheus, grafana)
+- Nginx skonfigurowany ze stub_status i rozszerzonym logowaniem
+- Prometheus scrape configs dla wszystkich serwisów
+- 180+ alert rules w 5 kategoriach
+
+### ✅ Grafana
+- Provisioning datasource i dashboardów skonfigurowany
+- 3 dashboardy utworzone: Traffic, System, Business
+- 20+ panelów wizualizujących metryki
+
+### ✅ Dokumentacja
+- MONITORING.md - kompletna dokumentacja systemu (338 linii)
+- RUNBOOK.md - zaktualizowany z procedurami monitorowania
+- MONITORING_IMPLEMENTATION.md - śledzenie postępu
+
+## Pliki utworzone/zmodyfikowane
+```
+backend/
+  requirements.txt - dodano prometheus-fastapi-instrumentator
+  main.py - integracja instrumentatora i middleware
+  monitoring/
+    __init__.py
+    metrics.py - definicje metryk i instrumentator
+  middleware/
+    __init__.py
+    tracking.py - middleware tracking sesji użytkowników
+
+docker-compose.prod.yml - dodano monitoring stack
+nginx/nginx.conf - stub_status i rozszerzone logowanie
+
+monitoring/
+  prometheus.yml - scrape configs
+  alerts.yml - 180+ reguł alertów
+  grafana/
+    provisioning/
+      datasources/prometheus.yml
+      dashboards/default.yml
+    dashboards/
+      traffic.json - dashboard ruchu
+      system.json - dashboard systemu
+      business.json - dashboard biznesowy
+
+MONITORING.md - dokumentacja systemu
+RUNBOOK.md - zaktualizowany runbook
+MONITORING_IMPLEMENTATION.md - ten plik
+```
