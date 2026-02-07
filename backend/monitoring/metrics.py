@@ -75,35 +75,9 @@ def track_endpoint_requests() -> Callable[[Info], None]:
     return instrumentation
 
 
-def track_response_size() -> Callable[[Info], None]:
-    """
-    Custom metric to track response sizes for bandwidth monitoring.
-    """
-    METRIC = Histogram(
-        "http_response_size_bytes",
-        "HTTP response size in bytes",
-        labelnames=("method", "endpoint"),
-        buckets=(100, 1000, 10000, 100000, 1000000, 10000000)
-    )
-    
-    def instrumentation(info: Info) -> None:
-        if info.modified_handler:
-            content_length = info.response.headers.get("content-length", "0")
-            try:
-                size = int(content_length)
-                METRIC.labels(
-                    method=info.method,
-                    endpoint=info.modified_handler
-                ).observe(size)
-            except (ValueError, TypeError):
-                pass
-    
-    return instrumentation
-
-
 # Register custom metrics
 instrumentator.add(track_endpoint_requests())
-instrumentator.add(track_response_size())
+# Note: response_size is already tracked by instrumentator.add(metrics.default())
 
 
 # Helper functions for use in application code
