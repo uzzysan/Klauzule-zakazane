@@ -6,10 +6,11 @@ from api.documents import router as documents_router
 from api.health import router as health_router
 from api.jobs import router as jobs_router
 from config import settings
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from middleware import UserTrackingMiddleware
 from monitoring import instrumentator
+from prometheus_client import REGISTRY, generate_latest
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -68,8 +69,13 @@ def read_root() -> dict:
     }
 
 
-# Initialize Prometheus metrics AFTER all routes are registered
-# This adds default metrics and exposes /metrics endpoint
-instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
+# Initialize Prometheus metrics instrumentation
+instrumentator.instrument(app)
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    """Prometheus metrics endpoint."""
+    return Response(content=generate_latest(REGISTRY), media_type="text/plain")
 
 
