@@ -49,10 +49,6 @@ app.add_middleware(
 # Add user tracking middleware for metrics
 app.add_middleware(UserTrackingMiddleware)
 
-# Initialize Prometheus metrics
-# This adds default metrics and exposes /metrics endpoint
-instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
-
 # Include routers
 app.include_router(health_router)
 app.include_router(auth_router)
@@ -70,5 +66,10 @@ def read_root() -> dict:
         "version": "0.1.0",
         "docs": "/docs",
     }
+
+
+# Initialize Prometheus metrics AFTER all routes are registered
+# This adds default metrics and exposes /metrics endpoint
+instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
 
 
