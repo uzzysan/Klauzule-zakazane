@@ -38,6 +38,7 @@ httpx==0.26.0
 
 # Monitoring
 sentry-sdk>=2.13.0
+prometheus-fastapi-instrumentator==7.0.0
 
 # Authentication
 bcrypt==4.1.2

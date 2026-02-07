@@ -8,6 +8,8 @@ from api.jobs import router as jobs_router
 from config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from middleware import UserTrackingMiddleware
+from monitoring import instrumentator
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -43,6 +45,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add user tracking middleware for metrics
+app.add_middleware(UserTrackingMiddleware)
+
+# Initialize Prometheus metrics
+# This adds default metrics and exposes /metrics endpoint
+instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
 
 # Include routers
 app.include_router(health_router)

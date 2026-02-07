@@ -1,0 +1,180 @@
+groups:
+  - name: api_alerts
+    interval: 30s
+    rules:
+      # High request rate - may indicate need for scaling
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 16.67  # >1000 requests/min
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High request rate detected"
+          description: "API receiving {{ $value | humanize }} requests/second (>1000/min) for 5 minutes. Consider scaling."
+
+      # High response time - performance issue
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile response time is {{ $value | humanize }}s (>2s threshold). Performance degradation detected."
+
+      # High error rate - service issues
+      - alert: HighErrorRate
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High API error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} (>5% threshold). Immediate attention required."
+
+      # API down - service unavailable
+      - alert: APIDown
+        expr: up{job="backend-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API is down"
+          description: "Backend API is not responding. Service unavailable."
+
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # High CPU usage - may need scaling
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% (>80% threshold) for 10 minutes. Consider scaling up."
+
+      # High memory usage - may need scaling
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanize }}% (>85% threshold) for 10 minutes. Consider scaling up."
+
+      # Critical memory usage - immediate action needed
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Critical memory usage"
+          description: "Memory usage is {{ $value | humanize }}% (>95% threshold). Immediate action required to prevent OOM."
+
+      # High disk usage - need cleanup or scaling
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 90
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value | humanize }}% (>90% threshold) on {{ $labels.device }}."
+
+      # Disk fill prediction - will run out of space
+      - alert: DiskWillFillIn4Hours
+        expr: predict_linear(node_filesystem_avail_bytes{fstype!="tmpfs"}[1h], 4*3600) < 0
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "Disk will be full soon"
+          description: "Disk {{ $labels.device }} will be full in approximately 4 hours based on current usage trends."
+
+  - name: nginx_alerts
+    interval: 30s
+    rules:
+      # Nginx down
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: nginx
+        annotations:
+          summary: "Nginx is down"
+          description: "Nginx web server is not responding."
+
+      # High connection rate - may indicate attack or need scaling
+      - alert: HighNginxConnectionRate
+        expr: rate(nginx_connections_active[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: nginx
+        annotations:
+          summary: "High Nginx connection rate"
+          description: "Nginx active connections rate is {{ $value | humanize }}/s (>1000 threshold)."
+
+  - name: business_alerts
+    interval: 60s
+    rules:
+      # Low document upload success rate
+      - alert: LowUploadSuccessRate
+        expr: (rate(document_uploads_total{status="success"}[10m]) / rate(document_uploads_total[10m])) < 0.90
+        for: 10m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Low document upload success rate"
+          description: "Upload success rate is {{ $value | humanizePercentage }} (< 90% threshold). Users may be experiencing issues."
+
+      # Slow analysis processing
+      - alert: SlowAnalysisProcessing
+        expr: histogram_quantile(0.95, rate(analysis_duration_seconds_bucket[10m])) > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Slow document analysis"
+          description: "95th percentile analysis time is {{ $value | humanize }}s (>30s threshold). Performance degradation in analysis pipeline."
+
+  - name: prometheus_alerts
+    interval: 60s
+    rules:
+      # Prometheus failing to scrape targets
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: "Prometheus target down"
+          description: "Prometheus cannot scrape {{ $labels.job }} target on {{ $labels.instance }}."
+
+      # Prometheus is running out of storage
+      - alert: PrometheusStorageAlmostFull
+        expr: (prometheus_tsdb_storage_blocks_bytes / prometheus_tsdb_retention_limit_bytes) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          component: monitoring
+        annotations:
+          summary: "Prometheus storage almost full"
+          description: "Prometheus storage is {{ $value | humanizePercentage }} full. Consider increasing retention or storage."
