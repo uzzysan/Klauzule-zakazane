@@ -83,7 +83,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="mailto:rafal.maculewicz@gmail.com"
+                                    href="mailto:rafal.maculewicz@tuta.com"
                                     className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
                                 >
                                     <Mail className="h-3 w-3" />
