@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Clock, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import {
     Button,
     Card,
@@ -11,12 +8,15 @@ import {
     CardHeader,
     CardTitle,
     RiskBadge,
-    RiskScore,
     RiskCounts,
+    RiskScore,
 } from "@/components/ui";
-import { cn } from "@/lib/utils";
 import api from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { AnalysisDetail, FlaggedClause } from "@/types/api";
+import { AlertTriangle, ArrowLeft, ChevronDown, ChevronUp, Clock, FileText, Heart } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function FlaggedClauseCard({ clause, isExpanded, onToggle }: { clause: FlaggedClause; isExpanded: boolean; onToggle: () => void }) {
     return (
@@ -194,10 +194,19 @@ export default function AnalysisPage() {
         <div className="container max-w-6xl py-8">
             {/* Header */}
             <div className="mb-8">
-                <Button variant="ghost" onClick={() => router.push("/upload")} className="mb-4">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Nowa analiza
-                </Button>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                    <Button variant="ghost" onClick={() => router.push("/upload")}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Nowa analiza
+                    </Button>
+
+                    <a href="https://suppi.pl/rafcio" target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" className="gap-2 hover:bg-secondary/80">
+                            <Heart className="h-4 w-4 text-rose-500 fill-rose-500/10" />
+                            Wspieram to co robisz
+                        </Button>
+                    </a>
+                </div>
 
                 <h1 className="text-3xl font-bold mb-2">Wyniki analizy</h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
