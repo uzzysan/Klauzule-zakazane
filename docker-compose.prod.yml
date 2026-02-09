@@ -208,6 +208,14 @@ services:
       - fairpact-network
     mem_limit: 512m
 
+  rafcio:
+    image: rafcio:latest
+    container_name: rafcio
+    restart: unless-stopped
+    networks:
+      - fairpact-network
+    mem_limit: 512m
+
 volumes:
   postgres_data:
   redis_data:
@@ -218,3 +226,4 @@ volumes:
 networks:
   fairpact-network:
     driver: bridge
+
