@@ -11,6 +11,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
+      - /opt/ev_assist:/opt/ev_assist:ro
     depends_on:
       - backend-1
       - frontend
@@ -210,6 +211,14 @@ services:
       - fairpact-network
     mem_limit: 512m
 
+  rafcio:
+    image: rafcio:latest
+    container_name: rafcio
+    restart: unless-stopped
+    networks:
+      - fairpact-network
+    mem_limit: 512m
+
 volumes:
   postgres_data:
   redis_data:
@@ -220,3 +229,4 @@ volumes:
 networks:
   fairpact-network:
     driver: bridge
+
