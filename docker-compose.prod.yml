@@ -123,7 +123,7 @@ services:
     image: minio/minio
     container_name: fairpact-minio
     restart: unless-stopped
-    command: /bin/sh -c 'export MINIO_ROOT_USER="$MINIO_ACCESS_KEY" && export MINIO_ROOT_PASSWORD="$MINIO_SECRET_KEY" && minio server /data --console-address ":9001"'
+    command: /bin/sh -c 'export MINIO_ROOT_USER="$$MINIO_ACCESS_KEY" && export MINIO_ROOT_PASSWORD="$$MINIO_SECRET_KEY" && minio server /data --console-address ":9001"'
     volumes:
       - minio_data:/data
     networks:
