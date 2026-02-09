@@ -11,6 +11,8 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/www/certbot:/var/www/certbot
+      - /var/www/maculewicz.pro:/var/www/maculewicz.pro:ro
+      - /opt/ev_assist/dist:/opt/ev_assist/dist:ro
     depends_on:
       - backend-1
       - frontend
@@ -123,7 +125,10 @@ services:
     image: minio/minio
     container_name: fairpact-minio
     restart: unless-stopped
-    command: /bin/sh -c 'export MINIO_ROOT_USER="$$MINIO_ACCESS_KEY" && export MINIO_ROOT_PASSWORD="$$MINIO_SECRET_KEY" && minio server /data --console-address ":9001"'
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     volumes:
       - minio_data:/data
     networks:
