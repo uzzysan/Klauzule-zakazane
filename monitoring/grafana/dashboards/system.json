@@ -1,16 +1,37 @@
 {
   "title": "FairPact - System Health",
   "uid": "fairpact-system",
-  "tags": ["fairpact", "system"],
-  "timezone": "",
+  "tags": ["fairpact", "system", "production"],
+  "timezone": "Europe/Warsaw",
   "schemaVersion": 38,
-  "version": 1,
-  "refresh": "30s",
+  "version": 2,
+  "refresh": "10s",
   "time": {"from": "now-6h", "to": "now"},
+  "annotations": {
+    "list": [
+      {
+        "name": "Alerts",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "expr": "ALERTS{alertstate=\"firing\"}",
+        "tagKeys": "severity,component",
+        "textFormat": "{{ alertname }}"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "instance",
+        "type": "query",
+        "query": "label_values(node_cpu_seconds_total, instance)",
+        "datasource": {"type": "prometheus", "uid": "prometheus"}
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
-      "title": "CPU Usage",
+      "title": "🔥 CPU Usage",
       "type": "timeseries",
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
       "targets": [{
@@ -21,20 +42,32 @@
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "min": 0,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {"color": "green", "value": null},
               {"color": "yellow", "value": 70},
-              {"color": "red", "value": 85}
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
             ]
+          },
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "showPoints": "never"
           }
         }
+      },
+      "options": {
+        "legend": {"displayMode": "table", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "multi"}
       }
     },
     {
       "id": 2,
-      "title": "Memory Usage",
+      "title": "💾 Memory Usage",
       "type": "timeseries",
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
       "targets": [{
@@ -45,36 +78,51 @@
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "min": 0,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {"color": "green", "value": null},
-              {"color": "yellow", "value": 75},
-              {"color": "red", "value": 90}
+              {"color": "yellow", "value": 70},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
             ]
+          },
+          "custom": {
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "showPoints": "never"
           }
         }
+      },
+      "options": {
+        "legend": {"displayMode": "table", "placement": "right", "showLegend": true},
+        "tooltip": {"mode": "multi"}
       }
     },
     {
       "id": 3,
-      "title": "Disk Usage",
+      "title": "💿 Disk Usage",
       "type": "gauge",
-      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+      "gridPos": {"h": 7, "w": 8, "x": 0, "y": 8},
       "targets": [{
-        "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100",
-        "legendFormat": "{{mountpoint}}",
+        "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\",mountpoint=\"/\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\",mountpoint=\"/\"})) * 100",
+        "legendFormat": "Root (/)",
         "refId": "A"
       }],
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "min": 0,
+          "max": 100,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {"color": "green", "value": null},
-              {"color": "yellow", "value": 80},
-              {"color": "red", "value": 90}
+              {"color": "yellow", "value": 70},
+              {"color": "orange", "value": 85},
+              {"color": "red", "value": 95}
             ]
           }
         }
@@ -82,74 +130,112 @@
     },
     {
       "id": 4,
-      "title": "Network Traffic",
-      "type": "timeseries",
-      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+      "title": "🌡️ System Load",
+      "type": "stat",
+      "gridPos": {"h": 7, "w": 8, "x": 8, "y": 8},
       "targets": [
         {
-          "expr": "rate(node_network_receive_bytes_total[5m])",
-          "legendFormat": "RX {{device}}",
+          "expr": "node_load1",
+          "legendFormat": "1 min",
           "refId": "A"
         },
         {
-          "expr": "rate(node_network_transmit_bytes_total[5m])",
-          "legendFormat": "TX {{device}}",
+          "expr": "node_load5",
+          "legendFormat": "5 min",
           "refId": "B"
+        },
+        {
+          "expr": "node_load15",
+          "legendFormat": "15 min",
+          "refId": "C"
         }
       ],
       "fieldConfig": {
-        "defaults": {"unit": "Bps"}
-      }
-    },
-    {
-      "id": 5,
-      "title": "Requests In Progress",
-      "type": "gauge",
-      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 8},
-      "targets": [{
-        "expr": "http_requests_inprogress",
-        "legendFormat": "In Progress",
-        "refId": "A"
-      }],
-      "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "color": {"mode": "thresholds"},
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {"color": "green", "value": null},
-              {"color": "yellow", "value": 50},
-              {"color": "red", "value": 100}
+              {"color": "yellow", "value": 2},
+              {"color": "red", "value": 4}
             ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 5,
+      "title": "🔄 Network Traffic",
+      "type": "timeseries",
+      "gridPos": {"h": 7, "w": 8, "x": 16, "y": 8},
+      "targets": [
+        {
+          "expr": "rate(node_network_receive_bytes_total{device=\"eth0\"}[5m])",
+          "legendFormat": "RX (Download)",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(node_network_transmit_bytes_total{device=\"eth0\"}[5m])",
+          "legendFormat": "TX (Upload)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
           }
         }
       }
     },
     {
       "id": 6,
-      "title": "System Load Average",
-      "type": "timeseries",
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
-      "targets": [
-        {
-          "expr": "node_load1",
-          "legendFormat": "1m load",
-          "refId": "A"
-        },
-        {
-          "expr": "node_load5",
-          "legendFormat": "5m load",
-          "refId": "B"
-        },
-        {
-          "expr": "node_load15",
-          "legendFormat": "15m load",
-          "refId": "C"
-        }
-      ],
+      "title": "🔴 Active Alerts",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 15},
+      "targets": [{
+        "expr": "ALERTS{alertstate=\"firing\"}",
+        "format": "table",
+        "instant": true,
+        "refId": "A"
+      }],
       "fieldConfig": {
-        "defaults": {"unit": "short"}
-      }
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "severity"},
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {"options": {"critical": {"color": "red", "text": "🔴 CRITICAL"}}},
+                  {"options": {"warning": {"color": "yellow", "text": "🟡 WARNING"}}}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "alertname": 0,
+              "severity": 1,
+              "component": 2,
+              "instance": 3
+            }
+          }
+        }
+      ]
     }
   ]
 }

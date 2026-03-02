@@ -49,16 +49,16 @@ groups:
   - name: system_alerts
     interval: 30s
     rules:
-      # High CPU usage - may need scaling
+      # High CPU usage - may need scaling (>85%)
       - alert: HighCPUUsage
-        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
-        for: 10m
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
         labels:
           severity: warning
           component: system
         annotations:
-          summary: "High CPU usage detected"
-          description: "CPU usage is {{ $value | humanize }}% (>80% threshold) for 10 minutes. Consider scaling up."
+          summary: "High CPU usage detected (>85%)"
+          description: "CPU usage is {{ $value | humanize }}% (>85% threshold) for 5 minutes. Consider scaling up."
 
       # High memory usage - may need scaling
       - alert: HighMemoryUsage
