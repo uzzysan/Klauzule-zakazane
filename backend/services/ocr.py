@@ -1,7 +1,5 @@
 """OCR service using Tesseract with Polish language support."""
 import io
-from pathlib import Path
-from typing import Optional
 
 import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
@@ -115,7 +113,7 @@ class OCRService:
                 preprocessing_applied=preprocess,
             )
 
-        except Exception as e:
+        except Exception:
             return OCRResult(
                 text="",
                 confidence=0.0,
@@ -191,7 +189,7 @@ class OCRService:
                 preprocessing_applied=True,
             )
 
-        except Exception as e:
+        except Exception:
             return OCRResult(
                 text="",
                 confidence=0.0,

@@ -145,7 +145,7 @@ def fetch_clauses_from_source_db() -> List[Dict[str, Any]]:
                 WHERE postanowienie_niedozwolone IS NOT NULL
                 AND postanowienie_niedozwolone != ''
             """
-            logger.info(f"Executing query...")
+            logger.info("Executing query...")
 
             result = conn.execute(text(query))
             rows = result.fetchall()
@@ -366,7 +366,7 @@ async def async_sync_prohibited_clauses() -> Dict[str, int]:
                 logger.info(f"Committed {stats['added']} new clauses")
 
         logger.info("=" * 60)
-        logger.info(f"Sync completed!")
+        logger.info("Sync completed!")
         logger.info(f"Source database: {stats['total_source']} clauses")
         logger.info(f"App database before: {stats['total_app']} clauses")
         logger.info(f"New clauses added: {stats['added']}")

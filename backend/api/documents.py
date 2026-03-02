@@ -171,7 +171,7 @@ async def upload_document(
     - **save_to_drive**: Save to Google Drive (requires authentication)
     """
     # Validate file
-    file_size = validate_file(file)
+    validate_file(file)
 
     # Validate language
     if language not in ["pl", "en"]:
@@ -288,7 +288,7 @@ async def get_document(
     from sqlalchemy import select
 
     result = await db.execute(
-        select(Document).where(Document.id == document_id, Document.deleted_at == None)
+        select(Document).where(Document.id == document_id, Document.deleted_at.is_(None))
     )
     document = result.scalar_one_or_none()
 

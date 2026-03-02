@@ -1,7 +1,6 @@
 """Tests for admin API endpoints."""
 from uuid import uuid4
 
-import pytest
 from httpx import AsyncClient
 
 from models.user import User

@@ -1,8 +1,6 @@
 """Middleware for tracking user sessions and updating metrics."""
 import hashlib
-import time
-from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, Set
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware

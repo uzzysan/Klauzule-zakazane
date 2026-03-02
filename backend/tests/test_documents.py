@@ -2,7 +2,6 @@
 from io import BytesIO
 from uuid import uuid4
 
-import pytest
 from httpx import AsyncClient
 
 from models.document import Document
@@ -29,11 +28,11 @@ class TestUploadDocument:
     async def test_upload_pdf_as_guest(self, client: AsyncClient, mocker):
         """Test uploading PDF document as guest user."""
         # Mock storage service
-        mock_upload = mocker.patch(
+        mocker.patch(
             "api.documents.storage_service.upload_file",
             return_value=("test-file.pdf", "abc123", 1024),
         )
-        mock_get_url = mocker.patch(
+        mocker.patch(
             "api.documents.storage_service.get_file_url",
             return_value="http://storage/test-file.pdf",
         )

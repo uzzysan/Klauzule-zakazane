@@ -1,11 +1,12 @@
 # Development dependencies for FairPact Backend
 
 # Code Quality
+ruff==0.15.4                    # Fast Python linter (replaces flake8/pylint)
 black==23.12.1                  # Code formatter
 isort==5.13.2                   # Import sorter
 mypy==1.8.0                     # Static type checker
-flake8==7.0.0                   # Linter
-pylint==3.0.3                   # Additional linter
+flake8==7.0.0                   # Linter (legacy, kept for compatibility)
+pylint==3.0.3                   # Additional linter (legacy)
 
 # Testing
 pytest==7.4.3                   # Test framework

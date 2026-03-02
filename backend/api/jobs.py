@@ -116,7 +116,7 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)) -> dic
                 except Exception:
                     response["error"] = "Task failed (details unavailable)"
 
-        except Exception as e:
+        except Exception:
             # If Celery query fails, return unknown status
             response["status"] = "queued"
             response["meta"] = {"stage": "unknown", "note": "Unable to query task status"}

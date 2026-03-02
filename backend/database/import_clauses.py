@@ -44,7 +44,7 @@ def fetch_external_clauses() -> List[Dict[str, Any]]:
         logger.error("SOURCE_DATABASE_URL not configured")
         return []
 
-    logger.info(f"Connecting to external database...")
+    logger.info("Connecting to external database...")
 
     try:
         # Create synchronous engine for external database
@@ -370,7 +370,7 @@ async def import_all_clauses() -> None:
         await session.commit()
 
         logger.info("=" * 60)
-        logger.info(f"Import complete!")
+        logger.info("Import complete!")
         logger.info(f"Total clauses processed: {len(external_clauses)}")
         logger.info(f"Successfully imported: {imported_count}")
         logger.info(f"Skipped (duplicates/errors): {skipped_count}")

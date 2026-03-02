@@ -1,0 +1,195 @@
+{
+  "title": "FairPact - Business Metrics",
+  "uid": "fairpact-business",
+  "tags": ["fairpact", "business"],
+  "timezone": "",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "1m",
+  "time": {"from": "now-24h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Document Uploads (24h)",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "sum(increase(document_uploads_total[24h]))",
+        "legendFormat": "Total Uploads",
+        "refId": "A"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Upload Success Rate",
+      "type": "gauge",
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "targets": [{
+        "expr": "(sum(rate(document_uploads_total{status=\"success\"}[1h])) / sum(rate(document_uploads_total[1h]))) * 100",
+        "legendFormat": "Success Rate %",
+        "refId": "A"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 90},
+              {"color": "green", "value": 95}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Active Users",
+      "type": "stat",
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(active_users_total{time_window=\"5m\"})",
+          "legendFormat": "Last 5 min",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(active_users_total{time_window=\"1h\"})",
+          "legendFormat": "Last 1 hour",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(active_users_total{time_window=\"24h\"})",
+          "legendFormat": "Last 24 hours",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {"mode": "palette-classic"}
+        }
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Document Uploads Over Time",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [
+        {
+          "expr": "sum(rate(document_uploads_total{status=\"success\"}[5m])) * 300",
+          "legendFormat": "Successful Uploads",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(document_uploads_total{status=\"error\"}[5m])) * 300",
+          "legendFormat": "Failed Uploads",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short"}
+      }
+    },
+    {
+      "id": 5,
+      "title": "Analysis Duration",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(analysis_duration_seconds_bucket[5m]))",
+          "legendFormat": "P50 (median)",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(analysis_duration_seconds_bucket[5m]))",
+          "legendFormat": "P95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(analysis_duration_seconds_bucket[5m]))",
+          "legendFormat": "P99",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 20},
+              {"color": "red", "value": 30}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Visitor Sessions by Type",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "targets": [{
+        "expr": "sum by(user_type) (increase(visitor_sessions_total[24h]))",
+        "legendFormat": "{{user_type}}",
+        "refId": "A"
+      }],
+      "options": {
+        "displayLabels": ["percent", "name"],
+        "pieType": "pie",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Uploads by File Type",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "targets": [{
+        "expr": "sum by(file_type) (increase(document_uploads_total{status=\"success\"}[24h]))",
+        "legendFormat": "{{file_type}}",
+        "refId": "A"
+      }],
+      "options": {
+        "displayLabels": ["percent", "name"],
+        "pieType": "donut",
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        }
+      }
+    }
+  ]
+}
