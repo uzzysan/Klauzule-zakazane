@@ -17,7 +17,7 @@ docker compose -f docker-compose.prod.yml ps
 
 # Restart specific service
 docker compose -f docker-compose.prod.yml restart backend-1
-docker compose -f docker-compose.prod.yml restart nginx
+sudo systemctl reload nginx
 ```
 
 ### View Logs

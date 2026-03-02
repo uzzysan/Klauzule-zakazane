@@ -39,7 +39,7 @@ echo "[Recent Errors (Last 10 lines)]"
 echo "--- Backend ---"
 docker logs --tail 10 fairpact-backend 2>&1 | grep -iE "error|exception|critical" || echo "No recent errors found."
 echo "--- Nginx ---"
-docker logs --tail 10 fairpact-nginx 2>&1 | grep -iE "error|warn" || echo "No recent errors found."
+sudo tail -50 /var/log/nginx/error.log 2>&1 | grep -iE "error|warn" | tail -10 || echo "No recent nginx errors found."
 
 echo ""
 echo "========================================================"

@@ -69,7 +69,7 @@ sudo -u deploy /opt/fairpact/scripts/deploy.sh
 
 ### "Nginx 502 Bad Gateway"
 1. Backend is likely down. Check backend container status.
-2. Check Nginx logs: `docker logs fairpact-nginx`
+2. Check Nginx logs: `sudo tail -f /var/log/nginx/error.log`
 
 ### "Disk Space Full"
 1. Check usage: `df -h`

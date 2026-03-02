@@ -15,7 +15,7 @@
 | **Monitor** | `./scripts/monitor.sh` |
 | **Logs** | `./scripts/view-logs.sh [service]` |
 | **Restart App** | `docker compose -f docker-compose.prod.yml restart` |
-| **Restart Nginx** | `docker compose -f docker-compose.prod.yml restart nginx` |
+| **Reload Nginx** | `sudo systemctl reload nginx` |
 | **Shell Access** | `docker compose -f docker-compose.prod.yml exec backend-1 /bin/bash` |
 | **DB Access** | `docker compose -f docker-compose.prod.yml exec postgres psql -U postgres -d fairpact` |
 

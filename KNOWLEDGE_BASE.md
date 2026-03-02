@@ -4,7 +4,7 @@
 **Cel:** Analiza umów pod kątem klauzul zakazanych (abuzywnych) w oparciu o rejestr UOKiK.
 
 ### Główne komponenty (kontenery Docker):
-- **fairpact-nginx** (nginx:alpine) - Reverse proxy, SSL (512MB)
+- **nginx** (host) - Reverse proxy, SSL (managed by systemd)
 - **fairpact-frontend** (Next.js 14) - UI aplikacji (512MB)
 - **fairpact-backend** (FastAPI) - API REST (2GB)
 - **fairpact-worker** (Celery) - Przetwarzanie dokumentów (1.5GB)

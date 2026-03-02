@@ -18,7 +18,8 @@
 - [x] 1.4 Integracja w backend/main.py
 
 ### ✅ Faza 2: Nginx & Exporters
-- [x] 2.1 Aktualizacja docker-compose.prod.yml (nginx-exporter, node-exporter)
+- [x] 2.1 Aktualizacja docker-compose.prod.yml (node-exporter, prometheus)
+- [x] 2.2 Nginx przeniesiony na host (systemd) - lepsza separacja i zarządzanie
 - [x] 2.2 Konfiguracja nginx/nginx.conf (stub_status)
 
 ### ✅ Faza 3: Prometheus Configuration
