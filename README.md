@@ -123,3 +123,9 @@ Check your Sentry dashboard at https://sentry.io to verify errors are being capt
 - Consider setting to 0.1-0.2 (10-20%) to reduce costs
 - Review `send_default_pii` setting for privacy compliance
 - Monitor Sentry quota usage
+
+## Wsparcie projektu
+
+Jeśli chcesz wesprzeć rozwój FairPact, możesz to zrobić przez:
+
+[![Wesprzyj mnie](https://suppi.pl/api/widget/button.svg?fill=6457FF&textColor=ffffff)](https://suppi.pl/rafcio)
