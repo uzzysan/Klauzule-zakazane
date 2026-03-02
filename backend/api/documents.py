@@ -11,7 +11,17 @@ from uuid import UUID, uuid4
 
 from config import settings
 from database.connection import get_db
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from models.document import Document
 from models.user import User
 from schemas.document import (

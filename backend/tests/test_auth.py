@@ -123,9 +123,7 @@ class TestLogin:
         data = response.json()
         assert data["detail"]["error"]["code"] == "INVALID_CREDENTIALS"
 
-    async def test_login_inactive_user(
-        self, client: AsyncClient, db_session, test_user: User
-    ):
+    async def test_login_inactive_user(self, client: AsyncClient, db_session, test_user: User):
         """Test login with inactive user fails."""
         test_user.is_active = False
         await db_session.commit()

@@ -19,9 +19,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return bcrypt.checkpw(
-        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
-    )
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
@@ -153,13 +151,17 @@ async def login(
     if not user or not user.hashed_password:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "INVALID_CREDENTIALS", "message": "Invalid email or password"}},
+            detail={
+                "error": {"code": "INVALID_CREDENTIALS", "message": "Invalid email or password"}
+            },
         )
 
     if not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "INVALID_CREDENTIALS", "message": "Invalid email or password"}},
+            detail={
+                "error": {"code": "INVALID_CREDENTIALS", "message": "Invalid email or password"}
+            },
         )
 
     if not user.is_active:
@@ -235,7 +237,9 @@ async def change_password(
     if not verify_password(old_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "INVALID_PASSWORD", "message": "Current password is incorrect"}},
+            detail={
+                "error": {"code": "INVALID_PASSWORD", "message": "Current password is incorrect"}
+            },
         )
 
     if len(new_password) < 8:

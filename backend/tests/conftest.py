@@ -19,7 +19,7 @@ from models.user import User
 # Uses the same credentials as the development database
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://fairpact:fairpact_dev_pass@localhost:5432/fairpact_test"
+    "postgresql+asyncpg://fairpact:fairpact_dev_pass@localhost:5432/fairpact_test",
 )
 
 

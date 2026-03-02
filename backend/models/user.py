@@ -27,7 +27,9 @@ class User(Base):
     hashed_password: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # OAuth
-    google_id: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True, index=True)
+    google_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
 
     # Profile
     full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)

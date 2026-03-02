@@ -16,7 +16,7 @@ class AnalysisFeedback(Base):
     __tablename__ = "analysis_feedback"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Reference to flagged clause
     flagged_clause_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
@@ -24,7 +24,7 @@ class AnalysisFeedback(Base):
         nullable=False,
         index=True,
     )
-    
+
     # Feedback
     is_correct: Mapped[bool] = mapped_column(
         Boolean, nullable=False, comment="Was this a true positive?"
@@ -36,7 +36,7 @@ class AnalysisFeedback(Base):
         comment="Admin user who reviewed",
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
@@ -58,26 +58,26 @@ class ModelMetrics(Base):
     __tablename__ = "model_metrics"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Date of metrics
     date: Mapped[datetime] = mapped_column(Date, nullable=False, unique=True, index=True)
-    
+
     # Metrics
     true_positives: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     false_positives: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     true_negatives: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     false_negatives: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    
+
     # Calculated metrics
     precision: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     recall: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     f1_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     accuracy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    
+
     # Additional info
     total_reviews: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(

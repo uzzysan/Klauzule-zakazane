@@ -56,7 +56,7 @@ class DocumentParser:
         1. Try to extract native text layer
         2. If no text or low quality, use OCR
         3. Extract metadata and structure
-        
+
         PyMuPDF is faster and better preserves document structure than pdfplumber.
         """
         try:

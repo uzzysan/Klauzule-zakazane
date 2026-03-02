@@ -22,6 +22,7 @@ def get_embedding_model():
     global _embedding_model
     if _embedding_model is None:
         from sentence_transformers import SentenceTransformer
+
         MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         logger.info(f"Loading embedding model: {MODEL_NAME}")
         _embedding_model = SentenceTransformer(MODEL_NAME)
@@ -75,11 +76,13 @@ def fetch_clauses_from_source_db() -> List[Dict[str, Any]]:
         with engine.connect() as conn:
             # Check available tables
             result = conn.execute(
-                text("""
+                text(
+                    """
                     SELECT table_name
                     FROM information_schema.tables
                     WHERE table_schema = 'public'
-                """)
+                """
+                )
             )
             tables = [row[0] for row in result]
             logger.info(f"Available tables: {tables}")
@@ -110,11 +113,13 @@ def fetch_clauses_from_source_db() -> List[Dict[str, Any]]:
 
             # Get column information
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                     SELECT column_name, data_type
                     FROM information_schema.columns
                     WHERE table_name = '{table_name}'
-                """)
+                """
+                )
             )
             columns = {row[0]: row[1] for row in result}
             logger.info(f"Available columns: {list(columns.keys())}")
@@ -165,6 +170,7 @@ def fetch_clauses_from_source_db() -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error fetching from source database: {e}")
         import traceback
+
         traceback.print_exc()
         return []
 
@@ -173,9 +179,7 @@ async def get_or_create_category(session) -> ClauseCategory:
     """Get or create default category for imported clauses."""
     code = "court_decisions"
 
-    result = await session.execute(
-        select(ClauseCategory).where(ClauseCategory.code == code)
-    )
+    result = await session.execute(select(ClauseCategory).where(ClauseCategory.code == code))
     category = result.scalar_one_or_none()
 
     if not category:
@@ -198,9 +202,7 @@ async def get_or_create_category(session) -> ClauseCategory:
 
 async def get_existing_clause_texts(session) -> set:
     """Get set of all existing clause texts for fast lookup."""
-    result = await session.execute(
-        select(ProhibitedClause.clause_text)
-    )
+    result = await session.execute(select(ProhibitedClause.clause_text))
     return {row[0] for row in result}
 
 
@@ -379,6 +381,7 @@ async def async_sync_prohibited_clauses() -> Dict[str, int]:
     except Exception as e:
         logger.error(f"Fatal error during sync: {e}")
         import traceback
+
         traceback.print_exc()
         stats["errors"] += 1
         return stats

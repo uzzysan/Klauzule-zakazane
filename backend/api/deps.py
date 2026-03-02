@@ -52,7 +52,9 @@ async def get_current_user(
     except JWTError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": {"code": "INVALID_TOKEN", "message": f"Token validation failed: {str(e)}"}},
+            detail={
+                "error": {"code": "INVALID_TOKEN", "message": f"Token validation failed: {str(e)}"}
+            },
             headers={"WWW-Authenticate": "Bearer"},
         )
 

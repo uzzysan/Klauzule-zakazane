@@ -14,7 +14,7 @@ router = APIRouter(prefix="/health", tags=["health"])
 async def liveness_check() -> dict:
     """
     Liveness probe endpoint.
-    
+
     Returns 200 OK if the service is running.
     Used by load balancers to determine if the instance should receive traffic.
     """
@@ -34,9 +34,9 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
     Used by load balancers to determine if the instance is ready.
     """
     from fastapi import Response
-    
+
     checks = {}
-    
+
     # Check database connection
     try:
         result = await db.execute(text("SELECT 1"))
@@ -58,9 +58,9 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
     has_errors = any("error" in str(v) for v in checks.values())
     if has_errors:
         return Response(
-            content='{"status": "not_ready", "checks": ' + str(checks).replace("'", '"') + '}',
+            content='{"status": "not_ready", "checks": ' + str(checks).replace("'", '"') + "}",
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            media_type="application/json"
+            media_type="application/json",
         )
 
     return {"status": "ready", "checks": checks}
@@ -70,10 +70,10 @@ async def readiness_check(db: AsyncSession = Depends(get_db)) -> dict:
 async def sentry_test() -> dict:
     """
     Test endpoint to verify Sentry error tracking.
-    
+
     Raises a deliberate exception that should be captured by Sentry.
     Use this endpoint to confirm Sentry integration is working correctly.
-    
+
     **Warning:** This endpoint intentionally raises an error.
     """
     raise ValueError("Sentry test error - if you see this in Sentry, integration is working!")

@@ -65,9 +65,9 @@ class ClauseAnalysisService:
     def __init__(self) -> None:
         """Initialize the analysis service."""
         from config import settings
-        
+
         self.model = get_embedding_model()
-        
+
         # Load thresholds from configuration (can be adjusted via environment variables)
         self.VECTOR_THRESHOLD_LOW = settings.analysis_threshold_low
         self.VECTOR_THRESHOLD_MEDIUM = settings.analysis_threshold_medium

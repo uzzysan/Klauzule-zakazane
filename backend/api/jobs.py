@@ -33,9 +33,7 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)) -> dic
 
     try:
         # First, check the database for document status (primary source of truth)
-        result = await db.execute(
-            select(Document).where(Document.celery_task_id == job_id)
-        )
+        result = await db.execute(select(Document).where(Document.celery_task_id == job_id))
         document = result.scalar_one_or_none()
 
         if document:
@@ -62,7 +60,9 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)) -> dic
                         "medium_risk_count": analysis.medium_risk_count if analysis else 0,
                         "low_risk_count": analysis.low_risk_count if analysis else 0,
                         "risk_score": analysis.risk_score if analysis else 0,
-                    } if analysis else None,
+                    }
+                    if analysis
+                    else None,
                 }
                 return response
 

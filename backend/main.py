@@ -77,5 +77,3 @@ instrumentator.instrument(app)
 def metrics() -> Response:
     """Prometheus metrics endpoint."""
     return Response(content=generate_latest(REGISTRY), media_type="text/plain")
-
-

@@ -18,9 +18,9 @@ class StorageService:
     def __init__(self) -> None:
         """Initialize MinIO client."""
         import logging
-        
+
         logger = logging.getLogger(__name__)
-        
+
         try:
             self.client = Minio(
                 settings.minio_endpoint,
@@ -30,7 +30,9 @@ class StorageService:
             )
             self.bucket_name = settings.minio_bucket_name
             self._ensure_bucket()
-            logger.info(f"MinIO storage service initialized successfully (bucket: {self.bucket_name})")
+            logger.info(
+                f"MinIO storage service initialized successfully (bucket: {self.bucket_name})"
+            )
         except Exception as e:
             logger.warning(
                 f"Failed to initialize MinIO storage service: {e}. "
@@ -94,7 +96,7 @@ class StorageService:
 
         Returns:
             Tuple of (object_name, checksum, file_size)
-        
+
         Raises:
             ValueError: If MinIO client is not available
         """

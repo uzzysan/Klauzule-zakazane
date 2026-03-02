@@ -36,7 +36,9 @@ target_metadata = Base.metadata
 
 def get_url():
     # Force sync driver for Alembic
-    return settings.database_url.get_secret_value().replace("postgresql+asyncpg://", "postgresql://")
+    return settings.database_url.get_secret_value().replace(
+        "postgresql+asyncpg://", "postgresql://"
+    )
 
 
 def run_migrations_offline() -> None:
@@ -72,7 +74,7 @@ def run_migrations_online() -> None:
     """
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
-    
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

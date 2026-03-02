@@ -106,9 +106,7 @@ async def submit_feedback(
     if existing.scalar_one_or_none():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={
-                "error": {"code": "ALREADY_EXISTS", "message": "Feedback already submitted"}
-            },
+            detail={"error": {"code": "ALREADY_EXISTS", "message": "Feedback already submitted"}},
         )
 
     # Create feedback
@@ -192,9 +190,7 @@ async def get_metrics(
     """
     from sqlalchemy import desc
 
-    result = await db.execute(
-        select(ModelMetrics).order_by(desc(ModelMetrics.date)).limit(days)
-    )
+    result = await db.execute(select(ModelMetrics).order_by(desc(ModelMetrics.date)).limit(days))
     metrics = result.scalars().all()
 
     return [MetricsResponse.model_validate(m) for m in metrics]
