@@ -1,6 +1,6 @@
 """User model."""
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import Boolean, String, Text
@@ -9,6 +9,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from database.connection import Base
+
+if TYPE_CHECKING:
+    from models.document import Document
 
 
 class User(Base):
