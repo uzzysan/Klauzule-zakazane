@@ -25,45 +25,6 @@ if [ ! -f .env ]; then
     fi
 fi
 
-# Ensure maculewicz.pro placeholder exists
-if [ ! -f /var/www/maculewicz.pro/index.html ]; then
-    echo "Creating maculewicz.pro placeholder..." | tee -a "$LOG_FILE"
-    sudo mkdir -p /var/www/maculewicz.pro
-    sudo tee /var/www/maculewicz.pro/index.html > /dev/null << 'HTMLEOF'
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maculewicz.pro - Strona w budowie</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .container { text-align: center; max-width: 600px; }
-        h1 { font-size: 3rem; margin-bottom: 1rem; font-weight: 700; }
-        p { font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9; }
-        .icon { font-size: 5rem; margin-bottom: 2rem; }
-        .links { margin-top: 3rem; }
-        .links a { display: inline-block; margin: 0.5rem; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.2); color: #fff; text-decoration: none; border-radius: 8px; transition: all 0.3s ease; backdrop-filter: blur(10px); }
-        .links a:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
-        @media (max-width: 768px) { h1 { font-size: 2rem; } p { font-size: 1rem; } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="icon">🚧</div>
-        <h1>Strona w budowie</h1>
-        <p>Pracujemy nad czymś wyjątkowym. Wróć wkrótce!</p>
-        <div class="links">
-            <a href="https://ev-assist.maculewicz.pro">EV Assist</a>
-            <a href="https://fairpact.pl">FairPact</a>
-        </div>
-    </div>
-</body>
-</html>
-HTMLEOF
-fi
-
 # Pull latest code
 echo "Pulling latest code from $BRANCH..." | tee -a "$LOG_FILE"
 git fetch origin
@@ -101,16 +62,35 @@ if docker compose -f docker-compose.prod.yml exec -T backend-1 python -m databas
     echo "Database seeded successfully." | tee -a "$LOG_FILE"
 else
     echo "WARNING: Database seeding failed (might already be seeded)." | tee -a "$LOG_FILE"
-    # Don't fail the deploy for seeding issues as it might be idempotent failure
 fi
 
-# Check health (hitting backend inside container to verify it's up)
+# Check health (hitting backend via localhost since it's exposed to host)
 echo "Checking system health..." | tee -a "$LOG_FILE"
-if docker compose -f docker-compose.prod.yml exec -T backend-1 curl -f http://localhost:8000/health/live > /dev/null 2>&1; then
-    echo "Backend is healthy." | tee -a "$LOG_FILE"
+for i in {1..10}; do
+    if curl -f http://localhost:8000/health/live > /dev/null 2>&1; then
+        echo "Backend is healthy." | tee -a "$LOG_FILE"
+        break
+    fi
+    if [ $i -eq 10 ]; then
+        echo "WARNING: Backend health check failed after 10 attempts!" | tee -a "$LOG_FILE"
+    fi
+    sleep 2
+done
+
+# Check frontend is accessible
+echo "Checking frontend accessibility..." | tee -a "$LOG_FILE"
+if curl -f http://localhost:3000 > /dev/null 2>&1; then
+    echo "Frontend is accessible." | tee -a "$LOG_FILE"
 else
-    echo "WARNING: Backend health check failed!" | tee -a "$LOG_FILE"
-    # We might want to exit 1 here if critical
+    echo "WARNING: Frontend accessibility check failed!" | tee -a "$LOG_FILE"
+fi
+
+# Reload host nginx to ensure it's using latest configuration
+echo "Reloading host nginx..." | tee -a "$LOG_FILE"
+if sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null; then
+    echo "Host nginx reloaded successfully." | tee -a "$LOG_FILE"
+else
+    echo "WARNING: Could not reload host nginx (might not be running on host yet)." | tee -a "$LOG_FILE"
 fi
 
 # Show status
