@@ -14,7 +14,6 @@ from api.deps import create_access_token
 from database.connection import Base, get_db
 from models.user import User
 
-
 # Test database URL - use PostgreSQL (same instance, different database)
 # Uses the same credentials as the development database
 TEST_DATABASE_URL = os.getenv(

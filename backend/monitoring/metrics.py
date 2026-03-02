@@ -1,9 +1,10 @@
 """Prometheus metrics configuration for FairPact API."""
+import time
 from typing import Callable
+
+from prometheus_client import Counter, Gauge, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator, metrics
 from prometheus_fastapi_instrumentator.metrics import Info
-from prometheus_client import Counter, Histogram, Gauge
-import time
 
 # Initialize Instrumentator with configuration
 instrumentator = Instrumentator(

@@ -5,11 +5,12 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
+from sqlalchemy import create_engine, select, text
+
 from celery_app import celery_app
 from config import settings
 from database.connection import get_celery_db_context
 from models.clause import ClauseCategory, ClauseLegalReference, LegalReference, ProhibitedClause
-from sqlalchemy import create_engine, select, text
 
 logger = logging.getLogger(__name__)
 

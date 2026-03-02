@@ -3,11 +3,12 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from database.connection import Base
 from sqlalchemy import Boolean, Date, Float, ForeignKey, Integer, Text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+from database.connection import Base
 
 
 class AnalysisFeedback(Base):

@@ -1,4 +1,11 @@
 """FairPact API - Contract Analysis Application."""
+import sentry_sdk
+from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import REGISTRY, generate_latest
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+
 from api.admin import router as admin_router
 from api.analysis import router as analysis_router
 from api.auth import router as auth_router
@@ -6,14 +13,8 @@ from api.documents import router as documents_router
 from api.health import router as health_router
 from api.jobs import router as jobs_router
 from config import settings
-from fastapi import FastAPI, Response
-from fastapi.middleware.cors import CORSMiddleware
 from middleware import UserTrackingMiddleware
 from monitoring import instrumentator
-from prometheus_client import REGISTRY, generate_latest
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.celery import CeleryIntegration
 
 # Initialize Sentry if DSN is configured
 if settings.sentry_dsn:

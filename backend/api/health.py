@@ -1,11 +1,11 @@
 """Health check endpoints for load balancers and monitoring."""
 import redis.asyncio as redis
-
-from config import settings
-from database.connection import get_db
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from config import settings
+from database.connection import get_db
 
 router = APIRouter(prefix="/health", tags=["health"])
 

@@ -3,16 +3,16 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
-from database.connection import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models.analysis import FlaggedClause
-from models.feedback import AnalysisFeedback, ModelMetrics
-from models.user import User
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.deps import get_admin_user, get_reviewer_user
+from database.connection import get_db
+from models.analysis import FlaggedClause
+from models.feedback import AnalysisFeedback, ModelMetrics
+from models.user import User
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -135,9 +135,10 @@ async def get_pending_reviews(
 
     - **limit**: Maximum number of items to return (default: 20)
     """
+    from sqlalchemy import and_, func
+
     from models.analysis import Analysis
     from models.document import Document
-    from sqlalchemy import and_, func
 
     # Get analyses with clauses that don't have feedback yet
     query = (

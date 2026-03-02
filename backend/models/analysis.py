@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from database.connection import Base
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -17,6 +16,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+from database.connection import Base
 
 
 class Analysis(Base):

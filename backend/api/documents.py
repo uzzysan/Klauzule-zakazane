@@ -9,8 +9,6 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from config import settings
-from database.connection import get_db
 from fastapi import (
     APIRouter,
     Depends,
@@ -22,6 +20,11 @@ from fastapi import (
     UploadFile,
     status,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.deps import get_optional_user
+from config import settings
+from database.connection import get_db
 from models.document import Document
 from models.user import User
 from schemas.document import (
@@ -31,9 +34,6 @@ from schemas.document import (
     DocumentUploadResponse,
 )
 from services.storage import storage_service
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.deps import get_optional_user
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 

@@ -2,8 +2,10 @@
 import hashlib
 from datetime import datetime
 from typing import Dict, Set
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
+
 from monitoring.metrics import record_visitor_session, update_active_users
 
 

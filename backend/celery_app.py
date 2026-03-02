@@ -1,9 +1,10 @@
 """Celery application configuration."""
+import sentry_sdk
 from celery import Celery
 from celery.schedules import crontab
-from config import settings
-import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
+
+from config import settings
 
 # Initialize Sentry if DSN is configured
 if settings.sentry_dsn:

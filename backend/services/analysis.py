@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
-from models.clause import ClauseLegalReference, LegalReference, ProhibitedClause
 from sentence_transformers import SentenceTransformer
 from sqlalchemy import select
 from sqlalchemy import text as sql_text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from models.clause import ClauseLegalReference, LegalReference, ProhibitedClause
 
 # Embedding model (same as used for import)
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"

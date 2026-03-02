@@ -3,9 +3,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from config import settings
+
 # Import Base and all models for autogenerate support
 from database.connection import Base
-from config import settings
 from models.analysis import Analysis, FlaggedClause  # noqa: F401
 from models.clause import (  # noqa: F401
     ClauseCategory,

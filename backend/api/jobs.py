@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from celery_app import celery_app
 from database.connection import get_db
-from models.document import Document
 from models.analysis import Analysis
+from models.document import Document
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 

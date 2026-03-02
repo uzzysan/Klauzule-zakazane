@@ -5,11 +5,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import BinaryIO, Optional
 
-from config import settings
 from minio import Minio
 from minio.commonconfig import Filter
 from minio.error import S3Error
 from minio.lifecycleconfig import Expiration, LifecycleConfig, Rule
+
+from config import settings
 
 
 class StorageService:
