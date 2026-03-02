@@ -7,7 +7,7 @@ export function Footer() {
     return (
         <footer className="border-t bg-secondary/30">
             <div className="container py-12">
-                <div className="grid gap-8 md:grid-cols-4">
+                <div className="grid gap-8 md:grid-cols-5">
                     {/* Brand */}
                     <div className="md:col-span-2">
                         <Link href="/" className="flex items-center gap-2 mb-4">
@@ -86,6 +86,22 @@ export function Footer() {
                                 </a>
                             </li>
                         </ul>
+                    </div>
+
+                    {/* Support */}
+                    <div>
+                        <h3 className="font-semibold mb-4">Wesprzyj projekt</h3>
+                        <a
+                            href="https://suppi.pl/rafcio"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <img
+                                width="165"
+                                src="https://suppi.pl/api/widget/button.svg?fill=6457FF&textColor=ffffff"
+                                alt="Wesprzyj mnie"
+                            />
+                        </a>
                     </div>
                 </div>
 

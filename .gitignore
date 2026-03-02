@@ -80,3 +80,7 @@ docker-compose.override.yml
 .logs/
 dummy.pdf
 backend/test_json.txt
+*.bak-*
+nginx/*.bak*
+nginx/*.pre-*
+/.claude

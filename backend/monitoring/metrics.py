@@ -9,10 +9,9 @@ import time
 instrumentator = Instrumentator(
     should_group_status_codes=False,  # Track individual status codes
     should_ignore_untemplated=True,   # Ignore non-templated paths (404s etc)
-    should_respect_env_var=True,      # Allow disabling with ENABLE_METRICS=false
+    should_respect_env_var=False,     # Always enable metrics in production
     should_instrument_requests_inprogress=True,  # Track concurrent requests
     excluded_handlers=["/health/live", "/health/ready", "/metrics"],  # Exclude health checks
-    env_var_name="ENABLE_METRICS",
     inprogress_name="http_requests_inprogress",
     inprogress_labels=True,
 )
