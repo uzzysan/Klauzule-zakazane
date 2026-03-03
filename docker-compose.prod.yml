@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=https://fairpact.pl
+        - NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://umami.maculewicz.pro/umami.js
+        - NEXT_PUBLIC_UMAMI_WEBSITE_ID=3a4c88cf-5adf-4c69-88f5-2f757ea53ac6
     container_name: fairpact-frontend
     restart: unless-stopped
     ports:
@@ -54,6 +56,12 @@ services:
     networks:
       - fairpact-network
     mem_limit: 1536m
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import subprocess; subprocess.check_output(['pidof', '-x', 'celery'])\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   celery-beat:
     build:
@@ -70,6 +78,12 @@ services:
     networks:
       - fairpact-network
     mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import subprocess; subprocess.check_output(['pidof', '-x', 'celery'])\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   postgres:
     image: pgvector/pgvector:pg15
