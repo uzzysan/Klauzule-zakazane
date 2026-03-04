@@ -1,0 +1,60 @@
+---
+# Codacy configuration file
+# https://docs.codacy.com/repositories-configure/configuring-code-patterns/
+
+version: "2.0"
+
+# A list of patterns to include/exclude
+code_patterns:
+  # Python
+  - pattern_id: python-bandit
+    enabled: true
+  - pattern_id: python-pylint
+    enabled: true
+  - pattern_id: python-mypy
+    enabled: true
+  
+  # TypeScript/JavaScript
+  - pattern_id: typescript-eslint
+    enabled: true
+  - pattern_id: javascript-eslint
+    enabled: true
+  
+  # Security
+  - pattern_id: security-bandit
+    enabled: true
+  - pattern_id: security-spotbugs
+    enabled: true
+
+# Files/directories to exclude from analysis
+exclude_paths:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/node_modules/**"
+  - "**/.next/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/venv/**"
+  - "**/.venv/**"
+  - "**/__pycache__/**"
+  - "backend/tests/**"
+  - "frontend/tests/**"
+  - "docs/**"
+  - "nginx/**"
+  - "ops/**"
+  - "monitoring/**"
+  - "scripts/**"
+  - "dane_testowe/**"
+
+# Language specific settings
+languages:
+  python:
+    enabled: true
+  typescript:
+    enabled: true
+  javascript:
+    enabled: true
+  dockerfile:
+    enabled: true
