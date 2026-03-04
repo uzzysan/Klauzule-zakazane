@@ -124,13 +124,13 @@ export function FileUpload({
           borderColor: isDragOver
             ? "hsl(var(--accent))"
             : displayError
-            ? "hsl(var(--destructive))"
-            : "hsl(var(--border))",
+              ? "hsl(var(--destructive))"
+              : "hsl(var(--border))",
           backgroundColor: isDragOver
             ? "hsl(var(--accent) / 0.1)"
             : displayError
-            ? "hsl(var(--destructive) / 0.05)"
-            : "transparent",
+              ? "hsl(var(--destructive) / 0.05)"
+              : "transparent",
         }}
         transition={{ duration: 0.2 }}
         className={cn(
@@ -175,10 +175,7 @@ export function FileUpload({
                   </p>
                 </div>
                 {!isUploading && (
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
+                  <motion.div whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -227,11 +224,7 @@ export function FileUpload({
               className="flex flex-col items-center"
             >
               <motion.div
-                animate={
-                  isDragOver
-                    ? { y: [0, -8, 0], scale: 1.1 }
-                    : { y: 0, scale: 1 }
-                }
+                animate={isDragOver ? { y: [0, -8, 0], scale: 1.1 } : { y: 0, scale: 1 }}
                 transition={{
                   duration: 0.6,
                   repeat: isDragOver ? Infinity : 0,
@@ -240,10 +233,7 @@ export function FileUpload({
                 <AnimatedIcon
                   icon={Upload}
                   size={48}
-                  className={cn(
-                    "mb-4",
-                    isDragOver ? "text-accent" : "text-muted-foreground"
-                  )}
+                  className={cn("mb-4", isDragOver ? "text-accent" : "text-muted-foreground")}
                   hoverScale={1.2}
                 />
               </motion.div>
@@ -253,12 +243,8 @@ export function FileUpload({
               >
                 {isDragOver ? "Upuść plik tutaj" : "Przeciągnij i upuść plik"}
               </motion.p>
-              <p className="mb-4 text-sm text-muted-foreground">
-                lub kliknij, aby wybrać
-              </p>
-              <p className="text-xs text-muted-foreground">
-                PDF, DOCX, JPG, PNG (max 50MB)
-              </p>
+              <p className="mb-4 text-sm text-muted-foreground">lub kliknij, aby wybrać</p>
+              <p className="text-xs text-muted-foreground">PDF, DOCX, JPG, PNG (max 50MB)</p>
             </motion.div>
           )}
         </AnimatePresence>

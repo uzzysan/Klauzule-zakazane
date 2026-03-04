@@ -31,8 +31,8 @@ export function Footer() {
               <span className="text-xl font-bold">FairPact</span>
             </Link>
             <p className="max-w-md text-sm text-muted-foreground">
-              Bezpłatne narzędzie do analizy umów pod kątem klauzul
-              niedozwolonych. Oparte na bazie 7,233 orzeczeń polskich sądów.
+              Bezpłatne narzędzie do analizy umów pod kątem klauzul niedozwolonych. Oparte na bazie
+              7,233 orzeczeń polskich sądów.
             </p>
           </FadeIn>
 
@@ -156,10 +156,7 @@ export function Footer() {
           className="mt-12 border-t pt-8"
         >
           <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
-            <motion.p
-              className="flex items-center gap-1"
-              whileHover={{ scale: 1.02 }}
-            >
+            <motion.p className="flex items-center gap-1" whileHover={{ scale: 1.02 }}>
               &copy; {currentYear} Rafał Maculewicz. Wszelkie prawa zastrzeżone.
               <motion.span
                 animate={{ scale: [1, 1.2, 1] }}
@@ -169,9 +166,7 @@ export function Footer() {
               </motion.span>
             </motion.p>
             <p className="text-center md:text-right">
-              <span className="block md:inline">
-                Narzędzie ma charakter informacyjny.
-              </span>{" "}
+              <span className="block md:inline">Narzędzie ma charakter informacyjny.</span>{" "}
               <span className="block md:inline">Nie stanowi porady prawnej.</span>
             </p>
           </div>

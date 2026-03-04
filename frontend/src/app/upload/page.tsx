@@ -8,10 +8,7 @@ import {
   CardTitle,
   FileUpload,
 } from "@/components/ui";
-import {
-  AnimatedButton,
-  AnimatedCard,
-} from "@/components/ui/animated-button";
+import { AnimatedButton, AnimatedCard } from "@/components/ui/animated-button";
 import { IconContainer, FadeIn, StaggerContainer, StaggerItem } from "@/components/icons";
 import api from "@/lib/api";
 import { useUploadStore } from "@/lib/store";
@@ -177,10 +174,7 @@ export default function UploadPage() {
 
           <div className="mt-6 flex justify-end gap-4">
             {(selectedFile || uploadError) && !isUploading && !isProcessing && (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button variant="outline" onClick={reset}>
                   Wyczyść
                 </Button>
@@ -236,9 +230,7 @@ export default function UploadPage() {
                 />
                 <div>
                   <h3 className="mb-1 font-semibold">7,233 klauzul</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Baza orzeczeń sądowych z Polski
-                  </p>
+                  <p className="text-sm text-muted-foreground">Baza orzeczeń sądowych z Polski</p>
                 </div>
               </div>
             </CardContent>
@@ -258,9 +250,7 @@ export default function UploadPage() {
                 />
                 <div>
                   <h3 className="mb-1 font-semibold">Szybka analiza</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Wyniki w kilka sekund
-                  </p>
+                  <p className="text-sm text-muted-foreground">Wyniki w kilka sekund</p>
                 </div>
               </div>
             </CardContent>

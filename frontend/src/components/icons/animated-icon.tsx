@@ -104,10 +104,7 @@ export function IconContainer({
 }: IconContainerProps) {
   return (
     <motion.div
-      className={cn(
-        "flex items-center justify-center rounded-xl",
-        className
-      )}
+      className={cn("flex items-center justify-center rounded-xl", className)}
       animate={animations[animation]}
       whileHover={{ scale: 1.05 }}
       style={glowColor ? { boxShadow: `0 0 20px ${glowColor}40` } : undefined}
@@ -211,12 +208,7 @@ interface FadeInProps {
   direction?: "up" | "down" | "left" | "right" | "none";
 }
 
-export function FadeIn({
-  children,
-  className,
-  delay = 0,
-  direction = "up",
-}: FadeInProps) {
+export function FadeIn({ children, className, delay = 0, direction = "up" }: FadeInProps) {
   const directions = {
     up: { y: 30 },
     down: { y: -30 },

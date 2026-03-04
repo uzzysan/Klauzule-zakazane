@@ -25,12 +25,11 @@ export function AnimatedButton({
   ...props
 }: AnimatedButtonProps) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      className="inline-block"
-    >
-      <Button className={cn(glowOnHover && "hover:shadow-lg hover:shadow-accent/25", className)} {...props}>
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
+      <Button
+        className={cn(glowOnHover && "hover:shadow-lg hover:shadow-accent/25", className)}
+        {...props}
+      >
         {Icon && iconPosition === "left" && (
           <motion.span
             className="mr-2 inline-flex"
@@ -71,10 +70,10 @@ export function AnimatedCard({
 }: AnimatedCardProps) {
   return (
     <motion.div
-      whileHover={{ 
+      whileHover={{
         scale: hoverScale,
         y: -4,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.2 },
       }}
       whileTap={{ scale: 0.98 }}
       className={cn(
@@ -82,9 +81,13 @@ export function AnimatedCard({
         glowColor && "hover:shadow-lg",
         className
       )}
-      style={glowColor ? { 
-        boxShadow: `0 0 0 ${glowColor}00`,
-      } : undefined}
+      style={
+        glowColor
+          ? {
+              boxShadow: `0 0 0 ${glowColor}00`,
+            }
+          : undefined
+      }
     >
       {children}
     </motion.div>
@@ -166,12 +169,7 @@ interface StepIndicatorProps {
   className?: string;
 }
 
-export function StepIndicator({
-  step,
-  isActive,
-  isCompleted,
-  className,
-}: StepIndicatorProps) {
+export function StepIndicator({ step, isActive, isCompleted, className }: StepIndicatorProps) {
   return (
     <motion.div
       initial={false}
@@ -180,14 +178,12 @@ export function StepIndicator({
         backgroundColor: isCompleted
           ? "hsl(var(--accent))"
           : isActive
-          ? "hsl(var(--accent))"
-          : "hsl(var(--muted))",
+            ? "hsl(var(--accent))"
+            : "hsl(var(--muted))",
       }}
       className={cn(
         "flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold",
-        isCompleted || isActive
-          ? "text-accent-foreground"
-          : "text-muted-foreground",
+        isCompleted || isActive ? "text-accent-foreground" : "text-muted-foreground",
         className
       )}
     >

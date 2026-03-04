@@ -60,10 +60,7 @@ export function Header() {
                 transition={{ delay: index * 0.1 + 0.2 }}
               >
                 <Link href={item.href}>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button
                       variant={pathname === item.href ? "secondary" : "ghost"}
                       className={cn(
