@@ -41,6 +41,7 @@ certs/
 
 # Backups
 backups/
+.backup/
 
 # IDE
 .vscode/*

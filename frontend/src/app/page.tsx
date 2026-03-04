@@ -1,4 +1,18 @@
-import { Button, Card, CardContent } from "@/components/ui";
+"use client";
+
+import { Card, CardContent } from "@/components/ui";
+import {
+  AnimatedIcon,
+  IconContainer,
+  StaggerContainer,
+  StaggerItem,
+  FadeIn,
+} from "@/components/icons";
+import {
+  AnimatedButton,
+  AnimatedCard,
+  AnimatedStat,
+} from "@/components/ui/animated-button";
 import {
   ArrowRight,
   Briefcase,
@@ -109,71 +123,130 @@ export default function Home() {
         {/* Hero Section */}
         <section className="container py-20 md:py-28">
           <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between">
-            <div className="mx-auto max-w-4xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-medium text-accent">
-                <Shield className="h-4 w-4" />
+            <FadeIn className="mx-auto max-w-4xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-medium text-accent"
+              >
+                <AnimatedIcon
+                  icon={Shield}
+                  size={16}
+                  animation="pulse"
+                  className="text-accent"
+                />
                 <span>Bezpłatna analiza bez rejestracji</span>
-              </div>
+              </motion.div>
 
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                Sprawdź umowę pod kątem <span className="text-accent">klauzul niedozwolonych</span>
+                Sprawdź umowę pod kątem{" "}
+                <span className="text-accent">klauzul niedozwolonych</span>
               </h1>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl lg:mx-0">
-                Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact przeanalizuje go
-                na podstawie <strong>7,233 orzeczeń polskich sądów</strong> i wskaże potencjalnie
-                niebezpieczne zapisy.
+                Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact
+                przeanalizuje go na podstawie{" "}
+                <strong>7,233 orzeczeń polskich sądów</strong> i wskaże
+                potencjalnie niebezpieczne zapisy.
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
                 <Link href="/upload">
-                  <Button size="lg" className="w-full px-8 text-base sm:w-auto">
+                  <AnimatedButton
+                    size="lg"
+                    className="w-full px-8 text-base sm:w-auto"
+                    icon={ArrowRight}
+                    glowOnHover
+                  >
                     Analizuj dokument za darmo
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  </AnimatedButton>
                 </Link>
                 <Link href="#jak-to-dziala">
-                  <Button variant="outline" size="lg" className="w-full px-8 text-base sm:w-auto">
+                  <AnimatedButton
+                    variant="outline"
+                    size="lg"
+                    className="w-full px-8 text-base sm:w-auto"
+                    icon={ChevronDown}
+                    iconPosition="right"
+                  >
                     Jak to działa?
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
+                  </AnimatedButton>
                 </Link>
               </div>
 
               {/* Trust indicators */}
-              <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground lg:justify-start">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Bez rejestracji</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>Prywatna sesja (max 8h)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>PDF, Word, zdjęcia</span>
-                </div>
-              </div>
-            </div>
+              <StaggerContainer
+                className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground lg:justify-start"
+                staggerDelay={0.1}
+              >
+                <StaggerItem>
+                  <div className="flex items-center gap-2">
+                    <AnimatedIcon
+                      icon={CheckCircle2}
+                      size={16}
+                      className="text-green-600"
+                      hoverScale={1.2}
+                    />
+                    <span>Bez rejestracji</span>
+                  </div>
+                </StaggerItem>
+                <StaggerItem>
+                  <div className="flex items-center gap-2">
+                    <AnimatedIcon
+                      icon={CheckCircle2}
+                      size={16}
+                      className="text-green-600"
+                      hoverScale={1.2}
+                    />
+                    <span>Prywatna sesja (max 8h)</span>
+                  </div>
+                </StaggerItem>
+                <StaggerItem>
+                  <div className="flex items-center gap-2">
+                    <AnimatedIcon
+                      icon={CheckCircle2}
+                      size={16}
+                      className="text-green-600"
+                      hoverScale={1.2}
+                    />
+                    <span>PDF, Word, zdjęcia</span>
+                  </div>
+                </StaggerItem>
+              </StaggerContainer>
+            </FadeIn>
 
             {/* Sponsor Slot */}
-            <div className="hidden shrink-0 lg:block lg:w-[320px]">
-              <div className="group relative overflow-hidden rounded-2xl border border-dashed border-accent/20 bg-accent/5 p-8 text-center transition-all hover:border-accent/40 hover:bg-accent/10">
+            <FadeIn delay={0.3} direction="left" className="hidden shrink-0 lg:block lg:w-[320px]">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -4 }}
+                transition={{ duration: 0.3 }}
+                className="group relative overflow-hidden rounded-2xl border border-dashed border-accent/20 bg-accent/5 p-8 text-center transition-all hover:border-accent/40 hover:bg-accent/10"
+              >
                 <div className="flex flex-col items-center gap-4">
-                  <div className="rounded-full bg-accent/10 p-3">
+                  <motion.div
+                    className="rounded-full bg-accent/10 p-3"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 2 }}
+                  >
                     <Gem className="h-8 w-8 text-accent" />
-                  </div>
+                  </motion.div>
                   <div className="space-y-2">
-                    <p className="font-medium text-foreground">Ta strona będzie zawsze darmowa</p>
+                    <p className="font-medium text-foreground">
+                      Ta strona będzie zawsze darmowa
+                    </p>
                     <p className="text-sm leading-relaxed text-muted-foreground">
-                      a to miejsce czeka na jedną firmę chętną umieścić tu swoje logo z podpisem{" "}
-                      <span className="font-semibold text-accent">dumny sponsor</span>.
+                      a to miejsce czeka na jedną firmę chętną umieścić tu swoje
+                      logo z podpisem{" "}
+                      <span className="font-semibold text-accent">
+                        dumny sponsor
+                      </span>
+                      .
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </FadeIn>
           </div>
         </section>
 
@@ -181,271 +254,431 @@ export default function Home() {
         <section className="border-y bg-secondary/30 py-12">
           <div className="container">
             <div className="grid gap-8 text-center md:grid-cols-4">
-              <div>
-                <div className="text-4xl font-bold text-accent">7,233</div>
-                <div className="mt-1 text-sm text-muted-foreground">Klauzul w bazie</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-accent">5,009</div>
-                <div className="mt-1 text-sm text-muted-foreground">Orzeczeń sądowych</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-accent">&lt;30s</div>
-                <div className="mt-1 text-sm text-muted-foreground">Czas analizy</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-accent">100%</div>
-                <div className="mt-1 text-sm text-muted-foreground">Bezpłatnie</div>
-              </div>
+              <AnimatedStat
+                value="7,233"
+                label="Klauzul w bazie"
+                delay={0}
+              />
+              <AnimatedStat
+                value="5,009"
+                label="Orzeczeń sądowych"
+                delay={0.1}
+              />
+              <AnimatedStat
+                value="<30s"
+                label="Czas analizy"
+                delay={0.2}
+              />
+              <AnimatedStat value="100%" label="Bezpłatnie" delay={0.3} />
             </div>
           </div>
         </section>
 
         {/* How it works Section */}
-        <section id="jak-to-dziala" className="container scroll-mt-20 py-20 md:py-28">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
+        <section
+          id="jak-to-dziala"
+          className="container scroll-mt-20 py-20 md:py-28"
+        >
+          <FadeIn className="mx-auto mb-16 max-w-2xl text-center">
             <h2 className="text-3xl font-bold md:text-4xl">Jak to działa?</h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Prosta analiza w trzech krokach — bez rejestracji, bez opłat
             </p>
-          </div>
+          </FadeIn>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="relative">
-              <div className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground">
-                1
-              </div>
-              <Card className="h-full pt-4">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-2xl bg-accent/10 p-4">
-                      <FileSearch className="h-10 w-10 text-accent" />
+          <StaggerContainer
+            className="grid gap-8 md:grid-cols-3"
+            staggerDelay={0.15}
+          >
+            <StaggerItem>
+              <div className="relative">
+                <motion.div
+                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  1
+                </motion.div>
+                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <IconContainer
+                        icon={FileSearch}
+                        size={40}
+                        animation="float"
+                        className="mb-4 h-16 w-16 bg-accent/10"
+                        iconClassName="text-accent"
+                      />
+                      <h3 className="mb-3 text-xl font-semibold">
+                        Prześlij dokument
+                      </h3>
+                      <p className="text-muted-foreground">
+                        PDF, Word lub zdjęcie umowy. Obsługujemy OCR dla skanów
+                        i zdjęć z telefonu.
+                      </p>
                     </div>
-                    <h3 className="mb-3 text-xl font-semibold">Prześlij dokument</h3>
-                    <p className="text-muted-foreground">
-                      PDF, Word lub zdjęcie umowy. Obsługujemy OCR dla skanów i zdjęć z telefonu.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </AnimatedCard>
+              </div>
+            </StaggerItem>
 
-            <div className="relative">
-              <div className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground">
-                2
-              </div>
-              <Card className="h-full pt-4">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-2xl bg-accent/10 p-4">
-                      <Database className="h-10 w-10 text-accent" />
+            <StaggerItem>
+              <div className="relative">
+                <motion.div
+                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  2
+                </motion.div>
+                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <IconContainer
+                        icon={Database}
+                        size={40}
+                        animation="pulse"
+                        className="mb-4 h-16 w-16 bg-accent/10"
+                        iconClassName="text-accent"
+                      />
+                      <h3 className="mb-3 text-xl font-semibold">
+                        Analiza semantyczna
+                      </h3>
+                      <p className="text-muted-foreground">
+                        System porównuje treść z bazą klauzul niedozwolonych z
+                        orzeczeń SOKiK i UOKiK.
+                      </p>
                     </div>
-                    <h3 className="mb-3 text-xl font-semibold">Analiza semantyczna</h3>
-                    <p className="text-muted-foreground">
-                      System porównuje treść z bazą klauzul niedozwolonych z orzeczeń SOKiK i UOKiK.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </AnimatedCard>
+              </div>
+            </StaggerItem>
 
-            <div className="relative">
-              <div className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground">
-                3
-              </div>
-              <Card className="h-full pt-4">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-2xl bg-accent/10 p-4">
-                      <Shield className="h-10 w-10 text-accent" />
+            <StaggerItem>
+              <div className="relative">
+                <motion.div
+                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  whileHover={{ scale: 1.1, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  3
+                </motion.div>
+                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <IconContainer
+                        icon={Shield}
+                        size={40}
+                        animation="pulse"
+                        className="mb-4 h-16 w-16 bg-accent/10"
+                        iconClassName="text-accent"
+                      />
+                      <h3 className="mb-3 text-xl font-semibold">
+                        Otrzymaj raport
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Szczegółowy raport z oznaczonymi klauzulami, oceną
+                        ryzyka i odniesieniami do orzeczeń.
+                      </p>
                     </div>
-                    <h3 className="mb-3 text-xl font-semibold">Otrzymaj raport</h3>
-                    <p className="text-muted-foreground">
-                      Szczegółowy raport z oznaczonymi klauzulami, oceną ryzyka i odniesieniami do
-                      orzeczeń.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                  </CardContent>
+                </AnimatedCard>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
         </section>
 
         {/* Use Cases Section */}
         <section className="border-y bg-secondary/30 py-20 md:py-28">
           <div className="container">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold md:text-4xl">Jakie dokumenty możesz sprawdzić?</h2>
+            <FadeIn className="mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold md:text-4xl">
+                Jakie dokumenty możesz sprawdzić?
+              </h2>
               <p className="mt-4 text-lg text-muted-foreground">
                 FairPact sprawdzi się przy różnych typach umów konsumenckich
               </p>
-            </div>
+            </FadeIn>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="group transition-colors hover:border-accent/50">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10">
-                      <HomeIcon className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+            <StaggerContainer
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+              staggerDelay={0.1}
+            >
+              <StaggerItem>
+                <AnimatedCard
+                  className="group transition-colors hover:border-accent/50"
+                  hoverScale={1.03}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div
+                        className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                      >
+                        <HomeIcon className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+                      </motion.div>
+                      <h3 className="mb-2 font-semibold">Umowy najmu</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Mieszkania, lokale użytkowe, garaże
+                      </p>
                     </div>
-                    <h3 className="mb-2 font-semibold">Umowy najmu</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Mieszkania, lokale użytkowe, garaże
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </AnimatedCard>
+              </StaggerItem>
 
-              <Card className="group transition-colors hover:border-accent/50">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10">
-                      <ShoppingCart className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+              <StaggerItem>
+                <AnimatedCard
+                  className="group transition-colors hover:border-accent/50"
+                  hoverScale={1.03}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div
+                        className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10"
+                        whileHover={{ scale: 1.1, rotate: -5 }}
+                      >
+                        <ShoppingCart className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+                      </motion.div>
+                      <h3 className="mb-2 font-semibold">
+                        Regulaminy sklepów
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        E-commerce, marketplace, usługi online
+                      </p>
                     </div>
-                    <h3 className="mb-2 font-semibold">Regulaminy sklepów</h3>
-                    <p className="text-sm text-muted-foreground">
-                      E-commerce, marketplace, usługi online
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </AnimatedCard>
+              </StaggerItem>
 
-              <Card className="group transition-colors hover:border-accent/50">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10">
-                      <Building2 className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+              <StaggerItem>
+                <AnimatedCard
+                  className="group transition-colors hover:border-accent/50"
+                  hoverScale={1.03}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div
+                        className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10"
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                      >
+                        <Building2 className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+                      </motion.div>
+                      <h3 className="mb-2 font-semibold">
+                        Umowy deweloperskie
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Zakup mieszkania, domu od dewelopera
+                      </p>
                     </div>
-                    <h3 className="mb-2 font-semibold">Umowy deweloperskie</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Zakup mieszkania, domu od dewelopera
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </AnimatedCard>
+              </StaggerItem>
 
-              <Card className="group transition-colors hover:border-accent/50">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10">
-                      <Briefcase className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+              <StaggerItem>
+                <AnimatedCard
+                  className="group transition-colors hover:border-accent/50"
+                  hoverScale={1.03}
+                >
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div
+                        className="mb-4 rounded-xl bg-primary/10 p-3 transition-colors group-hover:bg-accent/10"
+                        whileHover={{ scale: 1.1, rotate: -5 }}
+                      >
+                        <Briefcase className="h-8 w-8 text-primary transition-colors group-hover:text-accent" />
+                      </motion.div>
+                      <h3 className="mb-2 font-semibold">Umowy o usługi</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Telekomunikacja, fitness, kursy
+                      </p>
                     </div>
-                    <h3 className="mb-2 font-semibold">Umowy o usługi</h3>
-                    <p className="text-sm text-muted-foreground">Telekomunikacja, fitness, kursy</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </AnimatedCard>
+              </StaggerItem>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* Benefits Section */}
         <section className="container py-20 md:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <h2 className="mb-8 text-3xl font-bold md:text-4xl">Dlaczego FairPact?</h2>
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3">
-                    <Scale className="h-6 w-6 text-primary" />
+            <FadeIn>
+              <h2 className="mb-8 text-3xl font-bold md:text-4xl">
+                Dlaczego FairPact?
+              </h2>
+              <StaggerContainer className="space-y-6" staggerDelay={0.15}>
+                <StaggerItem>
+                  <div className="flex gap-4">
+                    <motion.div
+                      className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3"
+                      whileHover={{ scale: 1.1, rotate: 10 }}
+                    >
+                      <Scale className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Podstawa w orzecznictwie
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Każda klauzula w bazie pochodzi z rzeczywistego
+                        orzeczenia polskiego sądu. Otrzymujesz sygnaturę sprawy
+                        i datę wyroku.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="mb-1 text-lg font-semibold">Podstawa w orzecznictwie</h3>
-                    <p className="text-muted-foreground">
-                      Każda klauzula w bazie pochodzi z rzeczywistego orzeczenia polskiego sądu.
-                      Otrzymujesz sygnaturę sprawy i datę wyroku.
-                    </p>
+                </StaggerItem>
+                <StaggerItem>
+                  <div className="flex gap-4">
+                    <motion.div
+                      className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3"
+                      whileHover={{ scale: 1.1, rotate: -10 }}
+                    >
+                      <Zap className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Błyskawiczna analiza
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Wyniki otrzymujesz w kilkadziesiąt sekund, nie dni.
+                        Idealnie przed podpisaniem umowy lub w trakcie
+                        negocjacji.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3">
-                    <Zap className="h-6 w-6 text-primary" />
+                </StaggerItem>
+                <StaggerItem>
+                  <div className="flex gap-4">
+                    <motion.div
+                      className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3"
+                      whileHover={{ scale: 1.1, rotate: 10 }}
+                    >
+                      <Lock className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        Prywatność gwarantowana
+                      </h3>
+                      <p className="text-muted-foreground">
+                        Dokumenty są widoczne tylko dla Ciebie i usuwane
+                        automatycznie po zakończeniu sesji (maks. 8h). Analiza
+                        odbywa się lokalnie, bez wysyłania danych do
+                        zewnętrznych serwisów AI.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="mb-1 text-lg font-semibold">Błyskawiczna analiza</h3>
-                    <p className="text-muted-foreground">
-                      Wyniki otrzymujesz w kilkadziesiąt sekund, nie dni. Idealnie przed podpisaniem
-                      umowy lub w trakcie negocjacji.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="h-fit flex-shrink-0 rounded-xl bg-primary/10 p-3">
-                    <Lock className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 text-lg font-semibold">Prywatność gwarantowana</h3>
-                    <p className="text-muted-foreground">
-                      Dokumenty są widoczne tylko dla Ciebie i usuwane automatycznie po zakończeniu
-                      sesji (maks. 8h). Analiza odbywa się lokalnie, bez wysyłania danych do
-                      zewnętrznych serwisów AI.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                </StaggerItem>
+              </StaggerContainer>
+            </FadeIn>
 
-            <div className="flex justify-center">
-              <Card className="w-full max-w-md border-2 border-accent/20">
-                <CardContent className="pb-8 pt-8">
-                  <div className="text-center">
-                    <div className="mb-4 text-7xl font-bold text-accent">85%</div>
-                    <p className="mb-6 text-lg text-muted-foreground">
-                      umów konsumenckich zawiera co najmniej jedną potencjalnie niedozwoloną
-                      klauzulę
-                    </p>
-                    <Link href="/upload">
-                      <Button size="lg" className="w-full">
-                        Sprawdź swoją umowę
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <FadeIn delay={0.3} direction="left" className="flex justify-center">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="w-full max-w-md border-2 border-accent/20">
+                  <CardContent className="pb-8 pt-8">
+                    <div className="text-center">
+                      <motion.div
+                        className="mb-4 text-7xl font-bold text-accent"
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 200,
+                          damping: 15,
+                          delay: 0.5,
+                        }}
+                      >
+                        85%
+                      </motion.div>
+                      <p className="mb-6 text-lg text-muted-foreground">
+                        umów konsumenckich zawiera co najmniej jedną
+                        potencjalnie niedozwoloną klauzulę
+                      </p>
+                      <Link href="/upload">
+                        <AnimatedButton
+                          size="lg"
+                          className="w-full"
+                          icon={ArrowRight}
+                          glowOnHover
+                        >
+                          Sprawdź swoją umowę
+                        </AnimatedButton>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </FadeIn>
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="scroll-mt-20 border-t bg-secondary/30 py-20 md:py-28">
+        <section
+          id="faq"
+          className="scroll-mt-20 border-t bg-secondary/30 py-20 md:py-28"
+        >
           <div className="container">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
-              <h2 className="text-3xl font-bold md:text-4xl">Często zadawane pytania</h2>
+            <FadeIn className="mx-auto mb-16 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold md:text-4xl">
+                Często zadawane pytania
+              </h2>
               <p className="mt-4 text-lg text-muted-foreground">
                 Wszystko, co musisz wiedzieć o analizie klauzul niedozwolonych
               </p>
-            </div>
+            </FadeIn>
 
-            <div className="mx-auto max-w-3xl space-y-4">
+            <StaggerContainer
+              className="mx-auto max-w-3xl space-y-4"
+              staggerDelay={0.1}
+            >
               {faqs.map((faq, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6">
-                    <h3 className="mb-3 text-lg font-semibold">{faq.question}</h3>
-                    <p className="text-muted-foreground">{faq.answer}</p>
-                  </CardContent>
-                </Card>
+                <StaggerItem key={index}>
+                  <motion.div
+                    whileHover={{ scale: 1.01, x: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Card>
+                      <CardContent className="pt-6">
+                        <h3 className="mb-3 text-lg font-semibold">
+                          {faq.question}
+                        </h3>
+                        <p className="text-muted-foreground">{faq.answer}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* Final CTA Section */}
         <section className="container py-20 md:py-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">Gotowy sprawdzić swoją umowę?</h2>
+          <FadeIn className="mx-auto max-w-3xl text-center">
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+              Gotowy sprawdzić swoją umowę?
+            </h2>
             <p className="mb-8 text-lg text-muted-foreground">
               Bezpłatna analiza bez rejestracji. Wyniki w kilkadziesiąt sekund.
             </p>
             <Link href="/upload">
-              <Button size="lg" className="px-10 text-base">
+              <AnimatedButton
+                size="lg"
+                className="px-10 text-base"
+                icon={ArrowRight}
+                glowOnHover
+              >
                 Rozpocznij analizę za darmo
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              </AnimatedButton>
             </Link>
-          </div>
+          </FadeIn>
         </section>
       </div>
     </>
   );
 }
+
+// Missing import
+import { motion } from "framer-motion";

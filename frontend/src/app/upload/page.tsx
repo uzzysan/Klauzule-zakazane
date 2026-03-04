@@ -2,17 +2,22 @@
 
 import {
   Button,
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
   FileUpload,
 } from "@/components/ui";
+import {
+  AnimatedButton,
+  AnimatedCard,
+} from "@/components/ui/animated-button";
+import { IconContainer, FadeIn, StaggerContainer, StaggerItem } from "@/components/icons";
 import api from "@/lib/api";
 import { useUploadStore } from "@/lib/store";
 import { ArrowRight, Clock, FileText, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -125,14 +130,14 @@ export default function UploadPage() {
 
   return (
     <div className="container max-w-4xl py-12">
-      <div className="mb-8 text-center">
+      <FadeIn className="mb-8 text-center">
         <h1 className="mb-2 text-3xl font-bold">Analizuj umowę</h1>
         <p className="text-muted-foreground">
           Prześlij dokument, aby sprawdzić go pod kątem klauzul niedozwolonych
         </p>
-      </div>
+      </FadeIn>
 
-      <Card className="mb-8">
+      <AnimatedCard className="mb-8" hoverScale={1.01}>
         <CardHeader>
           <CardTitle>Prześlij dokument</CardTitle>
           <CardDescription>
@@ -150,85 +155,118 @@ export default function UploadPage() {
             disabled={isUploading || isProcessing}
           />
 
-          {statusMessage && (
-            <div className="mt-4 rounded-lg bg-secondary/50 p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-                <span className="text-sm font-medium">{statusMessage}</span>
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {statusMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                className="mt-4 rounded-lg bg-secondary/50 p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="h-5 w-5 rounded-full border-2 border-accent border-t-transparent"
+                  />
+                  <span className="text-sm font-medium">{statusMessage}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="mt-6 flex justify-end gap-4">
             {(selectedFile || uploadError) && !isUploading && !isProcessing && (
-              <Button variant="outline" onClick={reset}>
-                Wyczyść
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button variant="outline" onClick={reset}>
+                  Wyczyść
+                </Button>
+              </motion.div>
             )}
-            <Button
+            <AnimatedButton
               onClick={handleUpload}
               disabled={!selectedFile || isUploading || isProcessing}
               isLoading={isUploading || isProcessing}
+              icon={ArrowRight}
+              glowOnHover
             >
-              {isUploading || isProcessing ? (
-                "Przetwarzanie..."
-              ) : (
-                <>
-                  Analizuj dokument
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
+              {isUploading || isProcessing ? "Przetwarzanie..." : "Analizuj dokument"}
+            </AnimatedButton>
           </div>
         </CardContent>
-      </Card>
+      </AnimatedCard>
 
       {/* Features */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <FileText className="h-6 w-6 text-primary" />
+      <StaggerContainer className="grid gap-6 md:grid-cols-3" staggerDelay={0.1}>
+        <StaggerItem>
+          <AnimatedCard className="group" hoverScale={1.03}>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <IconContainer
+                  icon={FileText}
+                  size={24}
+                  animation="float"
+                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
+                  iconClassName="text-primary group-hover:text-accent"
+                />
+                <div>
+                  <h3 className="mb-1 font-semibold">Analiza dokumentów</h3>
+                  <p className="text-sm text-muted-foreground">
+                    PDF, Word, obrazy - wszystkie formaty obsługiwane
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="mb-1 font-semibold">Analiza dokumentów</h3>
-                <p className="text-sm text-muted-foreground">
-                  PDF, Word, obrazy - wszystkie formaty obsługiwane
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </AnimatedCard>
+        </StaggerItem>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <Shield className="h-6 w-6 text-primary" />
+        <StaggerItem>
+          <AnimatedCard className="group" hoverScale={1.03}>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <IconContainer
+                  icon={Shield}
+                  size={24}
+                  animation="pulse"
+                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
+                  iconClassName="text-primary group-hover:text-accent"
+                />
+                <div>
+                  <h3 className="mb-1 font-semibold">7,233 klauzul</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Baza orzeczeń sądowych z Polski
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="mb-1 font-semibold">7,233 klauzul</h3>
-                <p className="text-sm text-muted-foreground">Baza orzeczeń sądowych z Polski</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </AnimatedCard>
+        </StaggerItem>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <Clock className="h-6 w-6 text-primary" />
+        <StaggerItem>
+          <AnimatedCard className="group" hoverScale={1.03}>
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <IconContainer
+                  icon={Clock}
+                  size={24}
+                  animation="bounce"
+                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
+                  iconClassName="text-primary group-hover:text-accent"
+                />
+                <div>
+                  <h3 className="mb-1 font-semibold">Szybka analiza</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Wyniki w kilka sekund
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="mb-1 font-semibold">Szybka analiza</h3>
-                <p className="text-sm text-muted-foreground">Wyniki w kilka sekund</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </AnimatedCard>
+        </StaggerItem>
+      </StaggerContainer>
     </div>
   );
 }
