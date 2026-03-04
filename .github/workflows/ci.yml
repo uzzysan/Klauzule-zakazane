@@ -87,6 +87,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://fairpact:test_password@localhost:5432/fairpact_test
           REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          JWT_SECRET_KEY: test-jwt-secret-key-for-ci-only-not-production
+          MINIO_ACCESS_KEY: test-minio-access-key
+          MINIO_SECRET_KEY: test-minio-secret-key
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_BUCKET_NAME: fairpact-test
         run: |
           cd backend
           pytest --cov=. --cov-report=xml --cov-report=term -x
