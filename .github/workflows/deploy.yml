@@ -6,6 +6,15 @@ on:
     types: [completed]
     branches: [main, master]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'master'
+        type: choice
+        options:
+          - master
+          - main
 
 concurrency:
   group: deploy
@@ -14,15 +23,27 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Only deploy if CI succeeded
-    # Branch filter is already applied in on.workflow_run.branches
-    if: github.event.workflow_run.conclusion == 'success'
+    
+    # Deploy if:
+    # 1. Manual trigger (workflow_dispatch) - always deploy
+    # 2. CI Pipeline completed successfully
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     
     steps:
+      - name: Debug workflow info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion || 'N/A (not workflow_run)' }}"
+          echo "Head SHA: ${{ github.event.workflow_run.head_sha || github.sha }}"
+          echo "Ref: ${{ github.ref }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
@@ -31,10 +52,38 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
           script: |
+            set -e
+            echo "🚀 Starting FairPact deployment..."
+            
             cd /opt/fairpact
+            
+            # Determine which branch to use
+            BRANCH="${{ github.event.inputs.branch || 'master' }}"
+            echo "📋 Deploying branch: $BRANCH"
+            
+            # Fetch and checkout
             git fetch origin
-            git checkout main 2>/dev/null || git checkout master
-            git pull origin main 2>/dev/null || git pull origin master
-            ./scripts/deploy.sh
+            git checkout "$BRANCH" || git checkout master
+            git pull origin "$BRANCH"
+            
+            # Show deployed commit
+            echo "📌 Deployed commit: $(git rev-parse --short HEAD)"
+            
+            # Run deployment script
+            ./scripts/deploy.sh "$BRANCH"
+            
             echo "✅ FairPact deployment completed!"
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            echo "🔍 Verifying deployment..."
+            docker compose -f /opt/fairpact/docker-compose.prod.yml ps
+            curl -s http://localhost:8000/health/live && echo " - Backend OK" || echo " - Backend check failed"
