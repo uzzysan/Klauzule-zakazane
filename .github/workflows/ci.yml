@@ -83,6 +83,21 @@ jobs:
           cd backend
           mypy . || true  # Don't fail on type errors initially
 
+      - name: Setup database
+        run: |
+          # Wait for PostgreSQL to be ready
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U fairpact; then
+              echo "PostgreSQL is ready"
+              break
+            fi
+            sleep 1
+          done
+          # Create pgvector extension
+          PGPASSWORD=test_password psql -h localhost -p 5432 -U fairpact -d fairpact_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        env:
+          PGPASSWORD: test_password
+
       - name: Run tests
         env:
           DATABASE_URL: postgresql://fairpact:test_password@localhost:5432/fairpact_test
