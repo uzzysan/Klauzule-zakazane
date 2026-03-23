@@ -27,10 +27,7 @@ services:
       - "127.0.0.1:8000:8000"
     env_file:
       - .env.production
-    depends_on:
-      - postgres
-      - redis
-      - minio
+    depends_on: []
     networks:
       - fairpact-network
     mem_limit: 2g
@@ -47,15 +44,17 @@ services:
       dockerfile: Dockerfile
     container_name: fairpact-worker
     restart: unless-stopped
-    command: celery -A celery_app worker --loglevel=info --concurrency=2 -Q celery,documents,sync
+    command: celery -A celery_app worker --loglevel=info --autoscale=10,3 -Q celery,documents,sync
     env_file:
       - .env.production
     depends_on:
       - backend-1
-      - redis
     networks:
       - fairpact-network
-    mem_limit: 1536m
+    mem_limit: 6g
+    cpus: 5.0
+    volumes:
+      - huggingface_cache:/app/.cache/huggingface
     healthcheck:
       test: ["CMD-SHELL", "python3 -c \"import subprocess; subprocess.check_output(['pidof', '-x', 'celery'])\""]
       interval: 30s
@@ -74,7 +73,6 @@ services:
       - .env.production
     depends_on:
       - backend-1
-      - redis
     networks:
       - fairpact-network
     mem_limit: 512m
@@ -84,76 +82,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  postgres:
-    image: pgvector/pgvector:pg15
-    container_name: fairpact-postgres
-    restart: unless-stopped
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backend/database/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-    networks:
-      - fairpact-network
-    mem_limit: 2560m
-    env_file:
-      - .env.production
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: fairpact-redis
-    restart: unless-stopped
-    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
-    volumes:
-      - redis_data:/data
-    networks:
-      - fairpact-network
-    mem_limit: 1g
-    env_file:
-      - .env.production
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  minio:
-    image: minio/minio
-    container_name: fairpact-minio
-    restart: unless-stopped
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-    volumes:
-      - minio_data:/data
-    networks:
-      - fairpact-network
-    mem_limit: 1g
-    env_file:
-      - .env.production
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  # Monitoring stack - bez nginx-exporter
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: fairpact-node-exporter
-    restart: unless-stopped
-    command:
-      - '--path.rootfs=/host'
-    volumes:
-      - /:/host:ro,rslave
-    networks:
-      - fairpact-network
-    mem_limit: 128m
 
   prometheus:
     image: prom/prometheus:latest
@@ -208,11 +136,9 @@ services:
     mem_limit: 512m
 
 volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
   prometheus_data:
   grafana_data:
+  huggingface_cache:
 
 networks:
   fairpact-network:

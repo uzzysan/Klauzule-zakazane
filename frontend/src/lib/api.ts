@@ -17,7 +17,7 @@ import type {
   SyncResponse,
 } from "@/types/api";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = "https://fairpact.pl";
 
 class ApiClient {
   private baseUrl: string;
