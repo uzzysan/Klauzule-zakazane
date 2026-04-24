@@ -38,7 +38,7 @@ dependencies = [
     # Monitoring
     "sentry-sdk[celery]>=2.13.0",
     # UOKiK scraper + LLM
-    "google-generativeai>=0.7.0",
+    "google-genai>=1.0.0",
     "playwright>=1.41.0",
 ]
 
