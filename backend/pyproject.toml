@@ -37,6 +37,10 @@ dependencies = [
     "passlib[bcrypt]==1.7.4",
     # Monitoring
     "sentry-sdk[celery]>=2.13.0",
+    # UOKiK scraper + LLM
+    "google-generativeai>=0.7.0",
+    "httpx>=0.27.0",
+    "playwright>=1.41.0",
 ]
 
 [project.optional-dependencies]

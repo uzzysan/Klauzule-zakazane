@@ -36,6 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Install Playwright dependencies for Chromium (needed for UOKiK scraper)
+RUN playwright install-deps chromium
+
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 

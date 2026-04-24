@@ -19,7 +19,7 @@ celery_app = Celery(
     "fairpact",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["tasks.document_processing", "tasks.sync"],
+    include=["tasks.document_processing", "tasks.sync", "tasks.uokik_sync"],
 )
 
 # Configure Celery
@@ -48,6 +48,11 @@ celery_app.conf.beat_schedule = {
     "sync-prohibited-clauses-daily": {
         "task": "tasks.sync.sync_prohibited_clauses",
         "schedule": crontab(hour=3, minute=0),  # Run daily at 3:00 AM UTC
+        "options": {"queue": "sync"},
+    },
+    "sync-uokik-clauses-weekly": {
+        "task": "tasks.uokik_sync.sync_uokik_clauses",
+        "schedule": crontab(day_of_week=1, hour=2, minute=0),  # Monday 2:00 AM UTC
         "options": {"queue": "sync"},
     },
 }
