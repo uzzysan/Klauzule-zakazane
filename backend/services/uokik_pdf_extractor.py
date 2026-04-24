@@ -63,14 +63,18 @@ class UokikPDFExtractor:
 
         try:
             logger.info(f"Downloading PDF from {url}")
-            async with httpx.AsyncClient(headers=DEFAULT_UOKIK_HEADERS, timeout=60, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                headers=DEFAULT_UOKIK_HEADERS, timeout=60, follow_redirects=True
+            ) as client:
                 response = await client.get(url)
                 response.raise_for_status()
 
                 # Verify it's a PDF
                 content_type = response.headers.get("content-type", "")
                 if "pdf" not in content_type and not response.content.startswith(b"%PDF"):
-                    raise PDFExtractionError(f"Downloaded file is not a PDF (content-type: {content_type})")
+                    raise PDFExtractionError(
+                        f"Downloaded file is not a PDF (content-type: {content_type})"
+                    )
 
                 pdf_path.write_bytes(response.content)
                 logger.info(f"PDF saved to {pdf_path} ({len(response.content)} bytes)")

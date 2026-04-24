@@ -61,9 +61,13 @@ class LLMExtractor:
             api_key: Gemini API key. If None, uses settings.gemini_api_key.
             model_name: Gemini model name. Defaults to gemini-1.5-flash.
         """
-        self.api_key = api_key or (settings.gemini_api_key.get_secret_value() if settings.gemini_api_key else None)
+        self.api_key = api_key or (
+            settings.gemini_api_key.get_secret_value() if settings.gemini_api_key else None
+        )
         if not self.api_key:
-            raise LLMExtractorError("Gemini API key not configured. Set GEMINI_API_KEY in environment.")
+            raise LLMExtractorError(
+                "Gemini API key not configured. Set GEMINI_API_KEY in environment."
+            )
 
         self.model_name = model_name or "models/gemini-2.5-flash"
         self.client = genai.Client(api_key=self.api_key)
@@ -85,7 +89,9 @@ class LLMExtractor:
         # Truncate if too long (Gemini 1.5 Flash supports ~1M tokens, but let's be safe)
         max_chars = 150_000
         if len(document_text) > max_chars:
-            logger.warning(f"Document text too long ({len(document_text)} chars), truncating to {max_chars}")
+            logger.warning(
+                f"Document text too long ({len(document_text)} chars), truncating to {max_chars}"
+            )
             document_text = document_text[:max_chars]
 
         prompt = CLAUSE_EXTRACTION_PROMPT + document_text
@@ -112,7 +118,9 @@ class LLMExtractor:
             except Exception as e:
                 logger.warning(f"LLM extraction attempt {attempt} failed: {e}")
                 if attempt == max_retries:
-                    raise LLMExtractorError(f"Failed to extract clauses after {max_retries} attempts: {e}")
+                    raise LLMExtractorError(
+                        f"Failed to extract clauses after {max_retries} attempts: {e}"
+                    )
 
         return []
 

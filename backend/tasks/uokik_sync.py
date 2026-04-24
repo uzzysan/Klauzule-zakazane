@@ -80,8 +80,7 @@ async def get_existing_signatures_last_year(session) -> Set[str]:
     one_year_ago = datetime.now() - timedelta(days=365)
 
     result = await session.execute(
-        select(LegalReference.article_code)
-        .where(
+        select(LegalReference.article_code).where(
             LegalReference.effective_date >= one_year_ago,
         )
     )
@@ -191,7 +190,11 @@ async def save_clause_to_db(
 
             if not legal_ref:
                 decision_number = clause_data.get("decision_number", "")
-                title = f"Decyzja UOKiK {decision_number}" if decision_number else f"Decyzja UOKiK - {signature}"
+                title = (
+                    f"Decyzja UOKiK {decision_number}"
+                    if decision_number
+                    else f"Decyzja UOKiK - {signature}"
+                )
                 legal_ref = LegalReference(
                     id=uuid4(),
                     article_code=signature,
@@ -288,7 +291,9 @@ async def async_sync_uokik_clauses(dry_run: bool = False, start_year: int = 2017
         if dry_run:
             logger.info("DRY RUN - not saving to database")
             for i, decision in enumerate(decisions, 1):
-                logger.info(f"[{i}/{len(decisions)}] Would process: {decision.get('signature', 'N/A')} - {decision.get('pdf_url', 'N/A')}")
+                logger.info(
+                    f"[{i}/{len(decisions)}] Would process: {decision.get('signature', 'N/A')} - {decision.get('pdf_url', 'N/A')}"
+                )
             return stats
 
         # Process each decision

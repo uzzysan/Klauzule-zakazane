@@ -36,7 +36,9 @@ def main():
     parser = argparse.ArgumentParser(description="Test UOKiK PDF extraction pipeline")
     parser.add_argument("--pdf", default=SAMPLE_PDF, help="Path to PDF file")
     parser.add_argument("--api-key", default=os.getenv("GEMINI_API_KEY"), help="Gemini API key")
-    parser.add_argument("--save-prompt", action="store_true", help="Save prompt to file for manual testing")
+    parser.add_argument(
+        "--save-prompt", action="store_true", help="Save prompt to file for manual testing"
+    )
     args = parser.parse_args()
 
     pdf_path = Path(args.pdf)

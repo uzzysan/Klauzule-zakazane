@@ -9,7 +9,7 @@ import random
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from playwright.async_api import async_playwright, Page, Browser, Playwright
+from playwright.async_api import Browser, Page, Playwright, async_playwright
 
 logger = logging.getLogger(__name__)
 
@@ -302,11 +302,15 @@ class UokikScraper:
                     text = await el.inner_text()
                     if href and text:
                         # Filter for decision-like links
-                        links.append({
-                            "url": href if href.startswith("http") else f"{UOKIK_BASE_URL}/{href}",
-                            "text": text.strip(),
-                            "signature": text.strip(),
-                        })
+                        links.append(
+                            {
+                                "url": href
+                                if href.startswith("http")
+                                else f"{UOKIK_BASE_URL}/{href}",
+                                "text": text.strip(),
+                                "signature": text.strip(),
+                            }
+                        )
                 except Exception:
                     continue
 
@@ -352,7 +356,9 @@ class UokikScraper:
                 if pdf_link:
                     href = await pdf_link.get_attribute("href")
                     if href:
-                        detail["pdf_url"] = href if href.startswith("http") else f"{UOKIK_BASE_URL}/{href}"
+                        detail["pdf_url"] = (
+                            href if href.startswith("http") else f"{UOKIK_BASE_URL}/{href}"
+                        )
                         break
             except Exception:
                 continue
@@ -374,7 +380,9 @@ class UokikScraper:
         """
         page = await self._new_page()
         try:
-            response = await page.goto(UOKIK_BASE_URL, wait_until="networkidle", timeout=self.timeout)
+            response = await page.goto(
+                UOKIK_BASE_URL, wait_until="networkidle", timeout=self.timeout
+            )
             if response and response.status == 200:
                 logger.info("UOKiK site is accessible")
                 return True
