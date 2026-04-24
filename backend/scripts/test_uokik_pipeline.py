@@ -20,8 +20,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from services.llm_extractor import LLMExtractor, LLMExtractorError
-from services.uokik_pdf_extractor import UokikPDFExtractor
+from services.llm_extractor import LLMExtractor, LLMExtractorError  # noqa: E402
+from services.uokik_pdf_extractor import UokikPDFExtractor  # noqa: E402
 
 SAMPLE_PDF = "/home/uzzy/Pobrane/Decyzja RŁO 3_2024 Am Eco Energy Sp. z o.o. Wersja JAWNA.pdf"
 
