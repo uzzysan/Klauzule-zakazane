@@ -8,7 +8,6 @@ from uuid import uuid4
 from sqlalchemy import select
 
 from celery_app import celery_app
-from config import settings
 from database.connection import get_celery_db_context
 from models.clause import ClauseCategory, ClauseLegalReference, LegalReference, ProhibitedClause
 from services.uokik_pdf_extractor import PDFExtractionError, UokikPDFExtractor
