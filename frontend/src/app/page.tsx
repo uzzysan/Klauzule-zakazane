@@ -149,7 +149,7 @@ export default function Home() {
 
               <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl lg:mx-0">
                 Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact przeanalizuje go
-                na podstawie <strong>7,233 orzeczeń polskich sądów</strong> i wskaże potencjalnie
+                na podstawie <strong>orzeczeń polskich sądów</strong> i wskaże potencjalnie
                 niebezpieczne zapisy.
               </p>
 
@@ -271,7 +271,7 @@ export default function Home() {
             <StaggerItem>
               <div className="relative">
                 <motion.div
-                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.5 }}
                 >
@@ -300,7 +300,7 @@ export default function Home() {
             <StaggerItem>
               <div className="relative">
                 <motion.div
-                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.5 }}
                 >
@@ -330,7 +330,7 @@ export default function Home() {
             <StaggerItem>
               <div className="relative">
                 <motion.div
-                  className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
+                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.5 }}
                 >
