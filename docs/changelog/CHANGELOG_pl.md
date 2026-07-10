@@ -5,6 +5,16 @@ Wszystkie znaczące zmiany w tym projekcie będą dokumentowane w tym pliku.
 Format bazuje na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 a projekt przestrzega [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-10
+
+### Dodano
+
+- **Backend:** Publiczny endpoint statystyk strony głównej (`GET /api/v1/stats`)
+  - Zwraca `{ "clauses": <liczba klauzul>, "rulings": <liczba orzeczeń> }`
+  - `clauses` = liczba wszystkich klauzul w bazie (`COUNT(*)` z `klauzule_niedozwolone`)
+  - `rulings` = liczba orzeczeń sądowych (`COUNT(DISTINCT sygnatura)`)
+- **Frontend:** Strona główna pobiera te wartości i pokazuje aktualne liczby klauzul i orzeczeń zamiast wartości zaszytych na sztywno (fallback do wartości domyślnych przy błędzie).
+
 ## [1.2.0] - 2025-12-18
 
 ### Dodano

@@ -1029,6 +1029,24 @@ interface FlaggedClause {
 }
 ```
 
+## Homepage statistics (public)
+
+`GET /api/v1/stats`
+
+Returns the live numbers shown on the homepage. Public endpoint (no authentication).
+
+**200 OK response:**
+
+```json
+{
+  "clauses": 7467,
+  "rulings": 5198
+}
+```
+
+- `clauses` — total number of clauses in the database (`COUNT(*)` of `klauzule_niedozwolone`).
+- `rulings` — number of court rulings = distinct case signatures (`COUNT(DISTINCT sygnatura)`).
+
 ---
 
 **Document End**

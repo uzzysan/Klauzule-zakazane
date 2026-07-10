@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-10
+
+### Added
+
+- **Backend:** Public homepage statistics endpoint (`GET /api/v1/stats`)
+  - Returns `{ "clauses": <clause count>, "rulings": <ruling count> }`
+  - `clauses` = total clauses in the database (`COUNT(*)` of `klauzule_niedozwolone`)
+  - `rulings` = court rulings (`COUNT(DISTINCT sygnatura)`)
+- **Frontend:** Homepage fetches these values and shows live clause/ruling counts instead of hardcoded numbers (fallback to defaults on error).
+
 ## [1.2.0] - 2025-12-18
 
 ### Added
