@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui";
 import {
   AnimatedIcon,
@@ -99,6 +100,18 @@ const faqJsonLd = JSON.stringify({
 });
 
 export default function Home() {
+  const [stats, setStats] = useState<{ clauses: number; rulings: number } | null>(null);
+  useEffect(() => {
+    fetch("/api/v1/stats", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && typeof d.clauses === "number") setStats(d);
+      })
+      .catch(() => {});
+  }, []);
+  const clausesStr = stats ? stats.clauses.toLocaleString("en-US") : "7,233";
+  const rulingsStr = stats ? stats.rulings.toLocaleString("en-US") : "5,009";
+
   return (
     <>
       {/* Structured Data */}
@@ -237,8 +250,8 @@ export default function Home() {
         <section className="border-y bg-secondary/30 py-12">
           <div className="container">
             <div className="grid gap-8 text-center md:grid-cols-4">
-              <AnimatedStat value="7,233" label="Klauzul w bazie" delay={0} />
-              <AnimatedStat value="5,009" label="Orzeczeń sądowych" delay={0.1} />
+              <AnimatedStat value={clausesStr} label="Klauzul w bazie" delay={0} />
+              <AnimatedStat value={rulingsStr} label="Orzeczeń sądowych" delay={0.1} />
               <AnimatedStat value="<30s" label="Czas analizy" delay={0.2} />
               <AnimatedStat value="100%" label="Bezpłatnie" delay={0.3} />
             </div>
