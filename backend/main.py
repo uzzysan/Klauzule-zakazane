@@ -12,6 +12,7 @@ from api.auth import router as auth_router
 from api.documents import router as documents_router
 from api.health import router as health_router
 from api.jobs import router as jobs_router
+from api.stats import router as stats_router
 from config import settings
 from middleware import UserTrackingMiddleware
 from monitoring import instrumentator
@@ -58,6 +59,7 @@ app.include_router(documents_router)
 app.include_router(jobs_router)
 app.include_router(analysis_router)
 app.include_router(admin_router)
+app.include_router(stats_router)
 
 
 @app.get("/")

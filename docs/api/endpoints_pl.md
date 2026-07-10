@@ -1011,6 +1011,24 @@ interface FlaggedClause {
 }
 ```
 
+## Statystyki strony głównej (publiczne)
+
+`GET /api/v1/stats`
+
+Zwraca aktualne liczby prezentowane na stronie głównej. Endpoint publiczny (bez uwierzytelniania).
+
+**Odpowiedź 200 OK:**
+
+```json
+{
+  "clauses": 7467,
+  "rulings": 5198
+}
+```
+
+- `clauses` — liczba wszystkich klauzul w bazie (`COUNT(*)` z tabeli `klauzule_niedozwolone`).
+- `rulings` — liczba orzeczeń sądowych = liczba unikalnych sygnatur akt (`COUNT(DISTINCT sygnatura)`).
+
 ---
 
 **Koniec Dokumentu**
