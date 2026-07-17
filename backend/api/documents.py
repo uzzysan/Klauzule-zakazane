@@ -352,3 +352,59 @@ async def get_document(
         "celery_task_id": document.celery_task_id,
         "expires_at": document.expires_at.isoformat() if document.expires_at else None,
     }
+
+
+@router.get("/{document_id}/text")
+async def get_document_text(
+    document_id: UUID,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user),
+) -> dict:
+    """Get document extracted text by document ID."""
+    from sqlalchemy import select
+    from models.document import DocumentMetadata
+
+    result = await db.execute(
+        select(Document).where(Document.id == document_id, Document.deleted_at.is_(None))
+    )
+    document = result.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "NOT_FOUND", "message": "Document not found"}},
+        )
+
+    # CHECK 1: Expiration
+    if document.expires_at and datetime.utcnow() > document.expires_at:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error": {"code": "EXPIRED", "message": "Document session expired"}},
+        )
+
+    # CHECK 2: Access Control
+    if document.user_id:
+        if not current_user or current_user.id != document.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"error": {"code": "ACCESS_DENIED", "message": "Access denied"}},
+            )
+    else:
+        allowed_docs = _get_guest_documents(request)
+        if str(document.id) not in allowed_docs:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"error": {"code": "ACCESS_DENIED", "message": "Access restricted"}}
+            )
+
+    meta_result = await db.execute(
+        select(DocumentMetadata).where(DocumentMetadata.document_id == document_id)
+    )
+    metadata = meta_result.scalar_one_or_none()
+
+    return {
+        "document_id": str(document_id),
+        "full_text": metadata.full_text if metadata else "",
+    }
+
