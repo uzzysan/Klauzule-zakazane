@@ -39,6 +39,10 @@ docker compose -f docker-compose.prod.yml build
 echo "Stopping existing containers..." | tee -a "$LOG_FILE"
 docker compose -f docker-compose.prod.yml down --remove-orphans
 
+# Force remove rafcio container to prevent name conflict with manual deployments
+echo "Removing any existing rafcio container..." | tee -a "$LOG_FILE"
+docker rm -f rafcio || true
+
 # Start services
 echo "Starting services..." | tee -a "$LOG_FILE"
 docker compose -f docker-compose.prod.yml up -d
