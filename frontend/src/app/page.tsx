@@ -34,32 +34,32 @@ const faqs = [
   {
     question: "Czym są klauzule niedozwolone (abuzywne)?",
     answer:
-      "Klauzule niedozwolone to postanowienia umowne, które kształtują prawa i obowiązki konsumenta w sposób sprzeczny z dobrymi obyczajami, rażąco naruszając jego interesy. Są one nieważne [...]
+      "Klauzule niedozwolone to postanowienia umowne, które kształtują prawa i obowiązki konsumenta w sposób sprzeczny z dobrymi obyczajami, rażąco naruszając jego interesy. Są one niewa�[...]
   },
   {
     question: "Jak działa analiza umowy w FairPact?",
     answer:
-      "FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą 7,233 klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne oraz s�[...]
+      "FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą 7,233 klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne ora[...]
   },
   {
     question: "Czy analiza jest bezpłatna?",
     answer:
-      "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt sekund[...]
+      "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt se[...]
   },
   {
     question: "Jakie dokumenty mogę analizować?",
     answer:
-      "FairPact obsługuje umowy najmu, regulaminy sklepów internetowych, umowy o świadczenie usług, umowy kredytowe i pożyczkowe, umowy z deweloperami, umowy telekomunikacyjne, regulaminy konkurs[...]
+      "FairPact obsługuje umowy najmu, regulaminy sklepów internetowych, umowy o świadczenie usług, umowy kredytowe i pożyczkowe, umowy z deweloperami, umowy telekomunikacyjne, regulaminy kon[...]
   },
   {
     question: "Czy FairPact zastępuje poradę prawną?",
     answer:
-      "Nie, FairPact jest narzędziem informacyjnym i nie stanowi porady prawnej. Wyniki analizy wskazują potencjalnie problematyczne zapisy, ale ostateczną ocenę i decyzje prawne powinien podjąć[...]
+      "Nie, FairPact jest narzędziem informacyjnym i nie stanowi porady prawnej. Wyniki analizy wskazują potencjalnie problematyczne zapisy, ale ostateczną ocenę i decyzje prawne powinien podj[...]
   },
   {
     question: "Skąd pochodzi baza klauzul niedozwolonych?",
     answer:
-      "Baza zawiera klauzule z rejestru UOKiK oraz orzeczeń Sądu Ochrony Konkurencji i Konsumentów (SOKiK). Każda klauzula posiada sygnaturę orzeczenia, datę wydania wyroku oraz informacje o str[...]
+      "Baza zawiera klauzule z rejestru UOKiK oraz orzeczeń Sądu Ochrony Konkurencji i Konsumentów (SOKiK). Każda klauzula posiada sygnaturę orzeczenia, datę wydania wyroku oraz informacje o[...]
   },
 ];
 
@@ -152,7 +152,7 @@ export default function Home() {
               </h1>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl lg:mx-0">
-                Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków UOKiK i S[...]
+                Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków UOKi[...]
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
@@ -345,7 +345,7 @@ export default function Home() {
                 { title: "Umowy o świadczenie usług", desc: "Abonamenty, siłownie, szkolenia", icon: Briefcase },
               ].map((item, idx) => (
                 <StaggerItem key={idx}>
-                  <AnimatedCard className="group h-full border border-slate-200/60 bg-white p-6 transition-all hover:border-primary/45 dark:border-slate-800/60 dark:bg-slate-900" hoverScale={1.04}>
+                  <AnimatedCard className="group h-full border border-slate-200/60 bg-white p-6 transition-all hover:border-primary/45 dark:border-slate-800/60 dark:bg-slate-900" hoverScale={1.04[...]>
                     <div className="flex flex-col items-center text-center">
                       <div className="mb-4 rounded-xl bg-slate-100 p-3 text-slate-700 transition-colors group-hover:bg-primary/10 group-hover:text-primary dark:bg-slate-800 dark:text-slate-300">
                         <item.icon className="h-6 w-6" />
@@ -371,7 +371,7 @@ export default function Home() {
                 {[
                   {
                     title: "Rzetelna podstawa prawna",
-                    desc: "W przeciwieństwie do standardowych chatbotów AI, które mogą halucynować, FairPact wiąże każde wykryte ryzyko z konkretną sygnaturą wyroku sądowego w Polsce.",
+                    desc: "W przeciwieństwie do standardowych chatbotów AI, które mogą halucynować, FairPact wiąże każde wykryte ryzyko z konkretną sygnaturą wyroku sądowego w Polsce."[...]
                     icon: Scale,
                   },
                   {
