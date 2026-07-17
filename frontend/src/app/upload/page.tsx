@@ -131,19 +131,19 @@ export default function UploadPage() {
   return (
     <div className="container max-w-4xl py-16 md:py-24">
       {/* Background elements */}
-      <div className="absolute top-[-5%] left-[20%] h-[350px] w-[350px] rounded-full bg-indigo-500/5 blur-[90px] pointer-events-none" />
+      <div className="pointer-events-none absolute left-[20%] top-[-5%] h-[350px] w-[350px] rounded-full bg-indigo-500/5 blur-[90px]" />
 
       <FadeIn className="mb-12 text-center">
         <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
           Analizuj swoją umowę
         </h1>
-        <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+        <p className="mx-auto max-w-xl text-lg text-muted-foreground">
           Prześlij plik, aby sprawdzić go pod kątem potencjalnie niebezpiecznych klauzul abuzywnych.
         </p>
       </FadeIn>
 
       {/* Step Indicators */}
-      <div className="mb-10 flex justify-center items-center gap-4 max-w-md mx-auto">
+      <div className="mx-auto mb-10 flex max-w-md items-center justify-center gap-4">
         <StepIndicator step={1} isActive={activeStep === 1} isCompleted={activeStep > 1} />
         <div className="h-0.5 w-16 bg-slate-200 dark:bg-slate-800" />
         <StepIndicator step={2} isActive={activeStep === 2} isCompleted={activeStep > 2} />
@@ -151,7 +151,10 @@ export default function UploadPage() {
         <StepIndicator step={3} isActive={activeStep === 3} isCompleted={false} />
       </div>
 
-      <AnimatedCard className="mb-12 border border-slate-200/80 bg-white/70 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70" hoverScale={1}>
+      <AnimatedCard
+        className="mb-12 border border-slate-200/80 bg-white/70 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70"
+        hoverScale={1}
+      >
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold">Wybierz plik z dysku</CardTitle>
           <CardDescription className="text-sm">
@@ -175,7 +178,7 @@ export default function UploadPage() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="mt-6 rounded-xl bg-slate-100/50 p-4 border dark:bg-slate-800/50"
+                className="mt-6 rounded-xl border bg-slate-100/50 p-4 dark:bg-slate-800/50"
               >
                 <div className="flex items-center gap-3">
                   <motion.div
@@ -214,7 +217,10 @@ export default function UploadPage() {
       {/* Trust & Features Footer */}
       <StaggerContainer className="grid gap-6 md:grid-cols-3" staggerDelay={0.08}>
         <StaggerItem>
-          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+          <AnimatedCard
+            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
+            hoverScale={1.02}
+          >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
@@ -224,8 +230,10 @@ export default function UploadPage() {
                   className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Wygodny podgląd</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    Wygodny podgląd
+                  </h4>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Precyzyjny podział na sekcje oraz czytelny podgląd oryginalnego tekstu umowy.
                   </p>
                 </div>
@@ -235,7 +243,10 @@ export default function UploadPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+          <AnimatedCard
+            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
+            hoverScale={1.02}
+          >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
@@ -245,9 +256,12 @@ export default function UploadPage() {
                   className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">7 233 klauzul UOKiK</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Automatyczne dopasowanie do pełnego rejestru orzeczeń polskich sądów powszechnych.
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    7 233 klauzul UOKiK
+                  </h4>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Automatyczne dopasowanie do pełnego rejestru orzeczeń polskich sądów
+                    powszechnych.
                   </p>
                 </div>
               </div>
@@ -256,7 +270,10 @@ export default function UploadPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+          <AnimatedCard
+            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
+            hoverScale={1.02}
+          >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
@@ -266,9 +283,12 @@ export default function UploadPage() {
                   className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Błyskawiczny audyt</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Analiza semantyczna trwa zazwyczaj od 10 do 30 sekund w zależności od długości pliku.
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    Błyskawiczny audyt
+                  </h4>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Analiza semantyczna trwa zazwyczaj od 10 do 30 sekund w zależności od długości
+                    pliku.
                   </p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui";
 import {
   AnimatedIcon,
@@ -150,15 +151,8 @@ export default function Home() {
                 Sprawdź swoją umowę w <span className="bg-gradient-to-r from-primary to-indigo-400 bg-clip-text text-transparent">kilka sekund</span>
               </h1>
 
-<<<<<<< HEAD
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl lg:mx-0">
-                Prześlij umowę najmu, regulamin sklepu lub inny dokument. FairPact przeanalizuje go
-                na podstawie <strong>orzeczeń polskich sądów</strong> i wskaże potencjalnie
-                niebezpieczne zapisy.
-=======
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl lg:mx-0">
                 Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków UOKiK i SOKiK.
->>>>>>> d73fd9d (design: refresh UI/UX design system, landing, upload and interactive analysis side-by-side view)
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
@@ -258,19 +252,12 @@ export default function Home() {
         {/* Stats Section */}
         <section className="relative z-10 border-y border-slate-200/60 bg-slate-100/50 py-16 dark:border-slate-800/60 dark:bg-slate-900/30">
           <div className="container">
-<<<<<<< HEAD
-            <div className="grid gap-8 text-center md:grid-cols-4">
-              <AnimatedStat value={clausesStr} label="Klauzul w bazie" delay={0} />
-              <AnimatedStat value={rulingsStr} label="Orzeczeń sądowych" delay={0.1} />
-              <AnimatedStat value="<30s" label="Czas analizy" delay={0.2} />
-              <AnimatedStat value="100%" label="Bezpłatnie" delay={0.3} />
-=======
             <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4">
-              <AnimatedStat value="7 233" label="Wykrytych klauzul niedozwolonych" delay={0} />
-              <AnimatedStat value="5 009" label="Przeanalizowanych spraw sądowych" delay={0.1} />
+              <AnimatedStat value={clausesStr} label="Wykrytych klauzul niedozwolonych" delay={0} />
+              <AnimatedStat value={rulingsStr} label="Przeanalizowanych spraw sądowych" delay={0.1} />
               <AnimatedStat value="< 30s" label="Średni czas analizy dokumentu" delay={0.2} />
               <AnimatedStat value="100%" label="Bezpłatny audyt prawny konsumenta" delay={0.3} />
->>>>>>> d73fd9d (design: refresh UI/UX design system, landing, upload and interactive analysis side-by-side view)
+            </div>
             </div>
           </div>
         </section>
@@ -286,94 +273,6 @@ export default function Home() {
 
           <StaggerContainer className="grid gap-8 md:grid-cols-3" staggerDelay={0.15}>
             <StaggerItem>
-<<<<<<< HEAD
-              <div className="relative">
-                <motion.div
-                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
-                  whileHover={{ scale: 1.1, rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  1
-                </motion.div>
-                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center">
-                      <IconContainer
-                        icon={FileSearch}
-                        size={40}
-                        animation="float"
-                        className="mb-4 h-16 w-16 bg-accent/10"
-                        iconClassName="text-accent"
-                      />
-                      <h3 className="mb-3 text-xl font-semibold">Prześlij dokument</h3>
-                      <p className="text-muted-foreground">
-                        PDF, Word lub zdjęcie umowy. Obsługujemy OCR dla skanów i zdjęć z telefonu.
-                      </p>
-                    </div>
-                  </CardContent>
-                </AnimatedCard>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="relative">
-                <motion.div
-                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
-                  whileHover={{ scale: 1.1, rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  2
-                </motion.div>
-                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center">
-                      <IconContainer
-                        icon={Database}
-                        size={40}
-                        animation="pulse"
-                        className="mb-4 h-16 w-16 bg-accent/10"
-                        iconClassName="text-accent"
-                      />
-                      <h3 className="mb-3 text-xl font-semibold">Analiza semantyczna</h3>
-                      <p className="text-muted-foreground">
-                        System porównuje treść z bazą klauzul niedozwolonych z orzeczeń SOKiK i
-                        UOKiK.
-                      </p>
-                    </div>
-                  </CardContent>
-                </AnimatedCard>
-              </div>
-            </StaggerItem>
-
-            <StaggerItem>
-              <div className="relative">
-                <motion.div
-                  className="absolute -left-4 -top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-accent-foreground"
-                  whileHover={{ scale: 1.1, rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  3
-                </motion.div>
-                <AnimatedCard className="h-full pt-4" hoverScale={1.02}>
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center">
-                      <IconContainer
-                        icon={Shield}
-                        size={40}
-                        animation="pulse"
-                        className="mb-4 h-16 w-16 bg-accent/10"
-                        iconClassName="text-accent"
-                      />
-                      <h3 className="mb-3 text-xl font-semibold">Otrzymaj raport</h3>
-                      <p className="text-muted-foreground">
-                        Szczegółowy raport z oznaczonymi klauzulami, oceną ryzyka i odniesieniami do
-                        orzeczeń.
-                      </p>
-                    </div>
-                  </CardContent>
-                </AnimatedCard>
-              </div>
-=======
               <AnimatedCard className="h-full border border-slate-200/80 bg-white/60 p-8 dark:border-slate-800/80 dark:bg-slate-900/60" hoverScale={1.03}>
                 <div className="flex flex-col items-center text-center">
                   <IconContainer
@@ -422,7 +321,6 @@ export default function Home() {
                   </p>
                 </div>
               </AnimatedCard>
->>>>>>> d73fd9d (design: refresh UI/UX design system, landing, upload and interactive analysis side-by-side view)
             </StaggerItem>
           </StaggerContainer>
         </section>

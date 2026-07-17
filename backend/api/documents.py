@@ -363,6 +363,7 @@ async def get_document_text(
 ) -> dict:
     """Get document extracted text by document ID."""
     from sqlalchemy import select
+
     from models.document import DocumentMetadata
 
     result = await db.execute(
@@ -395,7 +396,7 @@ async def get_document_text(
         if str(document.id) not in allowed_docs:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail={"error": {"code": "ACCESS_DENIED", "message": "Access restricted"}}
+                detail={"error": {"code": "ACCESS_DENIED", "message": "Access restricted"}},
             )
 
     meta_result = await db.execute(
@@ -407,4 +408,3 @@ async def get_document_text(
         "document_id": str(document_id),
         "full_text": metadata.full_text if metadata else "",
     }
-
