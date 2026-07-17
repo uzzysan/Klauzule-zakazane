@@ -34,32 +34,32 @@ const faqs = [
   {
     question: "Czym są klauzule niedozwolone (abuzywne)?",
     answer:
-      "Klauzule niedozwolone to postanowienia umowne, które kształtują prawa i obowiązki konsumenta w sposób sprzeczny z dobrymi obyczajami, rażąco naruszając jego interesy. Są one nieważne z mocy prawa zgodnie z art. 385¹ Kodeksu cywilnego. Przykłady to jednostronne prawo do zmiany ceny, wyłączenie odpowiedzialności sprzedawcy czy automatyczne przedłużanie umowy.",
+      "Klauzule niedozwolone to postanowienia umowne, które kształtują prawa i obowiązki konsumenta w sposób sprzeczny z dobrymi obyczajami, rażąco naruszając jego interesy. Są one nieważne [...]
   },
   {
     question: "Jak działa analiza umowy w FairPact?",
     answer:
-      "FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą 7,233 klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne oraz słowa kluczowe, przypisując każdemu dopasowaniu poziom ryzyka (wysoki, średni, niski) wraz z odniesieniem do konkretnego orzeczenia sądowego.",
+      "FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą 7,233 klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne oraz s�[...]
   },
   {
     question: "Czy analiza jest bezpłatna?",
     answer:
-      "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt sekund. Dokumenty są dostępne tylko dla Ciebie i usuwane po zakończeniu sesji (max 8h).",
+      "Tak, podstawowa analiza umów jest całkowicie bezpłatna i nie wymaga rejestracji. Możesz przesłać dokument w formacie PDF, Word lub jako zdjęcie i otrzymać wyniki w kilkadziesiąt sekund[...]
   },
   {
     question: "Jakie dokumenty mogę analizować?",
     answer:
-      "FairPact obsługuje umowy najmu, regulaminy sklepów internetowych, umowy o świadczenie usług, umowy kredytowe i pożyczkowe, umowy z deweloperami, umowy telekomunikacyjne, regulaminy konkursów i wiele innych. System najlepiej sprawdza się przy umowach B2C (przedsiębiorca-konsument).",
+      "FairPact obsługuje umowy najmu, regulaminy sklepów internetowych, umowy o świadczenie usług, umowy kredytowe i pożyczkowe, umowy z deweloperami, umowy telekomunikacyjne, regulaminy konkurs[...]
   },
   {
     question: "Czy FairPact zastępuje poradę prawną?",
     answer:
-      "Nie, FairPact jest narzędziem informacyjnym i nie stanowi porady prawnej. Wyniki analizy wskazują potencjalnie problematyczne zapisy, ale ostateczną ocenę i decyzje prawne powinien podjąć wykwalifikowany prawnik. Zalecamy konsultację z prawnikiem w przypadku wykrycia klauzul wysokiego ryzyka.",
+      "Nie, FairPact jest narzędziem informacyjnym i nie stanowi porady prawnej. Wyniki analizy wskazują potencjalnie problematyczne zapisy, ale ostateczną ocenę i decyzje prawne powinien podjąć[...]
   },
   {
     question: "Skąd pochodzi baza klauzul niedozwolonych?",
     answer:
-      "Baza zawiera klauzule z rejestru UOKiK oraz orzeczeń Sądu Ochrony Konkurencji i Konsumentów (SOKiK). Każda klauzula posiada sygnaturę orzeczenia, datę wydania wyroku oraz informacje o stronach postępowania. Baza jest regularnie aktualizowana o nowe orzeczenia.",
+      "Baza zawiera klauzule z rejestru UOKiK oraz orzeczeń Sądu Ochrony Konkurencji i Konsumentów (SOKiK). Każda klauzula posiada sygnaturę orzeczenia, datę wydania wyroku oraz informacje o str[...]
   },
 ];
 
@@ -152,7 +152,7 @@ export default function Home() {
               </h1>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl lg:mx-0">
-                Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków UOKiK i SOKiK.
+                Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków UOKiK i S[...]
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
@@ -241,7 +241,7 @@ export default function Home() {
                       [Zapis niejednoznaczny - Średnie ryzyko]
                     </span>
                     <br />
-                    „...prawo do natychmiastowej zmiany bez uprzedniego powiadomienia...”
+                    „...prawo do natychmiastowej zmiany bez uprzedniego powiadomienia..."
                   </div>
                 </div>
               </motion.div>
@@ -257,7 +257,6 @@ export default function Home() {
               <AnimatedStat value={rulingsStr} label="Przeanalizowanych spraw sądowych" delay={0.1} />
               <AnimatedStat value="< 30s" label="Średni czas analizy dokumentu" delay={0.2} />
               <AnimatedStat value="100%" label="Bezpłatny audyt prawny konsumenta" delay={0.3} />
-            </div>
             </div>
           </div>
         </section>
