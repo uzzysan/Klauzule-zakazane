@@ -8,7 +8,7 @@ import {
   CardTitle,
   FileUpload,
 } from "@/components/ui";
-import { AnimatedButton, AnimatedCard } from "@/components/ui/animated-button";
+import { AnimatedButton, AnimatedCard, StepIndicator } from "@/components/ui/animated-button";
 import { IconContainer, FadeIn, StaggerContainer, StaggerItem } from "@/components/icons";
 import api from "@/lib/api";
 import { useUploadStore } from "@/lib/store";
@@ -113,11 +113,11 @@ export default function UploadPage() {
         case "downloading":
           return "Pobieranie pliku...";
         case "parsing":
-          return "Przetwarzanie dokumentu...";
+          return "Przetwarzanie dokumentu (strukturyzacja tekstu)...";
         case "analyzing":
-          return "Analizowanie klauzul...";
+          return "Analizowanie klauzul (wyszukiwanie semantyczne)...";
         default:
-          return "Przetwarzanie...";
+          return "Przetwarzanie dokumentu...";
       }
     }
     return null;
@@ -125,20 +125,37 @@ export default function UploadPage() {
 
   const statusMessage = getStatusMessage();
 
+  // Active step computation
+  const activeStep = isProcessing ? 3 : selectedFile ? 2 : 1;
+
   return (
-    <div className="container max-w-4xl py-12">
-      <FadeIn className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold">Analizuj umowę</h1>
-        <p className="text-muted-foreground">
-          Prześlij dokument, aby sprawdzić go pod kątem klauzul niedozwolonych
+    <div className="container max-w-4xl py-16 md:py-24">
+      {/* Background elements */}
+      <div className="absolute top-[-5%] left-[20%] h-[350px] w-[350px] rounded-full bg-indigo-500/5 blur-[90px] pointer-events-none" />
+
+      <FadeIn className="mb-12 text-center">
+        <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Analizuj swoją umowę
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+          Prześlij plik, aby sprawdzić go pod kątem potencjalnie niebezpiecznych klauzul abuzywnych.
         </p>
       </FadeIn>
 
-      <AnimatedCard className="mb-8" hoverScale={1.01}>
-        <CardHeader>
-          <CardTitle>Prześlij dokument</CardTitle>
-          <CardDescription>
-            Obsługiwane formaty: PDF, DOCX, JPG, PNG. Maksymalny rozmiar: 50MB.
+      {/* Step Indicators */}
+      <div className="mb-10 flex justify-center items-center gap-4 max-w-md mx-auto">
+        <StepIndicator step={1} isActive={activeStep === 1} isCompleted={activeStep > 1} />
+        <div className="h-0.5 w-16 bg-slate-200 dark:bg-slate-800" />
+        <StepIndicator step={2} isActive={activeStep === 2} isCompleted={activeStep > 2} />
+        <div className="h-0.5 w-16 bg-slate-200 dark:bg-slate-800" />
+        <StepIndicator step={3} isActive={activeStep === 3} isCompleted={false} />
+      </div>
+
+      <AnimatedCard className="mb-12 border border-slate-200/80 bg-white/70 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70" hoverScale={1}>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold">Wybierz plik z dysku</CardTitle>
+          <CardDescription className="text-sm">
+            Wspierane są pliki PDF, DOCX oraz formaty graficzne (JPG, PNG) do 50MB.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -158,25 +175,25 @@ export default function UploadPage() {
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: "auto" }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="mt-4 rounded-lg bg-secondary/50 p-4"
+                className="mt-6 rounded-xl bg-slate-100/50 p-4 border dark:bg-slate-800/50"
               >
                 <div className="flex items-center gap-3">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="h-5 w-5 rounded-full border-2 border-accent border-t-transparent"
+                    className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent"
                   />
-                  <span className="text-sm font-medium">{statusMessage}</span>
+                  <span className="text-sm font-semibold">{statusMessage}</span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="mt-6 flex justify-end gap-4">
+          <div className="mt-8 flex justify-end gap-4">
             {(selectedFile || uploadError) && !isUploading && !isProcessing && (
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" onClick={reset}>
-                  Wyczyść
+                <Button variant="outline" onClick={reset} className="px-6 py-5">
+                  Anuluj
                 </Button>
               </motion.div>
             )}
@@ -185,31 +202,31 @@ export default function UploadPage() {
               disabled={!selectedFile || isUploading || isProcessing}
               isLoading={isUploading || isProcessing}
               icon={ArrowRight}
+              className="px-8 py-5"
               glowOnHover
             >
-              {isUploading || isProcessing ? "Przetwarzanie..." : "Analizuj dokument"}
+              {isUploading || isProcessing ? "Przetwarzanie..." : "Rozpocznij analizę"}
             </AnimatedButton>
           </div>
         </CardContent>
       </AnimatedCard>
 
-      {/* Features */}
-      <StaggerContainer className="grid gap-6 md:grid-cols-3" staggerDelay={0.1}>
+      {/* Trust & Features Footer */}
+      <StaggerContainer className="grid gap-6 md:grid-cols-3" staggerDelay={0.08}>
         <StaggerItem>
-          <AnimatedCard className="group" hoverScale={1.03}>
-            <CardContent className="pt-6">
+          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+            <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
                   icon={FileText}
-                  size={24}
+                  size={20}
                   animation="float"
-                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
-                  iconClassName="text-primary group-hover:text-accent"
+                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h3 className="mb-1 font-semibold">Analiza dokumentów</h3>
-                  <p className="text-sm text-muted-foreground">
-                    PDF, Word, obrazy - wszystkie formaty obsługiwane
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Wygodny podgląd</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Precyzyjny podział na sekcje oraz czytelny podgląd oryginalnego tekstu umowy.
                   </p>
                 </div>
               </div>
@@ -218,19 +235,20 @@ export default function UploadPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <AnimatedCard className="group" hoverScale={1.03}>
-            <CardContent className="pt-6">
+          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+            <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
                   icon={Shield}
-                  size={24}
+                  size={20}
                   animation="pulse"
-                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
-                  iconClassName="text-primary group-hover:text-accent"
+                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h3 className="mb-1 font-semibold">7,233 klauzul</h3>
-                  <p className="text-sm text-muted-foreground">Baza orzeczeń sądowych z Polski</p>
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">7 233 klauzul UOKiK</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Automatyczne dopasowanie do pełnego rejestru orzeczeń polskich sądów powszechnych.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -238,19 +256,20 @@ export default function UploadPage() {
         </StaggerItem>
 
         <StaggerItem>
-          <AnimatedCard className="group" hoverScale={1.03}>
-            <CardContent className="pt-6">
+          <AnimatedCard className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900" hoverScale={1.02}>
+            <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <IconContainer
                   icon={Clock}
-                  size={24}
+                  size={20}
                   animation="bounce"
-                  className="rounded-lg bg-primary/10 p-2 group-hover:bg-accent/10"
-                  iconClassName="text-primary group-hover:text-accent"
+                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
                 />
                 <div>
-                  <h3 className="mb-1 font-semibold">Szybka analiza</h3>
-                  <p className="text-sm text-muted-foreground">Wyniki w kilka sekund</p>
+                  <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Błyskawiczny audyt</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Analiza semantyczna trwa zazwyczaj od 10 do 30 sekund w zależności od długości pliku.
+                  </p>
                 </div>
               </div>
             </CardContent>

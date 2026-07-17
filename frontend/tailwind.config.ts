@@ -53,9 +53,9 @@ const config: Config = {
         },
         // Risk level colors
         risk: {
-          high: "#DC2626", // Red
+          high: "#EF4444", // Rose
           medium: "#F59E0B", // Amber
-          low: "#10B981", // Green
+          low: "#10B981", // Emerald
         },
       },
       borderRadius: {

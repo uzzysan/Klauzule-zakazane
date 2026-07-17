@@ -127,6 +127,11 @@ class ApiClient {
     return this.request<DocumentResponse>(`/api/v1/documents/${documentId}`);
   }
 
+  async getDocumentText(documentId: string): Promise<{ document_id: string; full_text: string }> {
+    return this.request<{ document_id: string; full_text: string }>(`/api/v1/documents/${documentId}/text`);
+  }
+
+
   // Analysis endpoints
   async getDocumentAnalysis(documentId: string): Promise<DocumentAnalysisResponse> {
     return this.request<DocumentAnalysisResponse>(`/api/v1/analysis/document/${documentId}`);
