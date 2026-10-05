@@ -4,7 +4,10 @@
 
 set -e
 
-CODACY_API_TOKEN="${CODACY_API_TOKEN:-WaLrtVtwZvG8KqzvxRTI}"
+if [ -z "${CODACY_API_TOKEN:-}" ]; then
+    echo "Error: set CODACY_API_TOKEN to a Codacy token supplied securely through your environment." >&2
+    exit 1
+fi
 PROJECT_NAME="Klauzule-zakazane"
 PROJECT_OWNER="uzzysan"
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")

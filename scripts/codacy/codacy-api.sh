@@ -5,7 +5,10 @@
 
 set -e
 
-CODACY_API_TOKEN="${CODACY_API_TOKEN:-WaLrtVtwZvG8KqzvxRTI}"
+if [ -z "${CODACY_API_TOKEN:-}" ]; then
+    echo "Error: set CODACY_API_TOKEN to a Codacy token supplied securely through your environment." >&2
+    exit 1
+fi
 CODACY_BASE_URL="https://app.codacy.com/api/v3"
 PROJECT_NAME="Klauzule-zakazane"
 PROJECT_OWNER="uzzysan"
