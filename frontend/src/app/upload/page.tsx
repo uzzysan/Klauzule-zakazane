@@ -15,9 +15,12 @@ import { useUploadStore } from "@/lib/store";
 import { ArrowRight, Clock, FileText, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatCount } from "@/lib/stats";
+import { useStats } from "@/lib/use-stats";
 
 export default function UploadPage() {
   const router = useRouter();
+  const stats = useStats();
   const {
     selectedFile,
     setSelectedFile,
@@ -257,7 +260,7 @@ export default function UploadPage() {
                 />
                 <div>
                   <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    7 233 klauzul UOKiK
+                    {formatCount(stats.clauses)} klauzul UOKiK
                   </h4>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Automatyczne dopasowanie do pełnego rejestru orzeczeń polskich sądów

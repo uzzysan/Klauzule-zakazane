@@ -5,9 +5,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { AnimatedIcon } from "@/components/icons";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/icons";
+import { formatCount } from "@/lib/stats";
+import { useStats } from "@/lib/use-stats";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const stats = useStats();
 
   return (
     <footer className="border-t bg-secondary/30">
@@ -31,8 +34,9 @@ export function Footer() {
               <span className="text-xl font-bold">FairPact</span>
             </Link>
             <p className="max-w-md text-sm text-muted-foreground">
-              Bezpłatne narzędzie do analizy umów pod kątem klauzul niedozwolonych. Oparte na bazie
-              7,233 orzeczeń polskich sądów.
+              Bezpłatne narzędzie do analizy umów pod kątem klauzul niedozwolonych. Oparte na bazie{" "}
+              {formatCount(stats.clauses)} klauzul z {formatCount(stats.rulings)} orzeczeń polskich
+              sądów.
             </p>
           </FadeIn>
 

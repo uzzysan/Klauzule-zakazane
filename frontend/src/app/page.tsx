@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { CardContent } from "@/components/ui";
 import {
   AnimatedIcon,
@@ -28,9 +27,11 @@ import {
 import Link from "next/link";
 import Script from "next/script";
 import { motion } from "framer-motion";
+import { formatCount } from "@/lib/stats";
+import { useStats } from "@/lib/use-stats";
 
-// FAQ data for SEO
-const faqs = [
+// FAQ data for SEO; the clause count is filled from the live database counter.
+const buildFaqs = (clausesStr: string) => [
   {
     question: "Czym są klauzule niedozwolone (abuzywne)?",
     answer:
@@ -38,8 +39,7 @@ const faqs = [
   },
   {
     question: "Jak działa analiza umowy w FairPact?",
-    answer:
-      "FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą 7,233 klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne oraz słowa kluczowe, przypisując każdemu dopasowaniu poziom ryzyka (wysoki, średni, niski) wraz z odniesieniem do konkretnego orzeczenia sądowego.",
+    answer: `FairPact wykorzystuje zaawansowane algorytmy do porównywania tekstu umowy z bazą ${clausesStr} klauzul uznanych za niedozwolone przez polskie sądy. System analizuje podobieństwo semantyczne oraz słowa kluczowe, przypisując każdemu dopasowaniu poziom ryzyka (wysoki, średni, niski) wraz z odniesieniem do konkretnego orzeczenia sądowego.`,
   },
   {
     question: "Czy analiza jest bezpłatna?",
@@ -63,54 +63,50 @@ const faqs = [
   },
 ];
 
-// JSON-LD structured data as strings
-const appJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: "FairPact",
-  description:
-    "Bezpłatna analiza umów pod kątem klauzul niedozwolonych oparta na bazie 7,233 orzeczeń sądowych",
-  url: "https://fairpact.pl",
-  applicationCategory: "LegalService",
-  operatingSystem: "Web",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "PLN",
-  },
-  featureList: [
-    "Analiza umów PDF, DOCX i obrazów",
-    "Baza 7,233 klauzul niedozwolonych",
-    "Wyniki w kilkadziesiąt sekund",
-    "Bez rejestracji",
-  ],
-});
-
-const faqJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: faq.answer,
+// JSON-LD structured data; counts are injected from the live database counter.
+const buildAppJsonLd = (clausesStr: string, rulingsStr: string) =>
+  JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "FairPact",
+    description: `Bezpłatna analiza umów pod kątem klauzul niedozwolonych oparta na bazie ${clausesStr} klauzul i ${rulingsStr} unikalnych sygnatur orzeczeń sądowych`,
+    url: "https://fairpact.pl",
+    applicationCategory: "LegalService",
+    operatingSystem: "Web",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "PLN",
     },
-  })),
-});
+    featureList: [
+      "Analiza umów PDF, DOCX i obrazów",
+      `Baza ${clausesStr} klauzul niedozwolonych`,
+      "Wyniki w kilkadziesiąt sekund",
+      "Bez rejestracji",
+    ],
+  });
+
+const buildFaqJsonLd = (faqs: ReturnType<typeof buildFaqs>) =>
+  JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  });
 
 export default function Home() {
-  const [stats, setStats] = useState<{ clauses: number; rulings: number } | null>(null);
-  useEffect(() => {
-    fetch("/api/v1/stats", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d && typeof d.clauses === "number") setStats(d);
-      })
-      .catch(() => {});
-  }, []);
-  const clausesStr = stats ? stats.clauses.toLocaleString("en-US") : "7,233";
-  const rulingsStr = stats ? stats.rulings.toLocaleString("en-US") : "5,009";
+  const stats = useStats();
+  const clausesStr = formatCount(stats.clauses);
+  const rulingsStr = formatCount(stats.rulings);
+  const faqs = buildFaqs(clausesStr);
+  const appJsonLd = buildAppJsonLd(clausesStr, rulingsStr);
+  const faqJsonLd = buildFaqJsonLd(faqs);
 
   return (
     <>
@@ -156,8 +152,8 @@ export default function Home() {
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl lg:mx-0">
                 Prześlij umowę najmu, regulamin lub ofertę handlową. System FairPact automatycznie
-                porówna zapisy z bazą <strong>7 233 klauzul abuzywnych</strong> na podstawie wyroków
-                UOKiK i SOKiK.
+                porówna zapisy z bazą <strong>{clausesStr} klauzul abuzywnych</strong> na podstawie
+                wyroków UOKiK i SOKiK.
               </p>
 
               <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
@@ -258,10 +254,10 @@ export default function Home() {
         <section className="relative z-10 border-y border-slate-200/60 bg-slate-100/50 py-16 dark:border-slate-800/60 dark:bg-slate-900/30">
           <div className="container">
             <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4">
-              <AnimatedStat value={clausesStr} label="Wykrytych klauzul niedozwolonych" delay={0} />
+              <AnimatedStat value={clausesStr} label="Klauzul niedozwolonych w bazie" delay={0} />
               <AnimatedStat
                 value={rulingsStr}
-                label="Przeanalizowanych spraw sądowych"
+                label="Przeanalizowanych wyroków (unikalne sygnatury)"
                 delay={0.1}
               />
               <AnimatedStat value="< 30s" label="Średni czas analizy dokumentu" delay={0.2} />
