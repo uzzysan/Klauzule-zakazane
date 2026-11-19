@@ -87,7 +87,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Panel Administracyjny</h1>
+          <h1 className="text-2xl font-semibold">Panel Administracyjny</h1>
           <p className="text-sm text-muted-foreground">
             Zarządzaj systemem analizy klauzul niedozwolonych
           </p>
@@ -120,9 +120,7 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
       {/* Sync message */}
       {syncMessage && (
-        <div className="mb-6 rounded-md bg-green-500/10 p-4 text-green-700 dark:text-green-400">
-          {syncMessage}
-        </div>
+        <div className="mb-6 rounded-md bg-success/10 p-4 text-success">{syncMessage}</div>
       )}
 
       {/* Quick Actions */}
@@ -143,11 +141,13 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
       <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Oczekujące recenzje</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
+              Oczekujące recenzje
+            </CardTitle>
             <ClipboardList className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {isLoadingReviews ? "..." : pendingReviews.length}
             </div>
             <p className="text-xs text-muted-foreground">analiz do przejrzenia</p>
@@ -156,11 +156,13 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dzisiejsze recenzje</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
+              Dzisiejsze recenzje
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {isLoadingMetrics ? "..." : metrics.length > 0 ? metrics[0]?.total_reviews || 0 : 0}
             </div>
             <p className="text-xs text-muted-foreground">przesłanych dzisiaj</p>
@@ -169,11 +171,13 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Precyzja modelu</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
+              Precyzja modelu
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {isLoadingMetrics
                 ? "..."
                 : metrics.length > 0 && metrics[0]?.precision != null
@@ -186,11 +190,13 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">F1 Score</CardTitle>
+            <CardTitle className="font-sans text-sm font-medium text-muted-foreground">
+              F1 Score
+            </CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-semibold">
               {isLoadingMetrics
                 ? "..."
                 : metrics.length > 0 && metrics[0]?.f1_score != null

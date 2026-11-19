@@ -1,5 +1,14 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * FairPact design tokens.
+ * All colours are CSS variables (HSL triplets) defined in src/app/globals.css.
+ * They are authored in OKLCH — see docs/DESIGN_LANGUAGE.md for the source values
+ * and their measured contrast ratios. Never use raw Tailwind palette colours
+ * (slate-*, indigo-*, red-* …) in components; use these semantic names.
+ */
+const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -10,75 +19,105 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        lg: "2rem",
+      },
       screens: {
-        "2xl": "1400px",
+        "2xl": "1280px",
       },
     },
     extend: {
       colors: {
-        // Light mode colors (Ecru/Brown theme)
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: token("border"),
+        input: token("input"),
+        ring: token("ring"),
+        background: token("background"),
+        foreground: token("foreground"),
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: token("primary"),
+          foreground: token("primary-foreground"),
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: token("muted"),
+          foreground: token("foreground"),
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: token("destructive"),
+          foreground: token("primary-foreground"),
+        },
+        success: {
+          DEFAULT: token("success"),
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: token("muted"),
+          foreground: token("muted-foreground"),
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: token("accent"),
+          foreground: token("foreground"),
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: token("card"),
+          foreground: token("foreground"),
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: token("card"),
+          foreground: token("foreground"),
         },
-        // Risk level colors
+        // Risk levels — always pair with an icon and a text label (never colour alone).
         risk: {
-          high: "#EF4444", // Rose
-          medium: "#F59E0B", // Amber
-          low: "#10B981", // Emerald
+          high: {
+            DEFAULT: token("risk-high"),
+            tint: token("risk-high-tint"),
+            border: token("risk-high-border"),
+          },
+          medium: {
+            DEFAULT: token("risk-medium"),
+            tint: token("risk-medium-tint"),
+            border: token("risk-medium-border"),
+          },
+          low: {
+            DEFAULT: token("risk-low"),
+            tint: token("risk-low-tint"),
+            border: token("risk-low-border"),
+          },
         },
       },
       borderRadius: {
+        xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "Cambria", "Times New Roman", "serif"],
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
+      fontSize: {
+        // Display sizes for serif headings (1.25 modular scale from 16px)
+        "display-sm": ["2rem", { lineHeight: "1.2", letterSpacing: "-0.015em" }],
+        "display-md": ["2.5rem", { lineHeight: "1.15", letterSpacing: "-0.02em" }],
+        "display-lg": ["3.125rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+      maxWidth: {
+        prose: "68ch",
+      },
+      boxShadow: {
+        // Soft, ink-tinted shadows. In dark mode elevation comes from lighter surfaces instead.
+        xs: "0 1px 2px 0 hsl(var(--shadow) / 0.05)",
+        sm: "0 1px 2px 0 hsl(var(--shadow) / 0.06), 0 1px 3px 0 hsl(var(--shadow) / 0.04)",
+        md: "0 2px 4px -1px hsl(var(--shadow) / 0.06), 0 6px 16px -4px hsl(var(--shadow) / 0.08)",
+        lg: "0 4px 8px -2px hsl(var(--shadow) / 0.06), 0 16px 32px -8px hsl(var(--shadow) / 0.10)",
+      },
+      transitionTimingFunction: {
+        calm: "cubic-bezier(0.22, 1, 0.36, 1)",
+      },
+      transitionDuration: {
+        fast: "120ms",
+        base: "180ms",
+        slow: "280ms",
       },
     },
   },

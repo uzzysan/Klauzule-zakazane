@@ -29,7 +29,7 @@ export function PendingReviewsList({
   if (reviews.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <CheckCircle className="mb-4 h-12 w-12 text-green-500" />
+        <CheckCircle className="mb-4 h-12 w-12 text-success" />
         <h3 className="text-lg font-medium">Wszystko przejrzane!</h3>
         <p className="text-sm text-muted-foreground">Brak analiz oczekujących na recenzję</p>
       </div>
@@ -69,7 +69,7 @@ function ReviewItem({ review, onReviewComplete: _onReviewComplete }: ReviewItemP
             </span>
             <span>{review.total_clauses} klauzul</span>
             {review.high_risk_count > 0 && (
-              <span className="flex items-center gap-1 text-red-500">
+              <span className="flex items-center gap-1 text-risk-high">
                 {review.high_risk_count} wysokiego ryzyka
               </span>
             )}
@@ -79,9 +79,7 @@ function ReviewItem({ review, onReviewComplete: _onReviewComplete }: ReviewItemP
 
       <div className="flex items-center gap-2">
         {review.has_feedback && (
-          <span className="rounded bg-green-500/10 px-2 py-1 text-xs text-green-600 dark:text-green-400">
-            Ma feedback
-          </span>
+          <span className="rounded bg-success/10 px-2 py-1 text-xs text-success">Ma feedback</span>
         )}
         <Link href={`/admin/review/${review.analysis_id}`}>
           <Button variant="ghost" size="sm">

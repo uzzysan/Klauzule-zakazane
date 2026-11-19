@@ -76,18 +76,18 @@ export function MetricsOverview({ metrics, isLoading }: MetricsOverviewProps) {
             <div className="font-medium text-muted-foreground">Pred: Negatywna</div>
 
             <div className="py-2 font-medium text-muted-foreground">Real: Pozytywna</div>
-            <div className="rounded bg-green-500/10 py-2 text-green-600 dark:text-green-400">
+            <div className="rounded bg-success/10 py-2 text-success">
               TP: {latestMetrics.true_positives}
             </div>
-            <div className="rounded bg-red-500/10 py-2 text-red-600 dark:text-red-400">
+            <div className="rounded bg-destructive/10 py-2 text-destructive">
               FN: {latestMetrics.false_negatives}
             </div>
 
             <div className="py-2 font-medium text-muted-foreground">Real: Negatywna</div>
-            <div className="rounded bg-red-500/10 py-2 text-red-600 dark:text-red-400">
+            <div className="rounded bg-destructive/10 py-2 text-destructive">
               FP: {latestMetrics.false_positives}
             </div>
-            <div className="rounded bg-green-500/10 py-2 text-green-600 dark:text-green-400">
+            <div className="rounded bg-success/10 py-2 text-success">
               TN: {latestMetrics.true_negatives}
             </div>
           </div>
@@ -113,12 +113,8 @@ export function MetricsOverview({ metrics, isLoading }: MetricsOverviewProps) {
               <tr key={m.id} className="hover:bg-muted/30">
                 <td className="px-4 py-3">{new Date(m.date).toLocaleDateString("pl-PL")}</td>
                 <td className="px-4 py-3 text-right">{m.total_reviews}</td>
-                <td className="px-4 py-3 text-right text-green-600 dark:text-green-400">
-                  {m.true_positives}
-                </td>
-                <td className="px-4 py-3 text-right text-red-600 dark:text-red-400">
-                  {m.false_positives}
-                </td>
+                <td className="px-4 py-3 text-right text-success">{m.true_positives}</td>
+                <td className="px-4 py-3 text-right text-destructive">{m.false_positives}</td>
                 <td className="px-4 py-3 text-right">
                   {m.precision != null ? `${(m.precision * 100).toFixed(1)}%` : "-"}
                 </td>
@@ -169,9 +165,9 @@ function MetricCard({
           <span
             className={`flex items-center text-xs ${
               trend === "up"
-                ? "text-green-600 dark:text-green-400"
+                ? "text-success"
                 : trend === "down"
-                  ? "text-red-600 dark:text-red-400"
+                  ? "text-destructive"
                   : "text-muted-foreground"
             }`}
           >
@@ -181,7 +177,7 @@ function MetricCard({
           </span>
         )}
       </div>
-      <div className="mt-2 text-2xl font-bold">{displayValue}</div>
+      <div className="mt-2 text-2xl font-semibold">{displayValue}</div>
       {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
     </div>
   );

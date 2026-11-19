@@ -1,10 +1,30 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { Providers, Header, Footer } from "@/components/layout";
 import { Analytics } from "@/components/Analytics";
 
-const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter" });
+// UI typeface: Inter (high x-height, tabular figures, full Polish diacritics).
+const fontSans = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// Display & reading typeface: Source Serif 4 with optical sizing.
+const fontSerif = Source_Serif_4({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-serif",
+  display: "swap",
+  axes: ["opsz"],
+});
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F9F6F2" },
+    { media: "(prefers-color-scheme: dark)", color: "#11151A" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://fairpact.pl"),
@@ -48,21 +68,12 @@ export const metadata: Metadata = {
     title: "FairPact - Sprawdź umowę pod kątem klauzul niedozwolonych",
     description:
       "Bezpłatna analiza umów pod kątem klauzul niedozwolonych. Baza 7,233 orzeczeń sądowych. Sprawdź umowę w kilka sekund.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "FairPact - Analiza klauzul niedozwolonych",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "FairPact - Sprawdź umowę pod kątem klauzul niedozwolonych",
     description:
       "Bezpłatna analiza umów pod kątem klauzul niedozwolonych. Baza 7,233 orzeczeń sądowych.",
-    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "/",
@@ -77,12 +88,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pl" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#E65100" />
-      </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${fontSans.variable} ${fontSerif.variable} font-sans antialiased`}>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <Header />

@@ -1,19 +1,21 @@
 "use client";
 
 import { Button, Card, CardContent, RiskBadge, RiskCounts, RiskScore } from "@/components/ui";
+import { buttonVariants } from "@/components/ui/button";
+import { riskMeta } from "@/components/ui/risk-badge";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { AnalysisDetail, FlaggedClause } from "@/types/api";
 import {
   AlertTriangle,
   ArrowLeft,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  FileText,
-  Heart,
   BookOpen,
-  SlidersHorizontal,
+  ChevronDown,
+  Clock,
+  Heart,
+  Languages,
+  ListChecks,
+  Loader2,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
@@ -24,6 +26,15 @@ interface TextSegment {
   isHighlight: boolean;
   clauseId?: string;
   riskLevel?: "high" | "medium" | "low";
+}
+
+function DetailBlock({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h4 className="eyebrow mb-2 font-sans">{label}</h4>
+      {children}
+    </div>
+  );
 }
 
 function FlaggedClauseCard({
@@ -40,6 +51,7 @@ function FlaggedClauseCard({
   onSelect: () => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const meta = riskMeta[clause.risk_level];
 
   useEffect(() => {
     if (isSelected && cardRef.current) {
@@ -53,25 +65,26 @@ function FlaggedClauseCard({
       id={`clause-card-${clause.id}`}
       onClick={onSelect}
       className={cn(
-        "cursor-pointer rounded-xl border border-slate-200 bg-white p-4 transition-all duration-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/60",
-        isSelected &&
-          "border-transparent bg-primary/[0.02] shadow-lg ring-2 ring-primary dark:bg-primary/[0.04] dark:ring-primary"
+        "relative cursor-pointer overflow-hidden rounded-lg border bg-card p-4 pl-5 transition-[border-color,box-shadow] duration-base ease-calm hover:border-input/60",
+        isSelected && "border-primary/60 shadow-md ring-1 ring-primary/40"
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* Level stripe — colour reinforced by badge icon + label */}
+      <span aria-hidden className={cn("absolute inset-y-0 left-0 w-1", meta.dot)} />
+
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="mb-2.5 flex flex-wrap items-center gap-2">
             <RiskBadge level={clause.risk_level} />
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-muted-foreground dark:bg-slate-800">
+            <span className="text-xs tabular-nums text-muted-foreground">
               {(clause.confidence * 100).toFixed(0)}% dopasowania
             </span>
-            <span className="rounded bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {clause.match_type}
-            </span>
+            <span className="text-xs text-muted-foreground">·</span>
+            <span className="text-xs text-muted-foreground">{clause.match_type}</span>
           </div>
           <p
             className={cn(
-              "text-sm font-medium leading-relaxed text-slate-700 dark:text-slate-300",
+              "font-serif text-[0.9375rem] leading-relaxed text-foreground",
               !isExpanded && "line-clamp-2"
             )}
           >
@@ -81,102 +94,88 @@ function FlaggedClauseCard({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 flex-shrink-0 rounded-lg"
+          className="h-8 w-8 rounded-md text-muted-foreground"
+          aria-expanded={isExpanded}
+          aria-label={isExpanded ? "Zwiń szczegóły" : "Rozwiń szczegóły"}
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
           }}
         >
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 transition-transform duration-base ease-calm",
+              isExpanded && "rotate-180"
+            )}
+            aria-hidden
+          />
         </Button>
       </div>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="mt-4 space-y-4 overflow-hidden border-t border-slate-100 pt-4 text-xs dark:border-slate-800"
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
           >
-            {/* Matched text details */}
-            <div>
-              <h5 className="mb-1.5 font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Wykryty zapis
-              </h5>
-              <div className="rounded-lg border-l-4 border-destructive bg-destructive/5 p-3 font-mono leading-relaxed text-slate-800 dark:text-slate-200">
-                {clause.matched_text}
-              </div>
-            </div>
-
-            {/* Similar prohibited clause */}
-            {clause.explanation?.clause_text && (
-              <div>
-                <h5 className="mb-1.5 font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Wzorzec klauzuli niedozwolonej (UOKiK)
-                </h5>
-                <div className="rounded-lg bg-secondary/80 p-3 leading-relaxed text-slate-800 dark:text-slate-200">
-                  {clause.explanation.clause_text}
-                </div>
-              </div>
-            )}
-
-            {/* Legal references */}
-            {clause.explanation?.legal_references &&
-              clause.explanation.legal_references.length > 0 && (
-                <div>
-                  <h5 className="mb-1.5 font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Orzecznictwo i podstawa prawna
-                  </h5>
-                  <div className="space-y-2">
-                    {clause.explanation.legal_references.map((ref, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded-lg border border-slate-100 bg-slate-50/50 p-2.5 dark:border-slate-800 dark:bg-slate-900/40"
-                      >
-                        {ref.article_code && (
-                          <div className="font-bold text-primary">{ref.article_code}</div>
-                        )}
-                        {ref.law_name && (
-                          <div className="mt-0.5 font-medium text-slate-500">{ref.law_name}</div>
-                        )}
-                        {ref.description && (
-                          <p className="mt-1.5 leading-relaxed text-muted-foreground">
-                            {ref.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div className="mt-4 space-y-5 border-t pt-4 text-sm">
+              {clause.explanation?.clause_text && (
+                <DetailBlock label="Wzorzec klauzuli niedozwolonej">
+                  <blockquote className="border-l-2 border-input/50 pl-3 font-serif leading-relaxed text-foreground">
+                    {clause.explanation.clause_text}
+                  </blockquote>
+                </DetailBlock>
               )}
 
-            {/* Notes */}
-            {clause.explanation?.notes && (
-              <div>
-                <h5 className="mb-1 font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Komentarz prawny
-                </h5>
-                <p className="rounded-lg border border-dashed bg-primary/[0.01] p-2.5 leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300">
-                  {clause.explanation.notes}
-                </p>
-              </div>
-            )}
+              {clause.explanation?.legal_references &&
+                clause.explanation.legal_references.length > 0 && (
+                  <DetailBlock label="Orzecznictwo i podstawa prawna">
+                    <ul className="space-y-2">
+                      {clause.explanation.legal_references.map((ref, idx) => (
+                        <li key={idx} className="rounded-md border bg-muted/40 px-3 py-2.5">
+                          {ref.article_code && (
+                            <div className="font-medium tabular-nums text-primary">
+                              {ref.article_code}
+                            </div>
+                          )}
+                          {ref.law_name && (
+                            <div className="mt-0.5 text-muted-foreground">{ref.law_name}</div>
+                          )}
+                          {ref.description && (
+                            <p className="mt-1.5 leading-relaxed text-muted-foreground">
+                              {ref.description}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </DetailBlock>
+                )}
 
-            {/* Tags */}
-            {clause.explanation?.tags && clause.explanation.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {clause.explanation.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="rounded-md bg-indigo-50/60 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+              {clause.explanation?.notes && (
+                <DetailBlock label="Komentarz">
+                  <p className="leading-relaxed text-muted-foreground">
+                    {clause.explanation.notes}
+                  </p>
+                </DetailBlock>
+              )}
+
+              {clause.explanation?.tags && clause.explanation.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {clause.explanation.tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -370,13 +369,13 @@ export default function AnalysisPage() {
   if (loading) {
     return (
       <div className="container max-w-6xl py-24">
-        <div className="flex min-h-[450px] items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <p className="animate-pulse text-sm font-semibold text-muted-foreground">
-              Analizowanie dokumentu przez algorytm...
-            </p>
-          </div>
+        <div
+          className="flex min-h-[420px] flex-col items-center justify-center gap-4"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+          <p className="text-sm text-muted-foreground">Wczytywanie raportu…</p>
         </div>
       </div>
     );
@@ -385,21 +384,19 @@ export default function AnalysisPage() {
   if (error || !analysis) {
     return (
       <div className="container max-w-xl py-24">
-        <Card className="border border-red-100 bg-red-50/20 dark:border-red-950/30">
-          <CardContent className="py-12">
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="rounded-full bg-red-100 p-3 text-red-600 dark:bg-red-950/40">
-                <AlertTriangle className="h-6 w-6" />
-              </div>
-              <h2 className="text-xl font-bold">Wystąpił błąd analizy</h2>
-              <p className="text-sm text-muted-foreground">
-                {error || "Nie znaleziono żądanego raportu"}
-              </p>
-              <Button onClick={() => router.push("/upload")} className="mt-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Wgraj nową umowę
-              </Button>
-            </div>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center sm:py-12">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <AlertTriangle className="h-6 w-6" aria-hidden />
+            </span>
+            <h1 className="text-2xl">Nie udało się wczytać raportu</h1>
+            <p className="text-sm text-muted-foreground">
+              {error || "Nie znaleziono żądanego raportu"}
+            </p>
+            <Button onClick={() => router.push("/upload")} className="mt-2">
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Prześlij nową umowę
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -407,133 +404,138 @@ export default function AnalysisPage() {
   }
 
   const documentSegments = getDocumentSegments();
+  const filterLabels = {
+    all: "Wszystkie",
+    high: "Wysokie",
+    medium: "Średnie",
+    low: "Niskie",
+  } as const;
+  const paneHeight = "h-[70dvh] md:h-[calc(100dvh-11rem)] min-h-[460px] max-h-[900px]";
 
   return (
-    <div className="container max-w-7xl py-10">
-      {/* Page Header */}
-      <div className="mb-8 flex flex-col gap-4 border-b pb-6 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/upload")}
-              className="h-9 px-3"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Wgraj nowy plik
-            </Button>
-          </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Analiza umowy: {analysis.summary || "Wyniki skanowania"}
+    <div className="container max-w-7xl py-8 md:py-10">
+      {/* Page header */}
+      <div className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <Button
+            variant="link"
+            size="sm"
+            onClick={() => router.push("/upload")}
+            className="mb-3 gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Prześlij kolejny plik
+          </Button>
+          <p className="eyebrow mb-2">Raport analizy</p>
+          <h1 className="text-2xl md:text-display-sm">
+            {analysis.summary || "Wyniki analizy umowy"}
           </h1>
-          <div className="mt-2 flex w-fit items-center gap-4 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-muted-foreground dark:bg-slate-800">
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              Czas trwania: {analysis.duration_seconds ? `${analysis.duration_seconds}s` : "—"}
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-4 w-4" aria-hidden />
+              {analysis.duration_seconds ? `${analysis.duration_seconds} s` : "—"}
             </span>
-            <span className="h-3 w-px bg-slate-300 dark:bg-slate-700" />
-            <span className="flex items-center gap-1">
-              <FileText className="h-3.5 w-3.5" />
-              Język: {analysis.language === "pl" ? "Polski" : "Angielski"}
+            <span className="inline-flex items-center gap-1.5">
+              <Languages className="h-4 w-4" aria-hidden />
+              {analysis.language === "pl" ? "Polski" : "Angielski"}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <a href="https://suppi.pl/rafcio" target="_blank" rel="noopener noreferrer">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-rose-200 text-rose-600 hover:bg-rose-50/50 hover:text-rose-700 dark:border-rose-900 dark:hover:bg-rose-950/20"
-            >
-              <Heart className="h-4 w-4 fill-rose-500/10" />
-              Wspieram projekt
-            </Button>
-          </a>
+        <a
+          href="https://suppi.pl/rafcio"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ variant: "outline", size: "sm", className: "self-start" })}
+        >
+          <Heart className="h-4 w-4 text-primary" aria-hidden />
+          Wesprzyj projekt
+        </a>
+      </div>
+
+      {/* Summary */}
+      <section
+        aria-label="Podsumowanie"
+        className="mb-8 grid divide-y rounded-xl border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+      >
+        <div className="flex items-center justify-center p-6">
+          <RiskScore score={analysis.risk_score || 0} />
         </div>
+        <div className="flex flex-col items-center justify-center p-6 text-center">
+          <div className="eyebrow mb-2">Wykryte zapisy</div>
+          <div className="font-serif text-5xl font-semibold tabular-nums leading-none">
+            {analysis.total_clauses_found}
+          </div>
+          <div className="mt-3 text-sm text-muted-foreground">potencjalnie niedozwolone</div>
+        </div>
+        <div className="flex items-center justify-center p-6">
+          <RiskCounts
+            high={analysis.high_risk_count}
+            medium={analysis.medium_risk_count}
+            low={analysis.low_risk_count}
+            className="flex-col gap-2.5"
+          />
+        </div>
+      </section>
+
+      {/* Mobile tabs */}
+      <div
+        role="tablist"
+        aria-label="Widok raportu"
+        className="mb-4 grid grid-cols-2 gap-1 rounded-lg border bg-muted/60 p-1 md:hidden"
+      >
+        {(
+          [
+            { key: "text", label: "Tekst umowy", icon: BookOpen },
+            { key: "inspector", label: `Wykryte (${filteredClauses.length})`, icon: ListChecks },
+          ] as const
+        ).map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={mobileTab === key}
+            onClick={() => setMobileTab(key)}
+            className={cn(
+              "flex h-10 items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors duration-base",
+              mobileTab === key
+                ? "bg-card text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden />
+            {label}
+          </button>
+        ))}
       </div>
 
-      {/* Top metrics summary cards */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <Card className="border border-slate-200/60 bg-white/70 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/50">
-          <CardContent className="pt-6">
-            <RiskScore score={analysis.risk_score || 0} />
-          </CardContent>
-        </Card>
-
-        <Card className="border border-slate-200/60 bg-white/70 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/50">
-          <CardContent className="flex flex-col items-center justify-center pt-6 text-center">
-            <div className="text-4xl font-extrabold text-slate-900 dark:text-white">
-              {analysis.total_clauses_found}
-            </div>
-            <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Niedozwolone klauzule
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-slate-200/60 bg-white/70 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/50">
-          <CardContent className="flex items-center justify-center pt-6">
-            <RiskCounts
-              high={analysis.high_risk_count}
-              medium={analysis.medium_risk_count}
-              low={analysis.low_risk_count}
-              className="w-full max-w-xs flex-col gap-2"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Mobile Tab navigation */}
-      <div className="mb-6 flex overflow-hidden rounded-lg border bg-slate-100/50 p-1 dark:bg-slate-900/40 md:hidden">
-        <button
-          onClick={() => setMobileTab("text")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-semibold transition-all",
-            mobileTab === "text"
-              ? "bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"
-              : "text-muted-foreground"
-          )}
-        >
-          <BookOpen className="h-4 w-4" />
-          Tekst umowy
-        </button>
-        <button
-          onClick={() => setMobileTab("inspector")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-semibold transition-all",
-            mobileTab === "inspector"
-              ? "bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"
-              : "text-muted-foreground"
-          )}
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Wykryte ryzyka ({filteredClauses.length})
-        </button>
-      </div>
-
-      {/* Main Side-by-Side Area */}
+      {/* Side-by-side */}
       <div className="grid items-start gap-6 md:grid-cols-12">
-        {/* Left Pane - Document Text Viewer */}
-        <div
+        {/* Document */}
+        <section
+          aria-label="Tekst umowy"
           className={cn(
-            "flex h-[650px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:col-span-7 lg:col-span-8",
+            "flex flex-col overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-7 lg:col-span-8",
+            paneHeight,
             mobileTab !== "text" && "hidden md:flex"
           )}
         >
-          <div className="flex items-center justify-between border-b bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/60">
-            <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-              Podgląd analizowanego tekstu
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {documentText ? `${documentText.length} znaków` : ""}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3">
+            <h2 className="font-sans text-sm font-semibold">Tekst umowy</h2>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              {(["high", "medium", "low"] as const).map((lvl) => (
+                <span key={lvl} className="inline-flex items-center gap-1.5">
+                  <span className={cn(riskMeta[lvl].highlight, "pointer-events-none px-1")}>
+                    Aa
+                  </span>
+                  {riskMeta[lvl].label}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="scrollbar-thin flex-1 overflow-y-auto p-6">
+          <div className="scrollbar-thin flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8">
             {documentText ? (
-              <p className="select-text whitespace-pre-wrap font-serif text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+              <p className="mx-auto max-w-prose select-text whitespace-pre-wrap font-serif text-base leading-[1.75] text-foreground">
                 {documentSegments.map((seg, idx) => {
                   if (seg.isHighlight) {
                     const isSelected = selectedClauseId === seg.clauseId;
@@ -541,14 +543,20 @@ export default function AnalysisPage() {
                       <span
                         key={idx}
                         id={`highlight-segment-${seg.clauseId}`}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => handleSelectHighlight(seg.clauseId!)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelectHighlight(seg.clauseId!);
+                          }
+                        }}
                         className={cn(
-                          seg.riskLevel === "high" && "highlight-high",
-                          seg.riskLevel === "medium" && "highlight-medium",
-                          seg.riskLevel === "low" && "highlight-low",
+                          seg.riskLevel && riskMeta[seg.riskLevel].highlight,
                           isSelected && "highlight-selected"
                         )}
-                        title="Kliknij, aby zobaczyć szczegóły"
+                        title="Pokaż szczegóły"
                       >
                         {seg.text}
                       </span>
@@ -563,58 +571,56 @@ export default function AnalysisPage() {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Right Pane - Inspector Panel */}
-        <div
+          {documentText && (
+            <div className="border-t px-5 py-2 text-right text-xs tabular-nums text-muted-foreground">
+              {documentText.length.toLocaleString("pl-PL")} znaków
+            </div>
+          )}
+        </section>
+
+        {/* Inspector */}
+        <section
+          aria-label="Wykryte zapisy"
           className={cn(
-            "flex h-[650px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/30 md:col-span-5 lg:col-span-4",
+            "flex flex-col overflow-hidden rounded-xl border bg-card shadow-xs md:col-span-5 lg:col-span-4",
+            paneHeight,
             mobileTab !== "inspector" && "hidden md:flex"
           )}
         >
-          {/* Filters in Header */}
-          <div className="border-b bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/60">
+          <div className="border-b px-5 py-3">
             <div className="mb-3 flex items-center justify-between gap-4">
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                Lista ryzyka
-              </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              <h2 className="font-sans text-sm font-semibold">Wykryte zapisy</h2>
+              <span className="text-xs tabular-nums text-muted-foreground">
                 {filteredClauses.length} z {analysis.flagged_clauses.length}
               </span>
             </div>
 
-            {/* Filter buttons */}
-            <div className="flex flex-wrap gap-1.5">
+            <div role="group" aria-label="Filtruj według ryzyka" className="flex flex-wrap gap-1.5">
               {(["all", "high", "medium", "low"] as const).map((level) => (
                 <button
                   key={level}
                   onClick={() => setFilter(level)}
+                  aria-pressed={filter === level}
                   className={cn(
-                    "rounded-md border px-3 py-1.5 text-xs font-semibold transition-all",
+                    "h-8 rounded-full border px-3 text-xs font-medium transition-colors duration-base",
                     filter === level
-                      ? "border-transparent bg-primary text-primary-foreground shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-input/40 bg-card text-muted-foreground hover:border-input hover:text-foreground"
                   )}
                 >
-                  {level === "all"
-                    ? "Wszystkie"
-                    : level === "high"
-                      ? "Wysokie"
-                      : level === "medium"
-                        ? "Średnie"
-                        : "Niskie"}
+                  {filterLabels[level]}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Cards container */}
-          <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto bg-slate-50/30 p-4 dark:bg-slate-950/10">
+          <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto bg-muted/30 p-3 sm:p-4">
             {filteredClauses.length === 0 ? (
               <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
                 {filter === "all"
-                  ? "Nie znaleziono żadnych klauzul niedozwolonych"
-                  : "Brak klauzul spełniających wybrane kryteria"}
+                  ? "Nie znaleziono zapisów podobnych do klauzul niedozwolonych."
+                  : "Brak zapisów spełniających wybrane kryteria."}
               </div>
             ) : (
               filteredClauses.map((clause) => (
@@ -629,8 +635,12 @@ export default function AnalysisPage() {
               ))
             )}
           </div>
-        </div>
+        </section>
       </div>
+
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        Wyniki mają charakter informacyjny i nie stanowią porady prawnej.
+      </p>
     </div>
   );
 }

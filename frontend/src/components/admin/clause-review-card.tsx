@@ -69,9 +69,9 @@ export function ClauseReviewCard({
     <Card
       className={cn(
         "transition-all",
-        isExpanded && "ring-2 ring-accent",
-        hasFeedback && localFeedback === "correct" && "border-green-500/50 bg-green-500/5",
-        hasFeedback && localFeedback === "incorrect" && "border-red-500/50 bg-red-500/5"
+        isExpanded && "ring-1 ring-primary/40",
+        hasFeedback && localFeedback === "correct" && "border-success/40 bg-success/5",
+        hasFeedback && localFeedback === "incorrect" && "border-destructive/40 bg-destructive/5"
       )}
     >
       <CardHeader className="cursor-pointer" onClick={onToggle}>
@@ -88,8 +88,8 @@ export function ClauseReviewCard({
                   className={cn(
                     "flex items-center gap-1 rounded px-2 py-0.5 text-xs",
                     localFeedback === "correct"
-                      ? "bg-green-500/20 text-green-700 dark:text-green-400"
-                      : "bg-red-500/20 text-red-700 dark:text-red-400"
+                      ? "bg-success/15 text-success"
+                      : "bg-destructive/15 text-destructive"
                   )}
                 >
                   <CheckCircle className="h-3 w-3" />
@@ -194,7 +194,7 @@ export function ClauseReviewCard({
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Dodaj opcjonalne uwagi..."
-                      className="w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       rows={2}
                     />
                   </div>
@@ -206,7 +206,7 @@ export function ClauseReviewCard({
                     size="sm"
                     onClick={() => handleSubmitFeedback(true)}
                     disabled={isSubmitting}
-                    className="border-green-500/50 text-green-700 hover:bg-green-500/10 dark:text-green-400"
+                    className="border-success/40 text-success hover:bg-success/10"
                   >
                     {isSubmitting ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -221,7 +221,7 @@ export function ClauseReviewCard({
                     size="sm"
                     onClick={() => handleSubmitFeedback(false)}
                     disabled={isSubmitting}
-                    className="border-red-500/50 text-red-700 hover:bg-red-500/10 dark:text-red-400"
+                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
                   >
                     {isSubmitting ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -246,8 +246,8 @@ export function ClauseReviewCard({
                   className={cn(
                     "flex items-center gap-2 rounded p-3",
                     localFeedback === "correct"
-                      ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                      : "bg-red-500/10 text-red-700 dark:text-red-400"
+                      ? "bg-success/10 text-success"
+                      : "bg-destructive/10 text-destructive"
                   )}
                 >
                   <CheckCircle className="h-5 w-5" />
