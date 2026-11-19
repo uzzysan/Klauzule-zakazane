@@ -2,69 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * FairPact colour tokens — "Paper & Ink".
+ * Authored in OKLCH (comment), shipped as HSL triplets so Tailwind opacity
+ * modifiers (bg-primary/10) keep working. Contrast ratios are listed in
+ * docs/DESIGN_LANGUAGE.md. Change a value there first, then here.
+ */
 @layer base {
   :root {
-    /* Light mode (Premium Slate/Indigo theme) */
-    --background: 210 40% 98%; /* #F8FAFC - slate-50 */
-    --foreground: 224 71% 4%; /* #090D1A - very dark slate */
+    --background: 40.3 32.7% 96.2%; /* oklch(97.5% 0.006 85)  #F9F6F2 paper */
+    --foreground: 217.1 25.7% 14.7%; /* oklch(25.5% 0.025 260) #1C232F ink */
+    --card: 40.3 53.1% 98.8%; /* oklch(99.3% 0.003 85)  #FEFDFA */
+    --muted: 37.1 23.1% 92.6%; /* oklch(94.8% 0.008 80)  #F1EDE8 */
+    --muted-foreground: 217 9% 39.9%; /* oklch(50% 0.02 260)    #5D646F */
+    --border: 37.1 14.6% 85.7%; /* oklch(89.5% 0.01 80)   #E0DCD5 decorative */
+    --input: 217 6.5% 55.8%; /* oklch(64% 0.015 260)   #878C96 ≥3:1 controls */
+    --primary: 213.3 51.4% 30.2%; /* oklch(40% 0.085 255)   #254974 ink navy */
+    --primary-foreground: 40.3 43.3% 97.6%; /* oklch(98.5% 0.005 85) #FCFAF6 */
+    --accent: 214 43.1% 92.9%; /* oklch(94% 0.014 255)   #E5ECF5 hover wash */
+    --ring: 213.3 51.1% 41.6%; /* oklch(50% 0.11 255)    #3464A0 */
+    --destructive: 358.8 61.4% 42.7%; /* oklch(50% 0.17 25)     #B02A2D */
+    --success: 144.7 41.9% 29.9%; /* oklch(48% 0.09 155)    #2C6C47 */
+    --shadow: 217 30% 20%;
 
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 224 71% 4%;
+    --risk-high: 359.6 57.9% 41.8%; /* oklch(49% 0.16 25)    #A82D2E crimson */
+    --risk-high-tint: 6.1 100% 95.8%; /* oklch(95.8% 0.022 25) #FFECEA */
+    --risk-high-border: 5.5 69.1% 85.2%; /* oklch(86% 0.055 25)   #F3C4BF */
+    --risk-medium: 32.3 69.1% 31.9%; /* oklch(50% 0.10 65)    #8A5619 ochre */
+    --risk-medium-tint: 40.3 83.2% 92.6%; /* oklch(96.2% 0.03 85)  #FCF1DC */
+    --risk-medium-border: 37.4 63.9% 76.6%; /* oklch(86% 0.07 80) #E9CD9D */
+    --risk-low: 185.6 54.7% 28.5%; /* oklch(48% 0.07 205)   #216970 teal */
+    --risk-low-tint: 186.1 48.6% 93.3%; /* oklch(95.8% 0.016 205) #E6F4F6 */
+    --risk-low-border: 186.2 38.5% 78.6%; /* oklch(86% 0.04 205)  #B3D9DD */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-
-    --primary: 243 75% 59%; /* #4F46E5 - indigo-600 */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 40% 96.1%; /* slate-100 */
-    --secondary-foreground: 224 71% 12%;
-
-    --muted: 210 40% 92%; /* slate-200 */
-    --muted-foreground: 215.4 16.3% 44%;
-
-    --accent: 243 75% 59%; /* indigo-600 */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 346.8 84.2% 49.8%; /* rose-600 */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 214.3 31.8% 91.4%; /* slate-200 */
-    --input: 214.3 31.8% 91.4%;
-    --ring: 243 75% 59%;
-
-    --radius: 0.75rem;
+    --radius: 0.625rem;
+    color-scheme: light;
   }
 
   .dark {
-    /* Dark mode (Premium Obsidian/Indigo theme) */
-    --background: 224 71% 3.5%; /* #05070F - ultra dark slate */
-    --foreground: 210 40% 98%;
+    --background: 213.9 20.7% 8.6%; /* oklch(19.5% 0.012 255) #11151A night ink */
+    --foreground: 40.3 15.5% 89.6%; /* oklch(92.5% 0.008 85)  #E9E6E0 */
+    --card: 213.9 18.5% 11.6%; /* oklch(22.8% 0.014 255) #181D23 */
+    --muted: 213.9 16.4% 15.6%; /* oklch(27% 0.016 255)   #21272E */
+    --muted-foreground: 214 9.2% 66.4%; /* oklch(73% 0.015 255)   #A2A8B1 */
+    --border: 213.9 13.3% 20%; /* oklch(31.5% 0.016 255) #2C323A */
+    --input: 213.9 9% 42%; /* oklch(52% 0.02 255)    #616A75 */
+    --primary: 210.7 65.9% 75.2%; /* oklch(79% 0.075 250)   #96BFE9 */
+    --primary-foreground: 213.8 32.3% 9.2%; /* oklch(20% 0.02 255) #10171F */
+    --accent: 213.8 23.5% 17.3%; /* oklch(28.5% 0.025 255) #222B36 */
+    --ring: 210.4 64.8% 66.7%; /* oklch(72% 0.10 250)    #73A9E1 */
+    --destructive: 3.5 72.6% 67.8%; /* oklch(70% 0.14 25)     #E97871 */
+    --success: 141.3 38.2% 62.6%; /* oklch(76% 0.10 155)    #7BC495 */
+    --shadow: 220 40% 2%;
 
-    --card: 224 71% 7%; /* #0B0E1B */
-    --card-foreground: 210 40% 98%;
+    --risk-high: 4.2 81.9% 73.8%; /* oklch(75% 0.125 25)   #F38D85 */
+    --risk-high-tint: 4.6 31.1% 14.9%; /* oklch(25.5% 0.035 25) #321C1A */
+    --risk-high-border: 3.8 35.5% 30.8%; /* oklch(40% 0.075 25)   #6A3633 */
+    --risk-medium: 37.8 66.4% 67.3%; /* oklch(81% 0.10 80)    #E3BA74 */
+    --risk-medium-tint: 37.7 39.8% 12.3%; /* oklch(26% 0.03 80)    #2C2213 */
+    --risk-medium-border: 38.5 49.9% 25%; /* oklch(42% 0.065 80)  #604920 */
+    --risk-low: 186.2 42% 67.1%; /* oklch(79% 0.065 205)  #88C7CE */
+    --risk-low-tint: 186.1 41.4% 11.4%; /* oklch(25.5% 0.028 205) #112729 */
+    --risk-low-border: 185.9 42.3% 23.3%; /* oklch(40% 0.05 205)  #225054 */
 
-    --popover: 224 71% 5%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 244.5 74.3% 62.7%; /* indigo-500 */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 224 71% 12%; /* slate-900 like */
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 224 71% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 244.5 74.3% 62.7%; /* indigo-500 */
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 346.8 77.2% 49.8%; /* rose-500 */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 224 71% 15%;
-    --input: 224 71% 15%;
-    --ring: 244.5 74.3% 62.7%;
+    color-scheme: dark;
   }
 }
 
@@ -72,17 +73,73 @@
   * {
     @apply border-border;
   }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "kern" 1,
+      "liga" 1,
+      "calt" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2 {
+    @apply font-serif font-semibold tracking-tight text-foreground;
+    text-wrap: balance;
+  }
+
+  h3,
+  h4,
+  h5 {
+    @apply font-semibold text-foreground;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
-/* Custom scrollbar */
+/* Respect the user's motion preference everywhere (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -90,46 +147,66 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    @apply rounded-full bg-muted-foreground/30;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
   }
+
+  /* Small uppercase label above a section or value */
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground;
+  }
 }
 
-/* Risk badges */
 @layer components {
+  /* Risk badges — tinted pill, dark text, icon supplied by <RiskBadge> */
   .risk-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide transition-colors;
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium;
   }
 
   .risk-high {
-    @apply bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-900/30;
+    @apply border-risk-high-border bg-risk-high-tint text-risk-high;
   }
 
   .risk-medium {
-    @apply bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/30;
+    @apply border-risk-medium-border bg-risk-medium-tint text-risk-medium;
   }
 
   .risk-low {
-    @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/30;
+    @apply border-risk-low-border bg-risk-low-tint text-risk-low;
   }
-}
 
-/* Interactive highlight classes for document parser */
-.highlight-high {
-  @apply bg-rose-500/10 dark:bg-rose-500/15 border-b-2 border-rose-500 hover:bg-rose-500/20 cursor-pointer transition-all px-0.5 rounded-sm;
-}
+  /* Inline highlights in the contract text viewer.
+     Underline style differs per level so it survives colour-vision deficiency. */
+  .highlight-high,
+  .highlight-medium,
+  .highlight-low {
+    @apply cursor-pointer rounded-sm px-0.5 transition-colors duration-base;
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
 
-.highlight-medium {
-  @apply bg-amber-500/10 dark:bg-amber-500/15 border-b-2 border-amber-500 hover:bg-amber-500/20 cursor-pointer transition-all px-0.5 rounded-sm;
-}
+  .highlight-high {
+    @apply bg-risk-high-tint decoration-risk-high hover:bg-risk-high-border/60;
+    text-decoration-style: solid;
+  }
 
-.highlight-low {
-  @apply bg-emerald-500/10 dark:bg-emerald-500/15 border-b-2 border-emerald-500 hover:bg-emerald-500/20 cursor-pointer transition-all px-0.5 rounded-sm;
-}
+  .highlight-medium {
+    @apply bg-risk-medium-tint decoration-risk-medium hover:bg-risk-medium-border/60;
+    text-decoration-style: dashed;
+  }
 
-.highlight-selected {
-  @apply bg-indigo-500/20 dark:bg-indigo-500/30 ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-950 scale-[1.02] shadow-sm z-10;
+  .highlight-low {
+    @apply bg-risk-low-tint decoration-risk-low hover:bg-risk-low-border/60;
+    text-decoration-style: dotted;
+  }
+
+  .highlight-selected {
+    @apply outline outline-2 outline-offset-2 outline-ring;
+  }
 }

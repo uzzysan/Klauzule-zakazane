@@ -2,91 +2,67 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Upload, Shield } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "@/components/ui/button";
-import { AnimatedIcon } from "@/components/icons";
+import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
+
+const navItems = [
+  { href: "/#jak-to-dziala", label: "Jak to działa" },
+  { href: "/#faq", label: "FAQ" },
+];
 
 export function Header() {
   const pathname = usePathname();
-
-  const navItems = [
-    { href: "/", label: "Start", icon: Shield },
-    { href: "/upload", label: "Analizuj", icon: Upload },
-  ];
+  const onUpload = pathname === "/upload";
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-    >
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <motion.div
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <AnimatedIcon
-                icon={FileText}
-                size={20}
-                hoverScale={1.2}
-                className="text-accent-foreground"
-              />
-            </motion.div>
-            <motion.span
-              className="text-xl font-bold"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              FairPact
-            </motion.span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <div className="flex items-center gap-8">
+          <Link
+            href="/"
+            aria-label="FairPact — strona główna"
+            className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          >
+            <Logo />
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden items-center gap-1 md:flex">
-            {navItems.map((item, index) => (
-              <motion.div
+          <nav aria-label="Główna nawigacja" className="hidden items-center gap-1 md:flex">
+            {navItems.map((item) => (
+              <Link
                 key={item.href}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 + 0.2 }}
+                href={item.href}
+                className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors duration-base hover:text-foreground"
               >
-                <Link href={item.href}>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                      variant={pathname === item.href ? "secondary" : "ghost"}
-                      className={cn(
-                        "gap-2 transition-all duration-300",
-                        pathname === item.href && "bg-secondary"
-                      )}
-                    >
-                      <motion.span
-                        whileHover={pathname !== item.href ? { rotate: 10, scale: 1.1 } : {}}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <item.icon className="h-4 w-4" />
-                      </motion.span>
-                      {item.label}
-                    </Button>
-                  </motion.div>
-                </Link>
-              </motion.div>
+                {item.label}
+              </Link>
             ))}
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
+          <Link
+            href="/upload"
+            aria-current={onUpload ? "page" : undefined}
+            className={cn(
+              "group inline-flex h-10 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors duration-base sm:px-4",
+              onUpload
+                ? "bg-muted text-foreground"
+                : "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90"
+            )}
+          >
+            Analizuj umowę
+            {!onUpload && (
+              <ArrowRight
+                className="hidden h-4 w-4 transition-transform duration-base group-hover:translate-x-0.5 sm:block"
+                aria-hidden
+              />
+            )}
+          </Link>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

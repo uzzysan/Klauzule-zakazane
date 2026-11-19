@@ -95,9 +95,13 @@ The app uses `sentence-transformers` with local inference (no external API) to p
 - Uses embeddings for similarity matching, not generative AI
 - Deterministic results for the same input
 
-### Color Scheme
-- **Light mode**: Ecru/Brown palette (`#F5F5DC` background, `#3E2723` text, `#8D6E63` accents)
-- **Dark mode**: Dark Brown/Orange (`#1A120B` background, `#E0E0E0` text, `#E65100` accents)
+### Design Language ("Paper & Ink")
+All UI work must follow **`docs/DESIGN_LANGUAGE.md`** (colour tokens with measured contrast, typography, spacing, motion, logo, accessibility checklist).
+- **Light mode**: warm paper `#F9F6F2`, ink text `#1C232F`, ink-navy primary `#254974`
+- **Dark mode**: night ink `#11151A`, off-white text `#E9E6E0`, soft blue primary `#96BFE9`
+- **Fonts**: Source Serif 4 (headings, contract text) + Inter (UI), both with `latin-ext`
+- **Risk**: crimson / ochre / teal, always paired with an icon and a label
+- Use semantic Tailwind tokens only (`bg-card`, `text-muted-foreground`, `text-risk-high` …); never raw palette classes (`slate-*`, `red-*`, `bg-white`) or `dark:` colour overrides.
 
 ## Implemented Features
 

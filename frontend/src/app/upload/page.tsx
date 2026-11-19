@@ -1,20 +1,31 @@
 "use client";
 
-import {
-  Button,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  FileUpload,
-} from "@/components/ui";
-import { AnimatedButton, AnimatedCard, StepIndicator } from "@/components/ui/animated-button";
-import { IconContainer, FadeIn, StaggerContainer, StaggerItem } from "@/components/icons";
+import { Button, FileUpload } from "@/components/ui";
+import { AnimatedButton, StepIndicator } from "@/components/ui/animated-button";
+import { FadeIn, IconContainer } from "@/components/icons";
 import api from "@/lib/api";
 import { useUploadStore } from "@/lib/store";
-import { ArrowRight, Clock, FileText, Shield } from "lucide-react";
+import { ArrowRight, Clock, FileText, Loader2, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+
+const features = [
+  {
+    icon: FileText,
+    title: "Czytelny podgląd",
+    desc: "Podział na sekcje i podgląd oryginalnego tekstu z zaznaczonymi fragmentami.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Rejestr UOKiK i SOKiK",
+    desc: "Dopasowanie do tysięcy klauzul uznanych przez sądy za niedozwolone.",
+  },
+  {
+    icon: Clock,
+    title: "Zwykle 10–30 sekund",
+    desc: "Czas analizy zależy od długości dokumentu i jakości skanu.",
+  },
+];
 
 export default function UploadPage() {
   const router = useRouter();
@@ -128,174 +139,109 @@ export default function UploadPage() {
   // Active step computation
   const activeStep = isProcessing ? 3 : selectedFile ? 2 : 1;
 
-  return (
-    <div className="container max-w-4xl py-16 md:py-24">
-      {/* Background elements */}
-      <div className="pointer-events-none absolute left-[20%] top-[-5%] h-[350px] w-[350px] rounded-full bg-indigo-500/5 blur-[90px]" />
+  const busy = isUploading || isProcessing;
 
-      <FadeIn className="mb-12 text-center">
-        <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-          Analizuj swoją umowę
-        </h1>
-        <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-          Prześlij plik, aby sprawdzić go pod kątem potencjalnie niebezpiecznych klauzul abuzywnych.
+  return (
+    <div className="container max-w-3xl py-12 md:py-20">
+      <FadeIn className="mb-10 text-center">
+        <p className="eyebrow mb-3">Nowa analiza</p>
+        <h1 className="text-display-sm md:text-display-md">Analizuj swoją umowę</h1>
+        <p className="mx-auto mt-4 max-w-prose text-base text-muted-foreground md:text-lg">
+          Prześlij plik, a wskażemy zapisy podobne do klauzul uznanych przez sądy za niedozwolone.
         </p>
       </FadeIn>
 
-      {/* Step Indicators */}
-      <div className="mx-auto mb-10 flex max-w-md items-center justify-center gap-4">
-        <StepIndicator step={1} isActive={activeStep === 1} isCompleted={activeStep > 1} />
-        <div className="h-0.5 w-16 bg-slate-200 dark:bg-slate-800" />
-        <StepIndicator step={2} isActive={activeStep === 2} isCompleted={activeStep > 2} />
-        <div className="h-0.5 w-16 bg-slate-200 dark:bg-slate-800" />
-        <StepIndicator step={3} isActive={activeStep === 3} isCompleted={false} />
+      {/* Steps */}
+      <ol
+        aria-label="Etapy analizy"
+        className="mx-auto mb-8 flex max-w-lg items-center justify-center gap-3"
+      >
+        <li>
+          <StepIndicator
+            step={1}
+            label="Wybierz plik"
+            isActive={activeStep === 1}
+            isCompleted={activeStep > 1}
+          />
+        </li>
+        <li aria-hidden className="h-px w-8 bg-border sm:w-10" />
+        <li>
+          <StepIndicator
+            step={2}
+            label="Prześlij"
+            isActive={activeStep === 2}
+            isCompleted={activeStep > 2}
+          />
+        </li>
+        <li aria-hidden className="h-px w-8 bg-border sm:w-10" />
+        <li>
+          <StepIndicator step={3} label="Raport" isActive={activeStep === 3} />
+        </li>
+      </ol>
+
+      <div className="rounded-xl border bg-card p-5 shadow-sm sm:p-8">
+        <FileUpload
+          onFileSelect={handleFileSelect}
+          onFileRemove={handleFileRemove}
+          selectedFile={selectedFile}
+          isUploading={busy}
+          uploadProgress={isProcessing ? 100 : uploadProgress}
+          error={uploadError}
+          disabled={busy}
+        />
+
+        <AnimatePresence>
+          {statusMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              role="status"
+              aria-live="polite"
+              className="mt-5 flex items-center gap-3 rounded-lg border bg-muted/60 px-4 py-3 text-sm"
+            >
+              <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden />
+              <span>{statusMessage}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          {(selectedFile || uploadError) && !busy && (
+            <Button variant="ghost" onClick={reset} className="sm:w-auto">
+              Anuluj
+            </Button>
+          )}
+          <AnimatedButton
+            onClick={handleUpload}
+            disabled={!selectedFile || busy}
+            isLoading={busy}
+            loadingText="Przetwarzanie…"
+            icon={ArrowRight}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            Rozpocznij analizę
+          </AnimatedButton>
+        </div>
       </div>
 
-      <AnimatedCard
-        className="mb-12 border border-slate-200/80 bg-white/70 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70"
-        hoverScale={1}
-      >
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-bold">Wybierz plik z dysku</CardTitle>
-          <CardDescription className="text-sm">
-            Wspierane są pliki PDF, DOCX oraz formaty graficzne (JPG, PNG) do 50MB.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FileUpload
-            onFileSelect={handleFileSelect}
-            onFileRemove={handleFileRemove}
-            selectedFile={selectedFile}
-            isUploading={isUploading || isProcessing}
-            uploadProgress={isProcessing ? 100 : uploadProgress}
-            error={uploadError}
-            disabled={isUploading || isProcessing}
-          />
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        Pliki są przetwarzane wyłącznie na potrzeby analizy i usuwane po 8 godzinach.
+      </p>
 
-          <AnimatePresence>
-            {statusMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                className="mt-6 rounded-xl border bg-slate-100/50 p-4 dark:bg-slate-800/50"
-              >
-                <div className="flex items-center gap-3">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent"
-                  />
-                  <span className="text-sm font-semibold">{statusMessage}</span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="mt-8 flex justify-end gap-4">
-            {(selectedFile || uploadError) && !isUploading && !isProcessing && (
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button variant="outline" onClick={reset} className="px-6 py-5">
-                  Anuluj
-                </Button>
-              </motion.div>
-            )}
-            <AnimatedButton
-              onClick={handleUpload}
-              disabled={!selectedFile || isUploading || isProcessing}
-              isLoading={isUploading || isProcessing}
-              icon={ArrowRight}
-              className="px-8 py-5"
-              glowOnHover
-            >
-              {isUploading || isProcessing ? "Przetwarzanie..." : "Rozpocznij analizę"}
-            </AnimatedButton>
-          </div>
-        </CardContent>
-      </AnimatedCard>
-
-      {/* Trust & Features Footer */}
-      <StaggerContainer className="grid gap-6 md:grid-cols-3" staggerDelay={0.08}>
-        <StaggerItem>
-          <AnimatedCard
-            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
-            hoverScale={1.02}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <IconContainer
-                  icon={FileText}
-                  size={20}
-                  animation="float"
-                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
-                />
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    Wygodny podgląd
-                  </h4>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    Precyzyjny podział na sekcje oraz czytelny podgląd oryginalnego tekstu umowy.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </AnimatedCard>
-        </StaggerItem>
-
-        <StaggerItem>
-          <AnimatedCard
-            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
-            hoverScale={1.02}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <IconContainer
-                  icon={Shield}
-                  size={20}
-                  animation="pulse"
-                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
-                />
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    7 233 klauzul UOKiK
-                  </h4>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    Automatyczne dopasowanie do pełnego rejestru orzeczeń polskich sądów
-                    powszechnych.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </AnimatedCard>
-        </StaggerItem>
-
-        <StaggerItem>
-          <AnimatedCard
-            className="group border border-slate-200/50 bg-white dark:border-slate-800/50 dark:bg-slate-900"
-            hoverScale={1.02}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <IconContainer
-                  icon={Clock}
-                  size={20}
-                  animation="bounce"
-                  className="rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/20"
-                />
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    Błyskawiczny audyt
-                  </h4>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    Analiza semantyczna trwa zazwyczaj od 10 do 30 sekund w zależności od długości
-                    pliku.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </AnimatedCard>
-        </StaggerItem>
-      </StaggerContainer>
+      <ul className="mt-14 grid gap-6 sm:grid-cols-3">
+        {features.map((f) => (
+          <li key={f.title} className="flex gap-3 sm:flex-col">
+            <IconContainer icon={f.icon} size={18} className="h-9 w-9" />
+            <div>
+              <h2 className="font-sans text-sm font-semibold">{f.title}</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

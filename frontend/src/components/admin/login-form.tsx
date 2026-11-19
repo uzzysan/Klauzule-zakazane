@@ -50,7 +50,7 @@ export function LoginForm() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border bg-background px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 w-full rounded-md border border-input bg-card px-10 text-sm transition-colors placeholder:text-muted-foreground hover:border-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                 placeholder="admin@example.com"
                 required
               />
@@ -68,7 +68,7 @@ export function LoginForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border bg-background px-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 w-full rounded-md border border-input bg-card px-10 text-sm transition-colors placeholder:text-muted-foreground hover:border-foreground/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
                 placeholder="••••••••"
                 required
               />

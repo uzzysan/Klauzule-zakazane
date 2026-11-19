@@ -154,7 +154,7 @@ export default function ReviewPage() {
       <div className="container max-w-6xl py-12">
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
             <p className="text-muted-foreground">Ładowanie analizy...</p>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function ReviewPage() {
           </Button>
         </Link>
 
-        <h1 className="mb-2 text-3xl font-bold">Recenzja analizy</h1>
+        <h1 className="mb-2 text-3xl font-semibold">Recenzja analizy</h1>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
@@ -224,7 +224,7 @@ export default function ReviewPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-4xl font-bold">{analysis.total_clauses_found}</div>
+              <div className="text-4xl font-semibold">{analysis.total_clauses_found}</div>
               <div className="text-sm text-muted-foreground">
                 {analysis.total_clauses_found === 1
                   ? "znaleziona klauzula"
@@ -254,16 +254,16 @@ export default function ReviewPage() {
               <div className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
                 Postęp recenzji
               </div>
-              <div className="text-4xl font-bold">
+              <div className="text-4xl font-semibold">
                 {reviewedCount}
                 <span className="text-lg font-normal text-muted-foreground">/{totalCount}</span>
               </div>
               <div className="mt-2 flex justify-center gap-4 text-sm">
-                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                <span className="flex items-center gap-1 text-success">
                   <CheckCircle className="h-4 w-4" />
                   {correctCount}
                 </span>
-                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                <span className="flex items-center gap-1 text-destructive">
                   <XCircle className="h-4 w-4" />
                   {incorrectCount}
                 </span>
@@ -343,11 +343,11 @@ export default function ReviewPage() {
 
       {/* Summary when all reviewed */}
       {reviewedCount === totalCount && totalCount > 0 && (
-        <Card className="mt-6 border-green-500/50 bg-green-500/5">
+        <Card className="mt-6 border-success/40 bg-success/5">
           <CardContent className="py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <CheckCircle className="h-8 w-8 text-success" />
                 <div>
                   <h3 className="font-semibold">Recenzja zakończona!</h3>
                   <p className="text-sm text-muted-foreground">
