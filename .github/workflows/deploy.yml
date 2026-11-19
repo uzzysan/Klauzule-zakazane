@@ -65,8 +65,25 @@ jobs:
             
             # Fetch and checkout
             git fetch origin
-            git checkout "$BRANCH" || git checkout master
-            git pull origin "$BRANCH"
+            git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH"
+
+            # Sync with origin without failing when the server copy has diverged
+            # (e.g. past hotfixes committed directly on the VPS). Local commits
+            # are backed up to a timestamped branch pushed to origin, then the
+            # working tree is hard-reset to origin so the deploy always matches
+            # the branch CI just validated.
+            LOCAL_ONLY=$(git rev-list --count "origin/$BRANCH..HEAD")
+            if [ "$LOCAL_ONLY" -gt 0 ]; then
+              echo "⚠️ Server repo diverged: $LOCAL_ONLY local commit(s) not on origin/$BRANCH:"
+              git log --oneline "origin/$BRANCH..HEAD" || true
+              BACKUP="server-backup/$(date +%Y%m%d-%H%M%S)"
+              git branch "$BACKUP"
+              git push origin "$BACKUP" 2>/dev/null || echo "(could not push backup branch - kept locally on VPS)"
+              echo "🛟 Backed up to $BACKUP — resetting to origin/$BRANCH"
+              git reset --hard "origin/$BRANCH"
+            else
+              git pull --ff-only origin "$BRANCH"
+            fi
             
             # Show deployed commit
             echo "📌 Deployed commit: $(git rev-parse --short HEAD)"
