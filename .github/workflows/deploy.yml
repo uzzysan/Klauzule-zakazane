@@ -63,8 +63,11 @@ jobs:
             BRANCH="${{ github.event.inputs.branch || 'master' }}"
             echo "📋 Deploying branch: $BRANCH"
             
-            # Fetch and checkout
+            # Fetch and recover from any broken repository state left by a
+            # previously failed pull (e.g. an unfinished conflicted merge).
             git fetch origin
+            git merge --abort 2>/dev/null || true
+            git reset --hard
             git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH"
 
             # Sync with origin without failing when the server copy has diverged
