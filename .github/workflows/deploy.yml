@@ -85,10 +85,9 @@ jobs:
               git branch "$BACKUP"
               git push origin "$BACKUP" 2>/dev/null || echo "(could not push backup branch - kept locally on VPS)"
               echo "🛟 Backed up to $BACKUP — resetting to origin/$BRANCH"
-              git reset --hard "origin/$BRANCH"
-            else
-              git pull --ff-only origin "$BRANCH"
             fi
+            # Always align the working tree exactly with origin (no merge, no pull).
+            git reset --hard "origin/$BRANCH"
             
             # Show deployed commit
             echo "📌 Deployed commit: $(git rev-parse --short HEAD)"
