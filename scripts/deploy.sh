@@ -35,16 +35,22 @@ git pull origin "$BRANCH"
 echo "Building Docker images..." | tee -a "$LOG_FILE"
 docker compose -f docker-compose.prod.yml build
 
-# Stop existing containers
-echo "Stopping existing containers..." | tee -a "$LOG_FILE"
-docker compose -f docker-compose.prod.yml down --remove-orphans
+# NOTE: nie używamy `compose down` — kontenery rafcio/minio/redis/postgres
+# bywają utworzone poza tym projektem (bez etykiet compose) i wiszą na wspólnej
+# sieci fairpact-network, przez co `down` kończy się błędem „resource still in
+# use", a `set -e` przerywał cały deploy w połowie (stan: usługi zdjęte).
+# Zamiast tego: usuwamy tylko stary kontener rafcio (jeśli nie jest zarządzany
+# przez compose) i robimy `up -d`, który rolling-recreate'uje zmienione usługi.
+echo "Removing stale rafcio container if not compose-managed..." | tee -a "$LOG_FILE"
+if docker inspect rafcio >/dev/null 2>&1; then
+    PROJECT_LABEL=$(docker inspect rafcio --format '{{index .Config.Labels "com.docker.compose.project"}}' 2>/dev/null || echo "")
+    if [ -z "$PROJECT_LABEL" ]; then
+        docker rm -f rafcio || true
+    fi
+fi
 
-# Force remove rafcio container to prevent name conflict with manual deployments
-echo "Removing any existing rafcio container..." | tee -a "$LOG_FILE"
-docker rm -f rafcio || true
-
-# Start services
-echo "Starting services..." | tee -a "$LOG_FILE"
+# Start/update services (rolling; pełny down tylko ręcznie, świadomie)
+echo "Starting/updating services..." | tee -a "$LOG_FILE"
 docker compose -f docker-compose.prod.yml up -d
 
 # Wait for services to start
