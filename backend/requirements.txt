@@ -26,6 +26,7 @@ minio==7.2.3
 
 # Async tasks
 celery==5.3.6
+kombu==5.3.6
 redis==5.0.1
 
 # Validation
