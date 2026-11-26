@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Github, Heart, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { IdeaDialog } from "@/components/idea/idea-dialog";
 
 const linkClass =
   "inline-flex items-center gap-2 rounded-sm text-muted-foreground transition-colors duration-base hover:text-foreground";
@@ -67,6 +68,9 @@ export function Footer() {
                   <Github className="h-4 w-4" aria-hidden />
                   GitHub
                 </a>
+              </li>
+              <li>
+                <IdeaDialog />
               </li>
             </ul>
           </div>
